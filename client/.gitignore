@@ -1,0 +1,51 @@
+# Client-specific gitignore
+
+# Production build
+dist/
+build/
+
+# Development dependencies
+node_modules/
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Vite cache
+.vite/
+
+# Cypress test files
+cypress/videos/
+cypress/screenshots/
+
+# Storybook build outputs
+storybook-static/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Cache directories
+.cache/
+.parcel-cache/
+
+# IDE specific files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Test coverage
+coverage/
+
+# User-generated assets (if applicable)
+uploads/
+user-generated/

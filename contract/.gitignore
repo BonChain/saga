@@ -1,0 +1,89 @@
+# Contract-specific gitignore
+
+# Development dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+
+# Move build outputs
+build/
+
+# Compiled bytecode
+*.suipkg
+*.bytecode
+*.abi
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Sui client cache
+.sui/
+
+# Test files
+test-results/
+junit.xml
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+.tmp/
+
+# Cache directories
+.cache/
+
+# IDE specific files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Deployment configuration (keep examples)
+deploy/
+deployments/
+*.key
+*.pem
+*.p12
+
+# Local network configurations
+localnet.yaml
+testnet.yaml
+
+# Keystore files
+keystore/
+wallets/
+
+# Transaction history
+transactions/
+txs/
+
+# Move source files (keep source, ignore compiled)
+# move/ - uncomment if you want to ignore entire move directory
+move/build/
+move/cache/
+
+# Gas usage reports
+gas-reports/
+gas-usage.json
+
+# Test fixtures
+test/fixtures/
+test/cache/
+
+# Development artifacts
+dev/
+devnet/
+
+# Hot reload files
+.hot-reload/

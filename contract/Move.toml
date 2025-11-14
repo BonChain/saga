@@ -1,0 +1,16 @@
+[package]
+name = "suisaga"
+version = "0.0.1"
+edition = "2024.beta" # Move edition
+
+[dependencies]
+Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "framework/testnet" }
+
+[addresses]
+suisaga = "0x0"  # Will be replaced with actual address after deployment
+
+[dev-dependencies]
+Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "framework/testnet" }
+
+[dev-addresses]
+suisaga = "0x0"  # Will be replaced with actual address during testing

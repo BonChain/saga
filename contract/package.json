@@ -1,0 +1,29 @@
+{
+  "name": "suisaga-contract",
+  "version": "1.0.0",
+  "description": "SuiSaga smart contracts for living world blockchain game - Move language smart contracts and Sui blockchain integration",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "sui move build",
+    "publish": "sui client publish",
+    "test": "ts-node src/utils/test.ts",
+    "deploy": "ts-node src/utils/deploy.ts",
+    "upgrade": "sui client upgrade --gas-budget 1000000000",
+    "dev": "npm run build && npm run test"
+  },
+  "keywords": ["sui", "move", "blockchain", "smart-contracts", "living-world", "sui-move"],
+  "author": "SuiSaga Team",
+  "license": "MIT",
+  "dependencies": {
+    "@mysten/sui": "^1.0.0",
+    "@mysten/sui-typescript": "^0.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.5",
+    "typescript": "^5.3.3",
+    "ts-node": "^10.9.2"
+  },
+  "sui": {
+    "packageId": "0x0"  // Will be populated after first publish
+  }
+}
