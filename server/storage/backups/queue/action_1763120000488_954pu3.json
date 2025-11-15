@@ -1,0 +1,17 @@
+{
+  "type": "action",
+  "timestamp": "2025-11-14T11:33:20.489Z",
+  "originalChecksum": "e2ecb53d26fdbec01f3213c101b8dea4344265409b44cc0c5b9c1045e754afa1",
+  "data": {
+    "id": "1763120000488_954pu3",
+    "playerId": "test_player",
+    "intent": "attack the dragon with sword",
+    "originalInput": "I want to attack the dragon with my sword",
+    "timestamp": "2025-11-14T11:33:20.488Z",
+    "status": "pending",
+    "metadata": {
+      "confidence": 0.8,
+      "verificationHash": "e2ecb53d26fdbec01f3213c101b8dea4344265409b44cc0c5b9c1045e754afa1"
+    }
+  }
+}
