@@ -444,7 +444,7 @@ app.get('/api/actions/recent', async (req, res) => {
       const enhancedActions = recentActions.map(action => ({
         ...action,
         timeSinceSubmission: Math.floor((Date.now() - new Date(action.timestamp).getTime()) / 1000),
-        statusDisplay: (action.status as any) === 'received' ? 'AI is processing...' : action.status
+        statusDisplay: action.status === 'pending' ? 'AI is processing...' : action.status
       }));
 
       res.json({
