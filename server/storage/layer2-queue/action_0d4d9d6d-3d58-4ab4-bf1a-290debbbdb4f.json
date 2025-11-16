@@ -1,0 +1,34 @@
+{
+  "id": "0d4d9d6d-3d58-4ab4-bf1a-290debbbdb4f",
+  "playerId": "test-player-story-31",
+  "intent": "explore ancient ruins",
+  "originalInput": "I want to explore the mysterious ancient ruins in the forest",
+  "timestamp": "2025-11-16T19:33:20.850Z",
+  "status": "completed",
+  "metadata": {
+    "confidence": 0.8,
+    "parsedIntent": {
+      "actionType": "exploration",
+      "target": "want",
+      "urgency": "medium",
+      "objects": [],
+      "location": "the forest"
+    },
+    "verificationHash": "09e9473c59b534ab065e97c3904ac72e6d6db3d18c0e53f3bf660149bbfa4aea"
+  },
+  "consequences": [
+    {
+      "id": "73a67fb5-c795-4735-a873-1c10e76cc91a",
+      "actionId": "0d4d9d6d-3d58-4ab4-bf1a-290debbbdb4f",
+      "description": "Action processed successfully",
+      "impact": "minor",
+      "affectedSystems": [
+        "world_state"
+      ],
+      "timestamp": "2025-11-16T19:33:47.386Z",
+      "duration": 0,
+      "permanent": false,
+      "butterflyEffects": []
+    }
+  ]
+}

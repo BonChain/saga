@@ -8,6 +8,7 @@ import { BackupStorage } from './BackupStorage'
 import { DataValidation } from './DataValidation'
 import { StorageLogger } from './StorageLogger'
 import { WorldRules, Action, WorldState, WalrusConfig, BackupConfig, ValidationConfig, LoggerConfig } from '../types/storage'
+import { aiServiceAdapter } from '../services/ai/AIServiceAdapter'
 
 export interface StorageManagerConfig {
   storageBasePath: string
@@ -26,6 +27,7 @@ export class StorageManager {
   private readonly backupStorage: BackupStorage
   private readonly dataValidation: DataValidation
   private readonly logger: StorageLogger
+  private readonly aiIntegration = aiServiceAdapter
 
   constructor(config: StorageManagerConfig) {
     this.config = config
@@ -151,14 +153,14 @@ export class StorageManager {
       this.logger.info('queue', 'submit', `Submitting action for player ${playerId}: ${intent}`)
 
       // Create action object
-      // Story 2.3: Use 'received' status for immediate confirmation
+      // Story 2.3: Use 'pending' status for immediate confirmation (compatibility fix)
       const action: Action = {
         id: this.generateActionId(),
         playerId,
         intent,
         originalInput,
         timestamp: new Date().toISOString(),
-        status: 'received', // Actions start as 'received' for immediate confirmation
+        status: 'pending', // Actions start as 'pending' for AI processing
         metadata: {
           confidence: 0.8, // Default confidence
           parsedIntent
@@ -188,6 +190,11 @@ export class StorageManager {
         id: action.id,
         playerId,
         success: true
+      })
+
+      // Story 3.1: Trigger AI processing asynchronously (don't block the response)
+      this.triggerAIProcessing(action).catch(error => {
+        this.logger.error('system', 'ai_processing', `AI processing failed for action ${action.id}`, error as Error)
       })
 
       return { success: true, action }
@@ -742,6 +749,117 @@ export class StorageManager {
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Unknown error'
       return { success: false, error: errorMsg }
+    }
+  }
+
+  /**
+   * Story 3.1: Trigger AI processing for action consequences
+   */
+  private async triggerAIProcessing(action: Action): Promise<void> {
+    try {
+      // Initialize AI adapter if needed
+      await this.aiIntegration.initialize()
+
+      // Update action status to processing
+      action.status = 'processing'
+      await this.layer2.updateActionStatus(action.id, 'processing')
+
+      // Generate world state context for AI
+      const worldState = await this.layer3.read('latest')
+
+      // Create AI request with world context
+      const aiRequest = {
+        id: `ai-${action.id}`,
+        actionId: action.id,
+        promptType: 'consequence_generation' as any,
+        context: {
+          actionId: action.id,
+          playerIntent: action.intent,
+          originalInput: action.originalInput,
+          worldState: {
+            timestamp: worldState.data?.timestamp || new Date().toISOString(),
+            regions: worldState.data?.regions || {},
+            characters: worldState.data?.characters || {},
+            relationships: worldState.data?.relationships || {},
+            economy: worldState.data?.economy || {},
+            environment: worldState.data?.environment || {},
+            metadata: worldState.data?.metadata || {}
+          },
+          characterRelationships: [],
+          locationContext: {
+            currentLocation: 'unknown',
+            nearbyLocations: [],
+            environmentConditions: [],
+            availableResources: [],
+            dangers: [],
+            opportunities: []
+          },
+          recentActions: [],
+          worldRules: []
+        } as any,
+        prompt: `A player performs the action: "${action.originalInput}". Generate 2-4 logical consequences for this action in the world context.`,
+        timestamp: new Date().toISOString(),
+        maxTokens: 300,
+        temperature: 0.7
+      }
+
+      // Process with AI Service Adapter (using Z.ai)
+      const aiResponse = await this.aiIntegration.processAction(aiRequest)
+
+      if (aiResponse.success && aiResponse.consequences.length > 0) {
+        // Map AI consequences to storage format
+        action.consequences = aiResponse.consequences.map(aiConsequence => {
+          // Map AI impact levels to storage impact levels
+          let impactLevel: 'minor' | 'moderate' | 'major' | 'critical' = 'moderate'
+          if (typeof aiConsequence.impact?.level === 'string') {
+            const aiLevel = aiConsequence.impact.level.toLowerCase()
+            if (['minor', 'small'].includes(aiLevel)) impactLevel = 'minor'
+            else if (['moderate', 'medium'].includes(aiLevel)) impactLevel = 'moderate'
+            else if (['major', 'large', 'significant'].includes(aiLevel)) impactLevel = 'major'
+            else if (['critical', 'severe', 'extreme'].includes(aiLevel)) impactLevel = 'critical'
+          }
+
+          return {
+            id: aiConsequence.id,
+            actionId: aiConsequence.actionId,
+            description: aiConsequence.description,
+            impact: impactLevel,
+            affectedSystems: aiConsequence.impact?.affectedSystems || ['world_state'],
+            timestamp: aiConsequence.timestamp,
+            duration: aiConsequence.impact?.duration === 'permanent' ? -1 :
+                    (aiConsequence.impact?.duration === 'short_term' ? 300000 :
+                    aiConsequence.impact?.duration === 'medium_term' ? 86400000 :
+                    aiConsequence.impact?.duration === 'long_term' ? 2592000000 : 0),
+            permanent: aiConsequence.impact?.duration === 'permanent',
+            butterflyEffects: aiConsequence.cascadingEffects?.map(effect => effect.description) || []
+          }
+        })
+
+        // Update action status and store consequences
+        action.status = 'completed'
+        this.logger.info('system', 'ai_processing', `AI processing completed for action ${action.id}`, {
+          consequencesGenerated: action.consequences.length,
+          provider: this.aiIntegration.getCurrentProvider()
+        })
+      } else {
+        // AI processing failed
+        action.status = 'failed'
+        this.logger.error('system', 'ai_processing', `AI processing failed for action ${action.id}`, new Error(aiResponse.error?.message || 'Unknown AI error'))
+      }
+
+      // Update action in storage with new status and consequences
+      await this.layer2.updateActionStatus(action.id, action.status)
+      if (action.consequences && action.consequences.length > 0) {
+        await this.layer2.write(action) // This will store the consequences
+      }
+
+    } catch (error) {
+      // Ensure action is marked as failed on error
+      action.status = 'failed'
+      await this.layer2.updateActionStatus(action.id, 'failed').catch(() => {
+        // Ignore update errors since we're already in an error state
+      })
+      throw error
     }
   }
 
