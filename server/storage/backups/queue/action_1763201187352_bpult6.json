@@ -1,0 +1,24 @@
+{
+  "type": "action",
+  "timestamp": "2025-11-15T10:06:27.471Z",
+  "originalChecksum": "5a26471e913d24dbc02810783b005bd417c165d89992818369923e6a4073ded1",
+  "data": {
+    "id": "1763201187352_bpult6",
+    "playerId": "test-player-001",
+    "intent": "compose an epic poem about the dragon's treasure",
+    "originalInput": "compose an epic poem about the dragon's treasure",
+    "timestamp": "2025-11-15T10:06:27.352Z",
+    "status": "pending",
+    "metadata": {
+      "confidence": 0.8,
+      "parsedIntent": {
+        "type": "natural_language",
+        "actionType": "other",
+        "urgency": "medium",
+        "content": "compose an epic poem about the dragon's treasure",
+        "timestamp": "2025-11-15T10:06:27.350Z"
+      },
+      "verificationHash": "5a26471e913d24dbc02810783b005bd417c165d89992818369923e6a4073ded1"
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "id": "1763240366685_odnaws",
+  "playerId": "test-player-001",
+  "intent": "explore the dark forest",
+  "originalInput": "explore the dark forest",
+  "timestamp": "2025-11-15T20:59:26.685Z",
+  "status": "pending",
+  "metadata": {
+    "confidence": 0.8,
+    "parsedIntent": {
+      "type": "natural_language",
+      "actionType": "other",
+      "urgency": "medium",
+      "content": "explore the dark forest",
+      "timestamp": "2025-11-15T20:59:26.685Z",
+      "confidence": 0.534375,
+      "parsingError": true
+    },
+    "verificationHash": "854977079f689e1acc751880dd2091407723f49d986d87063b492086cdd3d8ae"
+  }
+}

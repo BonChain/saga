@@ -1,4 +1,5 @@
 import path from 'path'
+import { v4 as uuidv4 } from 'uuid'
 import { Layer1Blueprint } from './Layer1Blueprint'
 import { Layer2Queue } from './Layer2Queue'
 import { Layer3State } from './Layer3State'
@@ -150,13 +151,14 @@ export class StorageManager {
       this.logger.info('queue', 'submit', `Submitting action for player ${playerId}: ${intent}`)
 
       // Create action object
+      // Story 2.3: Use 'received' status for immediate confirmation
       const action: Action = {
         id: this.generateActionId(),
         playerId,
         intent,
         originalInput,
         timestamp: new Date().toISOString(),
-        status: 'pending',
+        status: 'received', // Actions start as 'received' for immediate confirmation
         metadata: {
           confidence: 0.8, // Default confidence
           parsedIntent
@@ -284,6 +286,266 @@ export class StorageManager {
       const errorMsg = error instanceof Error ? error.message : 'Unknown error'
       this.logger.error('state', 'getCurrent', 'Failed to get current world state', error as Error)
       return { success: false, error: errorMsg }
+    }
+  }
+
+  /**
+   * Initialize world state on server startup
+   * Ensures a valid world state exists and loads latest version if available
+   */
+  async initializeWorldState(): Promise<{ success: boolean, error?: string, state?: WorldState }> {
+    try {
+      this.logger.info('state', 'initialize', 'Initializing world state...')
+
+      // Try to get the latest world state
+      const latestResult = await this.layer3.getLatestVersion()
+
+      if (latestResult.success && latestResult.data) {
+        this.logger.info('state', 'initialize', `Loaded existing world state version ${latestResult.data.version}`)
+        return { success: true, state: latestResult.data }
+      } else {
+        // No existing world state, create initial one
+        this.logger.info('state', 'initialize', 'No existing world state found, creating initial state...')
+
+        const initialState = await this.createDefaultWorldState()
+        const saveResult = await this.layer3.write(initialState)
+
+        if (saveResult.success) {
+          this.logger.info('state', 'initialize', `Created initial world state version ${initialState.version}`)
+          return { success: true, state: initialState }
+        } else {
+          const errorMsg = `Failed to save initial world state: ${saveResult.error}`
+          this.logger.error('state', 'initialize', errorMsg)
+          return { success: false, error: errorMsg }
+        }
+      }
+
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error'
+      this.logger.error('state', 'initialize', 'Failed to initialize world state', error as Error)
+      return { success: false, error: errorMsg }
+    }
+  }
+
+  /**
+   * Create default world state with initial regions, characters, and environment
+   */
+  private async createDefaultWorldState(): Promise<WorldState> {
+    const timestamp = new Date().toISOString()
+
+    const defaultRegions: Record<string, any> = {
+      'village-greenvalley': {
+        id: 'village-greenvalley',
+        name: 'Green Valley Village',
+        type: 'village' as const,
+        status: 'peaceful' as const,
+        population: 150,
+        economy: {
+          prosperity: 75,
+          resources: {
+            food: 100,
+            wood: 50,
+            stone: 30,
+            gold: 25
+          },
+          tradeRoutes: ['forest-whispering', 'mountain-ironpeak']
+        },
+        events: [],
+        properties: {
+          defenses: 'basic',
+          reputation: 'friendly',
+          shops: ['tavern', 'blacksmith', 'general-store'],
+          description: 'A peaceful village nestled in a green valley, known for its friendly inhabitants and thriving trade.'
+        }
+      },
+      'lair-dragonspeak': {
+        id: 'lair-dragonspeak',
+        name: 'Dragon\'s Peak Lair',
+        type: 'lair' as const,
+        status: 'tense' as const,
+        population: 1,
+        economy: {
+          prosperity: 200,
+          resources: {
+            gold: 1000,
+            gems: 500,
+            artifacts: 10
+          },
+          tradeRoutes: []
+        },
+        events: [],
+        properties: {
+          danger: 'extreme',
+          wealth: 'legendary',
+          boss: 'ancient-dragon',
+          description: 'An ancient dragon\'s lair high in the mountains, filled with legendary treasures and immense danger.'
+        }
+      },
+      'forest-whispering': {
+        id: 'forest-whispering',
+        name: 'Whispering Forest',
+        type: 'forest' as const,
+        status: 'recovering' as const,
+        population: 25,
+        economy: {
+          prosperity: 40,
+          resources: {
+            herbs: 80,
+            wood: 200,
+            game: 60,
+            rare_ingredients: 15
+          },
+          tradeRoutes: ['village-greenvalley']
+        },
+        events: [],
+        properties: {
+          mystery: 'high',
+          magic: 'present',
+          danger: 'moderate',
+          description: 'An ancient forest where the trees seem to whisper secrets to those who know how to listen.'
+        }
+      }
+    }
+
+    const defaultCharacters: Record<string, any> = {
+      'dragon-ancient': {
+        id: 'dragon-ancient',
+        name: 'Ignis, the Ancient Dragon',
+        type: 'dragon' as const,
+        location: {
+          regionId: 'lair-dragonspeak',
+          coordinates: { x: 100, y: 100 }
+        },
+        attributes: {
+          health: 1000,
+          maxHealth: 1000,
+          relationships: {
+            'village-greenvalley': -50,
+            'forest-whispering': -20
+          },
+          reputation: {
+            'village-greenvalley': 'terror',
+            'forest-whispering': 'caution'
+          },
+          inventory: {
+            gold: 10000,
+            gems: 100
+          }
+        },
+        memories: [],
+        properties: {
+          age: 'ancient',
+          power: 'legendary',
+          temperament: 'territorial',
+          description: 'An ancient dragon who has ruled these lands for centuries, fiercely guarding its treasure hoard.'
+        }
+      },
+      'village-elder': {
+        id: 'village-elder',
+        name: 'Elder Marcus',
+        type: 'npc' as const,
+        location: {
+          regionId: 'village-greenvalley',
+          coordinates: { x: 50, y: 50 }
+        },
+        attributes: {
+          health: 80,
+          maxHealth: 80,
+          relationships: {
+            'village-greenvalley': 100,
+            'dragon-ancient': -30
+          },
+          reputation: {
+            'village-greenvalley': 'wise',
+            'forest-whispering': 'respectful'
+          },
+          inventory: {
+            gold: 50,
+            herbs: 20
+          }
+        },
+        memories: [],
+        properties: {
+          role: 'village_elder',
+          wisdom: 'high',
+          description: 'The wise elder of Green Valley, keeper of village history and traditions.'
+        }
+      }
+    }
+
+    const defaultRelationships: Record<string, any> = {
+      'dragon-village': {
+        id: 'dragon-village',
+        character1Id: 'dragon-ancient',
+        character2Id: 'village-elder',
+        type: 'hostility' as const,
+        strength: -80,
+        status: 'active' as const,
+        history: [{
+          timestamp,
+          type: 'conflict',
+          description: 'The dragon demands tribute from the village'
+        }],
+        properties: {
+          duration: 'generations',
+          reason: 'territorial_dispute'
+        }
+      }
+    }
+
+    const defaultEconomy: any = {
+      currency: 'gold',
+      exchangeRates: {
+        'silver': 10,
+        'copper': 100,
+        'gems': 0.1
+      },
+      marketStatus: 'stable' as const,
+      resources: {
+        food: {
+          supply: 150,
+          demand: 120,
+          price: 1,
+          trend: 'stable' as const
+        },
+        wood: {
+          supply: 200,
+          demand: 80,
+          price: 0.5,
+          trend: 'falling' as const
+        }
+      }
+    }
+
+    const defaultEnvironment: any = {
+      timeOfDay: 12, // Noon
+      weather: 'clear' as const,
+      season: 'spring' as const,
+      magicalEnergy: 65,
+      phenomena: [{
+        id: 'spring-bloom',
+        name: 'Spring Bloom',
+        type: 'natural',
+        description: 'The forest is alive with spring blossoms, increasing magical energy in the region.',
+        affectedRegions: ['forest-whispering']
+      }]
+    }
+
+    return {
+      version: 1,
+      timestamp,
+      regions: defaultRegions,
+      characters: defaultCharacters,
+      relationships: defaultRelationships,
+      economy: defaultEconomy,
+      environment: defaultEnvironment,
+      metadata: {
+        checksum: '',
+        actionCount: 0,
+        lastActionId: undefined,
+        description: 'Initial world state for SuiSaga living world',
+        walrusUrl: ''
+      }
     }
   }
 
@@ -484,9 +746,8 @@ export class StorageManager {
   }
 
   private generateActionId(): string {
-    const timestamp = Date.now()
-    const random = Math.random().toString(36).substring(2, 8)
-    return `${timestamp}_${random}`
+    // Story 2.3: Upgrade to UUID for cryptographically unique action IDs
+    return uuidv4()
   }
 
   private async createDefaultWorldRules(): Promise<WorldRules> {

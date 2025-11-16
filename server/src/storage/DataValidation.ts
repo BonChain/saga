@@ -179,8 +179,8 @@ export class DataValidation {
       }
     }
 
-    // Status validation
-    const validStatuses = ['pending', 'processing', 'completed', 'failed']
+    // Status validation (Story 2.3: Added 'received' status)
+    const validStatuses = ['received', 'pending', 'processing', 'completed', 'failed']
     if (action.status && !validStatuses.includes(action.status)) {
       errors.push(`Invalid action status: ${action.status}`)
     }

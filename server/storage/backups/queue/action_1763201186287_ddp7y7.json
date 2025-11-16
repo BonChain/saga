@@ -1,0 +1,24 @@
+{
+  "type": "action",
+  "timestamp": "2025-11-15T10:06:26.455Z",
+  "originalChecksum": "55418bc166fbfa38c6e4328341ba0e0436ca72650e21f2ca6947f0c540328c65",
+  "data": {
+    "id": "1763201186287_ddp7y7",
+    "playerId": "test-player-001",
+    "intent": "befriend the goblin king",
+    "originalInput": "befriend the goblin king",
+    "timestamp": "2025-11-15T10:06:26.288Z",
+    "status": "pending",
+    "metadata": {
+      "confidence": 0.8,
+      "parsedIntent": {
+        "type": "natural_language",
+        "actionType": "other",
+        "urgency": "medium",
+        "content": "befriend the goblin king",
+        "timestamp": "2025-11-15T10:06:26.268Z"
+      },
+      "verificationHash": "55418bc166fbfa38c6e4328341ba0e0436ca72650e21f2ca6947f0c540328c65"
+    }
+  }
+}

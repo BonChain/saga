@@ -1,0 +1,19 @@
+{
+  "id": "1763201186969_1cf2xj",
+  "playerId": "test-player-001",
+  "intent": "cast a spell to make it rain",
+  "originalInput": "cast a spell to make it rain",
+  "timestamp": "2025-11-15T10:06:26.969Z",
+  "status": "pending",
+  "metadata": {
+    "confidence": 0.8,
+    "parsedIntent": {
+      "type": "natural_language",
+      "actionType": "other",
+      "urgency": "medium",
+      "content": "cast a spell to make it rain",
+      "timestamp": "2025-11-15T10:06:26.968Z"
+    },
+    "verificationHash": "96b6c2828a9efc279fe171df8a65ceb56944db02d534884a9140262f6bda62cf"
+  }
+}

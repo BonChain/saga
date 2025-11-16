@@ -1,0 +1,19 @@
+{
+  "id": "1763201187935_goviip",
+  "playerId": "test-player-001",
+  "intent": "travel to the mountain\ncamp overnight\treturn with treasure",
+  "originalInput": "travel to the mountain\ncamp overnight\treturn with treasure",
+  "timestamp": "2025-11-15T10:06:27.935Z",
+  "status": "pending",
+  "metadata": {
+    "confidence": 0.8,
+    "parsedIntent": {
+      "type": "natural_language",
+      "actionType": "other",
+      "urgency": "medium",
+      "content": "travel to the mountain\ncamp overnight\treturn with treasure",
+      "timestamp": "2025-11-15T10:06:27.925Z"
+    },
+    "verificationHash": "d3ce7530466b6025c2394d353308d3c1c335793d1ba68dc3c11dd9b879f5892c"
+  }
+}

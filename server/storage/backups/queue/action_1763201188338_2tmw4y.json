@@ -1,0 +1,24 @@
+{
+  "type": "action",
+  "timestamp": "2025-11-15T10:06:28.459Z",
+  "originalChecksum": "bad1e87ac5ce0b74e357c30dc49ee5f20f9a793c399c1ca5822f801af9127a99",
+  "data": {
+    "id": "1763201188338_2tmw4y",
+    "playerId": "test-player-001",
+    "intent": "immediate feedback test",
+    "originalInput": "immediate feedback test",
+    "timestamp": "2025-11-15T10:06:28.338Z",
+    "status": "pending",
+    "metadata": {
+      "confidence": 0.8,
+      "parsedIntent": {
+        "type": "natural_language",
+        "actionType": "other",
+        "urgency": "medium",
+        "content": "immediate feedback test",
+        "timestamp": "2025-11-15T10:06:28.337Z"
+      },
+      "verificationHash": "bad1e87ac5ce0b74e357c30dc49ee5f20f9a793c399c1ca5822f801af9127a99"
+    }
+  }
+}

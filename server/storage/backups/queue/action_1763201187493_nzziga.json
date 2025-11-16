@@ -1,0 +1,24 @@
+{
+  "type": "action",
+  "timestamp": "2025-11-15T10:06:27.597Z",
+  "originalChecksum": "765c0b4d2dd56cc1c8537486c8f2ab8008a7d58fea1336d5e5eb9e46326897e2",
+  "data": {
+    "id": "1763201187493_nzziga",
+    "playerId": "test-player-001",
+    "intent": "convince the villagers to join my quest",
+    "originalInput": "convince the villagers to join my quest",
+    "timestamp": "2025-11-15T10:06:27.493Z",
+    "status": "pending",
+    "metadata": {
+      "confidence": 0.8,
+      "parsedIntent": {
+        "type": "natural_language",
+        "actionType": "other",
+        "urgency": "medium",
+        "content": "convince the villagers to join my quest",
+        "timestamp": "2025-11-15T10:06:27.493Z"
+      },
+      "verificationHash": "765c0b4d2dd56cc1c8537486c8f2ab8008a7d58fea1336d5e5eb9e46326897e2"
+    }
+  }
+}

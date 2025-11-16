@@ -1,0 +1,19 @@
+{
+  "id": "1763201188191_znq8ly",
+  "playerId": "test-player-001",
+  "intent": "calculate the optimal trade route: profit > 50% and distance < 100 miles",
+  "originalInput": "calculate the optimal trade route: profit > 50% and distance < 100 miles",
+  "timestamp": "2025-11-15T10:06:28.191Z",
+  "status": "pending",
+  "metadata": {
+    "confidence": 0.8,
+    "parsedIntent": {
+      "type": "natural_language",
+      "actionType": "other",
+      "urgency": "medium",
+      "content": "calculate the optimal trade route: profit > 50% and distance < 100 miles",
+      "timestamp": "2025-11-15T10:06:28.191Z"
+    },
+    "verificationHash": "bef242738979bc93e83405e8b3aba758a31656116908a2883972442d2e13967e"
+  }
+}

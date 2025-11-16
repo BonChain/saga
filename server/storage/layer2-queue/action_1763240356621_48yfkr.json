@@ -1,0 +1,21 @@
+{
+  "id": "1763240356621_48yfkr",
+  "playerId": "test-player-001",
+  "intent": "befriend the goblin king",
+  "originalInput": "befriend the goblin king",
+  "timestamp": "2025-11-15T20:59:16.621Z",
+  "status": "pending",
+  "metadata": {
+    "confidence": 0.8,
+    "parsedIntent": {
+      "type": "natural_language",
+      "actionType": "other",
+      "urgency": "medium",
+      "content": "befriend the goblin king",
+      "timestamp": "2025-11-15T20:59:16.621Z",
+      "confidence": 0.5346774193548387,
+      "parsingError": true
+    },
+    "verificationHash": "9eb3b988646cbd3abbb5a00037445d92b3699dda54cc17633fffb3f650b0c2ea"
+  }
+}

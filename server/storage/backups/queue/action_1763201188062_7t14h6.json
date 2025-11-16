@@ -1,0 +1,24 @@
+{
+  "type": "action",
+  "timestamp": "2025-11-15T10:06:28.175Z",
+  "originalChecksum": "038271426abb1b9b8133c7c09357c51396ca52f094109bca60f10d860469522c",
+  "data": {
+    "id": "1763201188062_7t14h6",
+    "playerId": "test-player-001",
+    "intent": "tell the blacksmith: \"I need a sword that's worthy of a hero!\"",
+    "originalInput": "tell the blacksmith: \"I need a sword that's worthy of a hero!\"",
+    "timestamp": "2025-11-15T10:06:28.062Z",
+    "status": "pending",
+    "metadata": {
+      "confidence": 0.8,
+      "parsedIntent": {
+        "type": "natural_language",
+        "actionType": "other",
+        "urgency": "medium",
+        "content": "tell the blacksmith: \"I need a sword that's worthy of a hero!\"",
+        "timestamp": "2025-11-15T10:06:28.061Z"
+      },
+      "verificationHash": "038271426abb1b9b8133c7c09357c51396ca52f094109bca60f10d860469522c"
+    }
+  }
+}

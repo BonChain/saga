@@ -1,0 +1,26 @@
+{
+  "type": "action",
+  "timestamp": "2025-11-15T20:59:04.744Z",
+  "originalChecksum": "7f0417aa7d732ae9c88af1f048e4b4b1c599301b262c8662b3e0d95372044c0e",
+  "data": {
+    "id": "1763240344636_lcoxxp",
+    "playerId": "test-player-001",
+    "intent": "attack the dragon with my sword",
+    "originalInput": "attack the dragon with my sword",
+    "timestamp": "2025-11-15T20:59:04.636Z",
+    "status": "pending",
+    "metadata": {
+      "confidence": 0.8,
+      "parsedIntent": {
+        "type": "natural_language",
+        "actionType": "other",
+        "urgency": "medium",
+        "content": "attack the dragon with my sword",
+        "timestamp": "2025-11-15T20:59:04.636Z",
+        "confidence": 0.6625,
+        "parsingError": true
+      },
+      "verificationHash": "7f0417aa7d732ae9c88af1f048e4b4b1c599301b262c8662b3e0d95372044c0e"
+    }
+  }
+}

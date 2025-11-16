@@ -12,8 +12,11 @@ dotenv.config();
 import { StorageManager, StorageManagerConfig } from './storage/StorageManager';
 import { WalrusConfig, BackupConfig, ValidationConfig, LoggerConfig } from './types/storage';
 
+// Import Story 2.2 Intent Parser
+import { intentParser } from './services/IntentParser';
+
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3005;
 
 // Initialize storage configuration (SECURE: Using environment variables)
 const storageConfig: StorageManagerConfig = {
@@ -62,9 +65,13 @@ const storageConfig: StorageManagerConfig = {
 // Initialize storage manager
 const storageManager = new StorageManager(storageConfig);
 
-// Initialize world rules on startup
+// Initialize world rules and world state on startup
 storageManager.initializeWorldRules().catch(error => {
   console.error('Failed to initialize world rules:', error);
+});
+
+storageManager.initializeWorldState().catch(error => {
+  console.error('Failed to initialize world state:', error);
 });
 
 // Middleware
@@ -96,10 +103,16 @@ app.get('/api', (req, res) => {
     version: '1.0.0',
     endpoints: {
       health: '/health',
+      actions: {
+        submit: '/api/actions/submit',
+        storage: '/api/storage/actions'
+      },
       storage: {
         worldRules: '/api/storage/world-rules',
-        actions: '/api/storage/actions',
         worldState: '/api/storage/world-state',
+        worldStateRegions: '/api/storage/world-state/regions',
+        worldStateCharacters: '/api/storage/world-state/characters',
+        worldStateHistory: '/api/storage/world-state/history',
         system: '/api/storage/system'
       }
     }
@@ -189,6 +202,122 @@ app.post('/api/storage/actions', async (req, res) => {
     res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+// Natural Language Action Submission (Story 2.1)
+app.post('/api/actions/submit', async (req, res) => {
+  try {
+    const { playerId, intent, originalInput, parsedIntent } = req.body;
+
+    // Input validation
+    if (!playerId || !intent || !originalInput) {
+      return res.status(400).json({
+        success: false,
+        error: 'playerId, intent, and originalInput are required'
+      });
+    }
+
+    // Validate action length (max 500 characters from Story 2.1 AC 2)
+    if (originalInput.length > 500) {
+      return res.status(400).json({
+        success: false,
+        error: 'Action text exceeds 500 character limit'
+      });
+    }
+
+    // Story 2.2: Parse intent using IntentParser service
+    let parsedIntentResult: any;
+    let finalParsedIntent: any;
+
+    if (parsedIntent && parsedIntent.actionType) {
+      // Use provided parsedIntent
+      finalParsedIntent = parsedIntent;
+      console.log(`[PARSER] Using provided parsedIntent: ${JSON.stringify(parsedIntent)}`);
+    } else {
+      // Parse intent using our IntentParser
+      console.log(`[PARSER] Parsing intent for: "${originalInput.substring(0, 100)}"`);
+      parsedIntentResult = intentParser.parseIntent(originalInput);
+
+      if (!parsedIntentResult.success || !parsedIntentResult.parsedIntent) {
+        // R-002 Mitigation: Low confidence parsing - provide fallback or error
+        const errorMessage = parsedIntentResult.error || 'Failed to parse intent';
+        console.log(`[PARSER] Intent parsing failed: ${errorMessage}`);
+
+        if (parsedIntentResult.fallback) {
+          // Create fallback parsedIntent with confidence below threshold
+          finalParsedIntent = {
+            type: 'natural_language',
+            actionType: 'other',
+            urgency: 'medium',
+            content: intent.trim(),
+            timestamp: new Date().toISOString(),
+            confidence: parsedIntentResult.confidence,
+            parsingError: true
+          };
+          console.log(`[PARSER] Using fallback intent with confidence: ${parsedIntentResult.confidence}`);
+        } else {
+          return res.status(400).json({
+            success: false,
+            error: errorMessage,
+            requiresClarification: true,
+            message: 'Could not understand your action. Please be more specific.'
+          });
+        }
+      } else {
+        // Use successfully parsed intent
+        finalParsedIntent = parsedIntentResult.parsedIntent;
+        console.log(`[PARSER] Successfully parsed intent: actionType=${finalParsedIntent.actionType}, target=${finalParsedIntent.target}, confidence=${(parsedIntentResult.confidence * 100).toFixed(1)}%`);
+      }
+    }
+
+    // Log action submission
+    console.log(`[ACTION] Player ${playerId} submitted action: ${intent.substring(0, 100)}`);
+
+    // Submit action to storage manager with parsed intent
+    const result = await storageManager.submitAction(
+      playerId,
+      intent.trim(),
+      originalInput.trim(),
+      finalParsedIntent
+    );
+
+    if (result.success) {
+      // Story 2.3: Enhanced immediate confirmation response (AC 1)
+      const confirmationData = {
+        id: result.action?.id, // Now uses UUID from StorageManager
+        playerId,
+        originalInput: originalInput.trim(),
+        intent: intent.trim(),
+        status: 'received', // Enhanced status: 'received' instead of 'submitted'
+        timestamp: new Date().toISOString(),
+        message: 'Action received! Processing world changes...', // Exact AC requirement message
+        actionDescription: finalParsedIntent?.target ?
+          `${finalParsedIntent.actionType} ${finalParsedIntent.target}` :
+          finalParsedIntent?.actionType || 'unknown action',
+        aiProcessingStatus: 'processing', // Story 2.3: Show AI is working on consequences
+        parsedIntent: finalParsedIntent // Include parsed intent for user reference
+      };
+
+      console.log(`[ACTION] Action submitted successfully: ${confirmationData.id}`);
+
+      res.status(201).json({
+        success: true,
+        data: confirmationData
+      });
+    } else {
+      console.error(`[ACTION] Submission failed: ${result.error}`);
+      res.status(500).json({
+        success: false,
+        error: result.error || 'Failed to submit action'
+      });
+    }
+  } catch (error) {
+    console.error('[ACTION] Submit endpoint error:', error);
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown server error'
     });
   }
 });
@@ -288,6 +417,59 @@ app.put('/api/storage/actions/:id/status', async (req, res) => {
   }
 });
 
+// Story 2.3: Recent Actions endpoint for immediate confirmation UI
+app.get('/api/actions/recent', async (req, res) => {
+  try {
+    const { playerId, minutes = 60, limit = 20 } = req.query;
+
+    const minutesNum = parseInt(minutes as string);
+    const limitNum = parseInt(limit as string);
+    const timeAgo = new Date(Date.now() - minutesNum * 60 * 1000).toISOString();
+
+    // Get all actions and filter by time
+    const result = await storageManager.getActions(
+      playerId as string,
+      null, // No status filter
+      100,  // Get more than needed for filtering
+      0
+    );
+
+    if (result.success) {
+      // Filter actions from the last N minutes
+      const recentActions = result.actions?.filter(action =>
+        new Date(action.timestamp) >= new Date(timeAgo)
+      ).slice(0, limitNum) || [];
+
+      // Add enhanced status for UI display (Story 2.3)
+      const enhancedActions = recentActions.map(action => ({
+        ...action,
+        timeSinceSubmission: Math.floor((Date.now() - new Date(action.timestamp).getTime()) / 1000),
+        statusDisplay: (action.status as any) === 'received' ? 'AI is processing...' : action.status
+      }));
+
+      res.json({
+        success: true,
+        data: enhancedActions,
+        meta: {
+          timeRange: `Last ${minutesNum} minutes`,
+          total: enhancedActions.length,
+          playerId: playerId || 'all players'
+        }
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        error: result.error
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
 // Layer 3: World State
 app.get('/api/storage/world-state', async (req, res) => {
   try {
@@ -359,6 +541,165 @@ app.get('/api/storage/world-state/history', async (req, res) => {
         error: result.error
       });
     }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+// Layer 3: World State - Enhanced Endpoints
+app.get('/api/storage/world-state/regions', async (req, res) => {
+  try {
+    const { regionId, type } = req.query;
+
+    const result = await storageManager.getCurrentWorldState();
+    if (!result.success || !result.state) {
+      return res.status(500).json({
+        success: false,
+        error: result.error || 'Unable to retrieve world state'
+      });
+    }
+
+    let regions = result.state.regions;
+
+    // Filter by region ID if specified
+    if (regionId) {
+      const region = regions[regionId as string];
+      if (!region) {
+        return res.status(404).json({
+          success: false,
+          error: `Region '${regionId}' not found`
+        });
+      }
+      regions = { [regionId as string]: region };
+    }
+
+    // Filter by type if specified
+    if (type) {
+      const filteredRegions: Record<string, any> = {};
+      Object.entries(regions).forEach(([id, region]) => {
+        if (region.type === type) {
+          filteredRegions[id] = region;
+        }
+      });
+      regions = filteredRegions;
+    }
+
+    res.json({
+      success: true,
+      data: {
+        regions,
+        count: Object.keys(regions).length,
+        worldVersion: result.state.version,
+        timestamp: result.state.timestamp
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+app.get('/api/storage/world-state/characters', async (req, res) => {
+  try {
+    const { characterId, location } = req.query;
+
+    const result = await storageManager.getCurrentWorldState();
+    if (!result.success || !result.state) {
+      return res.status(500).json({
+        success: false,
+        error: result.error || 'Unable to retrieve world state'
+      });
+    }
+
+    let characters = result.state.characters;
+
+    // Filter by character ID if specified
+    if (characterId) {
+      const character = characters[characterId as string];
+      if (!character) {
+        return res.status(404).json({
+          success: false,
+          error: `Character '${characterId}' not found`
+        });
+      }
+      characters = { [characterId as string]: character };
+    }
+
+    // Filter by location if specified
+    if (location) {
+      const filteredCharacters: Record<string, any> = {};
+      Object.entries(characters).forEach(([id, character]) => {
+        if (character.location.regionId === location) {
+          filteredCharacters[id] = character;
+        }
+      });
+      characters = filteredCharacters;
+    }
+
+    // Include relationships data
+    const relationships = result.state.relationships || {};
+
+    res.json({
+      success: true,
+      data: {
+        characters,
+        relationships,
+        count: Object.keys(characters).length,
+        worldVersion: result.state.version,
+        timestamp: result.state.timestamp
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+app.get('/api/storage/world-state/history/:version', async (req, res) => {
+  try {
+    const { version } = req.params;
+    const versionNum = parseInt(version);
+
+    if (isNaN(versionNum) || versionNum <= 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid version number. Must be a positive integer.'
+      });
+    }
+
+    // Get all states and find the specific version
+    const historyResult = await storageManager.getWorldStateHistory(100); // Get more for search
+    if (!historyResult.success || !historyResult.states) {
+      return res.status(500).json({
+        success: false,
+        error: historyResult.error || 'Unable to retrieve world state history'
+      });
+    }
+
+    const targetState = historyResult.states.find(state => state.version === versionNum);
+    if (!targetState) {
+      return res.status(404).json({
+        success: false,
+        error: `World state version ${versionNum} not found`,
+        availableVersions: historyResult.states.map(s => s.version)
+      });
+    }
+
+    res.json({
+      success: true,
+      data: {
+        state: targetState,
+        isLatest: false,
+        timestamp: targetState.timestamp
+      }
+    });
   } catch (error) {
     res.status(500).json({
       success: false,

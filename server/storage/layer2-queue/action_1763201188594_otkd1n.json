@@ -1,0 +1,19 @@
+{
+  "id": "1763201188594_otkd1n",
+  "playerId": "test-player-001",
+  "intent": "test action uniqueness",
+  "originalInput": "test action uniqueness",
+  "timestamp": "2025-11-15T10:06:28.594Z",
+  "status": "pending",
+  "metadata": {
+    "confidence": 0.8,
+    "parsedIntent": {
+      "type": "natural_language",
+      "actionType": "other",
+      "urgency": "medium",
+      "content": "test action uniqueness",
+      "timestamp": "2025-11-15T10:06:28.594Z"
+    },
+    "verificationHash": "60f86fdcaa9bdc3f3b3b52e8bf875e27ae0fce1e377704e36a913930f3c91e40"
+  }
+}

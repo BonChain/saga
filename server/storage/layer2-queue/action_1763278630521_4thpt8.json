@@ -1,0 +1,21 @@
+{
+  "id": "1763278630521_4thpt8",
+  "playerId": "test-player-001",
+  "intent": "attack the dragon with my sword",
+  "originalInput": "attack the dragon with my sword",
+  "timestamp": "2025-11-16T07:37:10.521Z",
+  "status": "pending",
+  "metadata": {
+    "confidence": 0.8,
+    "parsedIntent": {
+      "actionType": "combat",
+      "target": "sword",
+      "method": "my sword",
+      "urgency": "medium",
+      "objects": [
+        "sword"
+      ]
+    },
+    "verificationHash": "ac1bddd5b1a9710df5314fe900d77cefb093e6babe60addffa14ba2ce55f0523"
+  }
+}

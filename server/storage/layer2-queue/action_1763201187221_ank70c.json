@@ -1,0 +1,19 @@
+{
+  "id": "1763201187221_ank70c",
+  "playerId": "test-player-001",
+  "intent": "negotiate trade agreement with the elves",
+  "originalInput": "negotiate trade agreement with the elves",
+  "timestamp": "2025-11-15T10:06:27.221Z",
+  "status": "pending",
+  "metadata": {
+    "confidence": 0.8,
+    "parsedIntent": {
+      "type": "natural_language",
+      "actionType": "other",
+      "urgency": "medium",
+      "content": "negotiate trade agreement with the elves",
+      "timestamp": "2025-11-15T10:06:27.220Z"
+    },
+    "verificationHash": "21126f9b3fb83acdc96b8b15ff17ed5ece4a6f71e99b8a32b21704013bc1ddc0"
+  }
+}

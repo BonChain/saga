@@ -45,7 +45,7 @@ export interface Action {
   intent: string
   originalInput: string
   timestamp: string
-  status: 'pending' | 'processing' | 'completed' | 'failed'
+  status: 'received' | 'pending' | 'processing' | 'completed' | 'failed'
   consequences?: Consequence[]
   metadata: {
     confidence: number

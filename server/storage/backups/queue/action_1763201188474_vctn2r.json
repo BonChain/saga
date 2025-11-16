@@ -1,0 +1,24 @@
+{
+  "type": "action",
+  "timestamp": "2025-11-15T10:06:28.582Z",
+  "originalChecksum": "115d5d07c69852611269aebcaaf17f974fdf7254b62365fbce5a9e874db366a3",
+  "data": {
+    "id": "1763201188474_vctn2r",
+    "playerId": "test-player-001",
+    "intent": "test action uniqueness",
+    "originalInput": "test action uniqueness",
+    "timestamp": "2025-11-15T10:06:28.474Z",
+    "status": "pending",
+    "metadata": {
+      "confidence": 0.8,
+      "parsedIntent": {
+        "type": "natural_language",
+        "actionType": "other",
+        "urgency": "medium",
+        "content": "test action uniqueness",
+        "timestamp": "2025-11-15T10:06:28.472Z"
+      },
+      "verificationHash": "115d5d07c69852611269aebcaaf17f974fdf7254b62365fbce5a9e874db366a3"
+    }
+  }
+}

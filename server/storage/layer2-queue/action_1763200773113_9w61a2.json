@@ -1,0 +1,19 @@
+{
+  "id": "1763200773113_9w61a2",
+  "playerId": "test-player-001",
+  "intent": "burn the tavern and marry the dragon",
+  "originalInput": "burn the tavern and marry the dragon",
+  "timestamp": "2025-11-15T09:59:33.113Z",
+  "status": "pending",
+  "metadata": {
+    "confidence": 0.8,
+    "parsedIntent": {
+      "type": "natural_language",
+      "actionType": "other",
+      "urgency": "medium",
+      "content": "burn the tavern and marry the dragon",
+      "timestamp": "2025-11-15T09:59:33.112Z"
+    },
+    "verificationHash": "09ff3db53f2a57ad24973872907b4d0840b7259b086008e43a3507c5becaea89"
+  }
+}

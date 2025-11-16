@@ -1,42 +1,203 @@
-#root {
-  max-width: 1280px;
+/* Import VT323 font for retro terminal aesthetic */
+@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
+:root {
+  /* Retro terminal color palette */
+  --terminal-green: #00ff41;
+  --terminal-dark: #0a0a0a;
+  --terminal-medium: #1a1a1a;
+  --terminal-bright: #33ff33;
+  --terminal-dim: #00cc33;
+  --terminal-error: #ff4141;
+  --terminal-warning: #ffaa00;
+}
+
+body {
+  margin: 0;
+  font-family: 'VT323', monospace;
+  background: var(--terminal-dark);
+  color: var(--terminal-green);
+  overflow-x: hidden;
+}
+
+.app {
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse at top, rgba(0, 255, 65, 0.1) 0%, transparent 50%),
+    linear-gradient(180deg, #0a0a0a 0%, #1a1a1a 100%);
+  position: relative;
+}
+
+.app::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 255, 65, 0.03) 2px,
+      rgba(0, 255, 65, 0.03) 4px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 255, 65, 0.03) 2px,
+      rgba(0, 255, 65, 0.03) 4px
+    );
+  pointer-events: none;
+  z-index: 1;
+}
+
+.header {
+  text-align: center;
+  padding: 30px 20px;
+  position: relative;
+  z-index: 2;
+}
+
+.header h1 {
+  font-size: 48px;
+  margin: 0 0 10px 0;
+  text-shadow:
+    0 0 20px var(--terminal-green),
+    0 0 40px var(--terminal-green),
+    0 0 60px rgba(0, 255, 65, 0.5);
+  letter-spacing: 2px;
+  animation: flicker 3s infinite alternate;
+}
+
+.header p {
+  font-size: 18px;
+  margin: 0;
+  color: var(--terminal-dim);
+  text-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
+}
+
+@keyframes flicker {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
+}
+
+.main-content {
+  max-width: 800px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 0 20px 40px;
+  position: relative;
+  z-index: 2;
+}
+
+.recent-actions {
+  margin: 30px 0;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid var(--terminal-green);
+  border-radius: 8px;
+  box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
+}
+
+.recent-actions h3 {
+  margin: 0 0 15px 0;
+  color: var(--terminal-green);
+  font-size: 20px;
+  text-shadow: 0 0 10px var(--terminal-green);
+}
+
+.recent-actions ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.recent-actions li {
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(0, 255, 65, 0.2);
+  color: var(--terminal-bright);
+  font-size: 16px;
+  position: relative;
+  padding-left: 20px;
+}
+
+.recent-actions li::before {
+  content: '▶';
+  position: absolute;
+  left: 0;
+  color: var(--terminal-green);
+  animation: pulse 2s infinite;
+}
+
+.recent-actions li:last-child {
+  border-bottom: none;
+}
+
+.world-info {
+  margin: 30px 0;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(0, 255, 65, 0.3);
+  border-radius: 8px;
   text-align: center;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.world-info h3 {
+  margin: 0 0 15px 0;
+  color: var(--terminal-green);
+  font-size: 20px;
+  text-shadow: 0 0 10px var(--terminal-green);
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
+.world-info p {
+  margin: 8px 0;
+  font-size: 16px;
+  color: var(--terminal-dim);
+}
+
+.status-online {
+  color: var(--terminal-green);
+  text-shadow: 0 0 10px var(--terminal-green);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .header h1 {
+    font-size: 36px;
   }
-  to {
-    transform: rotate(360deg);
+
+  .header p {
+    font-size: 16px;
+  }
+
+  .main-content {
+    padding: 0 15px 30px;
   }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
 }
 
-.card {
-  padding: 2em;
+::-webkit-scrollbar-track {
+  background: var(--terminal-dark);
+  border: 1px solid var(--terminal-green);
 }
 
-.read-the-docs {
-  color: #888;
+::-webkit-scrollbar-thumb {
+  background: var(--terminal-green);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--terminal-bright);
 }

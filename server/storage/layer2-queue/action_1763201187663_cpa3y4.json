@@ -1,0 +1,19 @@
+{
+  "id": "1763201187663_cpa3y4",
+  "playerId": "test-player-001",
+  "intent": "summon a 🐉 and befriend the 👑",
+  "originalInput": "summon a 🐉 and befriend the 👑",
+  "timestamp": "2025-11-15T10:06:27.664Z",
+  "status": "pending",
+  "metadata": {
+    "confidence": 0.8,
+    "parsedIntent": {
+      "type": "natural_language",
+      "actionType": "other",
+      "urgency": "medium",
+      "content": "summon a 🐉 and befriend the 👑",
+      "timestamp": "2025-11-15T10:06:27.662Z"
+    },
+    "verificationHash": "376fe919bb2839b5b973951113cc14db16341b166d5cce5895fb5cb9fbfcb5d9"
+  }
+}

@@ -1,34 +1,43 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import ActionInput from './components/ActionInput'
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [submittedActions, setSubmittedActions] = useState<string[]>([])
+
+  const handleActionSubmit = (action: string) => {
+    setSubmittedActions(prev => [...prev, action])
+  }
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <div className="app">
+      <div className="header">
+        <h1>SuiSaga Living World</h1>
+        <p>Unlimited Player Agency - Natural Language Action System</p>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
+
+      <div className="main-content">
+        <ActionInput onSubmit={handleActionSubmit} />
+
+        {submittedActions.length > 0 && (
+          <div className="recent-actions">
+            <h3>Recent Actions:</h3>
+            <ul>
+              {submittedActions.slice(-5).map((action, index) => (
+                <li key={index}>{action}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        <div className="world-info">
+          <h3>World Status</h3>
+          <p>Server: <span className="status-online">● Online</span></p>
+          <p>Connected to Living World API</p>
+          <p>Ready to process unlimited actions</p>
+        </div>
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    </div>
   )
 }
 
