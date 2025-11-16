@@ -1,0 +1,26 @@
+{
+  "type": "action",
+  "timestamp": "2025-11-16T19:45:59.874Z",
+  "originalChecksum": "e195e977f8b059b8e945f4311ff2e3873a6d1020ceb64d916847de36ad5be551",
+  "data": {
+    "id": "f59a44f4-cd42-4527-bd9e-1409cd26de71",
+    "playerId": "test-player-zai-corrected",
+    "intent": "attack dragon",
+    "originalInput": "I want to attack the ancient dragon with my sword",
+    "timestamp": "2025-11-16T19:45:59.694Z",
+    "status": "pending",
+    "metadata": {
+      "confidence": 0.8,
+      "parsedIntent": {
+        "actionType": "combat",
+        "target": "want",
+        "method": "my sword",
+        "urgency": "medium",
+        "objects": [
+          "sword"
+        ]
+      },
+      "verificationHash": "e195e977f8b059b8e945f4311ff2e3873a6d1020ceb64d916847de36ad5be551"
+    }
+  }
+}

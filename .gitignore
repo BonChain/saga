@@ -101,10 +101,7 @@ jspm_packages/
 temp/
 tmp/
 build/
-stories/
 
 docs/
 example/
-
-core-system-reseach.md
-test-design-system.md
+stories/
