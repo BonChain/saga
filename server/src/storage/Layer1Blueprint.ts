@@ -1,6 +1,6 @@
 import { promises as fs } from 'fs'
-import path from 'path'
-import crypto from 'crypto'
+import * as path from 'path'
+import * as crypto from 'crypto'
 import { WorldRules, StorageLayer, StorageResult, ButterflyEffect, Effect, WalrusConfig, StorageLog } from '../types/storage'
 
 export class Layer1Blueprint implements StorageLayer<WorldRules> {
@@ -286,6 +286,60 @@ export class Layer1Blueprint implements StorageLayer<WorldRules> {
       return result.data.rules.butterflyEffects.filter(
         effect => effect.trigger.toLowerCase().includes(trigger.toLowerCase())
       )
+    }
+    return []
+  }
+
+  /**
+   * Get world rules formatted for consequence validation
+   */
+  async getWorldRules(): Promise<any[]> {
+    const result = await this.read()
+    if (result.success && result.data) {
+      // Convert WorldRules to WorldRule[] format expected by consequence services
+      const worldRules = result.data.rules
+      return [
+        {
+          id: 'physics_rules',
+          name: 'Physics Rules',
+          description: 'World physics and natural laws',
+          type: 'physics',
+          constraints: [
+            `gravity: ${worldRules.physics.gravity}`,
+            `timeFlow: ${worldRules.physics.timeFlow}`,
+            `weatherPatterns: ${worldRules.physics.weatherPatterns.join(', ')}`,
+            `magicalEnergy: ${worldRules.physics.magicalEnergy}`
+          ],
+          exceptions: []
+        },
+        {
+          id: 'character_behavior',
+          name: 'Character Behavior',
+          description: 'Rules governing character behavior and capabilities',
+          type: 'social',
+          constraints: [
+            `maxHealth: ${worldRules.characterBehavior.maxHealth}`,
+            `baseMovementSpeed: ${worldRules.characterBehavior.baseMovementSpeed}`,
+            `socialInteractionRange: ${worldRules.characterBehavior.socialInteractionRange}`,
+            `memoryCapacity: ${worldRules.characterBehavior.memoryCapacity}`,
+            `emotionInfluence: ${worldRules.characterBehavior.emotionInfluence}`
+          ],
+          exceptions: []
+        },
+        {
+          id: 'action_constraints',
+          name: 'Action Constraints',
+          description: 'Rules limiting player and character actions',
+          type: 'social',
+          constraints: [
+            `maxActionsPerTurn: ${worldRules.actionConstraints.maxActionsPerTurn}`,
+            `actionCooldown: ${worldRules.actionConstraints.actionCooldown}`,
+            `rangeLimit: ${worldRules.actionConstraints.rangeLimit}`,
+            `resourceRequirements: ${worldRules.actionConstraints.resourceRequirements}`
+          ],
+          exceptions: []
+        }
+      ]
     }
     return []
   }
