@@ -49,7 +49,7 @@ function validateContrast(foreground, background, requirement = 'AAA') {
 const colors = {
   neonGreen: '#00ff41',
   neonCyan: '#00ffff',
-  neonPink: '#ff33cc', // Updated brighter pink
+  neonPink: '#ff99ff', // Ultra-bright pink for WCAG AAA compliance
   neonYellow: '#ffaa00',
   neonRed: '#ff4141',
   terminalBlack: '#0a0a0a',

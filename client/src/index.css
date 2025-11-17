@@ -11,7 +11,7 @@
   /* Neon Accent Colors */
   --neon-green: #00ff41;
   --neon-cyan: #00ffff;
-  --neon-pink: #ff66ff; /* Maximum brightness pink for AAA compliance */
+  --neon-pink: #ff99ff; /* Ultra-bright pink for WCAG AAA compliance */
   --neon-yellow: #ffaa00;
   --neon-red: #ff4141;
 
@@ -20,8 +20,8 @@
   --green-dim: #00cc33;
   --cyan-bright: #33ffff;
   --cyan-dim: #00cccc;
-  --pink-bright: #ffffff; /* Use white text with pink glow */
-  --pink-dim: #ff33cc;
+  --pink-bright: #ffccff; /* Bright pink variant for AAA */
+  --pink-dim: #ff66ff;  /* Slightly dimmer but still AAA compliant */
 
   /* Typography */
   --font-terminal: 'VT323', monospace;
