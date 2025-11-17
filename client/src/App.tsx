@@ -1,9 +1,24 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import ActionInput from './components/ActionInput'
+import performanceMonitor from './utils/performanceMonitor'
 import './App.css'
 
 function App() {
   const [submittedActions, setSubmittedActions] = useState<string[]>([])
+
+  // Initialize performance monitoring (always automatic, user-friendly)
+  useEffect(() => {
+    // Start in auto mode - no user configuration needed
+    performanceMonitor.setPerformanceProfile('auto')
+
+    // Start monitoring silently for automatic adjustments
+    performanceMonitor.startMonitoring()
+
+    // Optional: Show performance overlay only in development
+    if (import.meta.env.DEV) {
+      performanceMonitor.toggleOverlay(true)
+    }
+  }, [])
 
   const handleActionSubmit = (action: string) => {
     setSubmittedActions(prev => [...prev, action])
@@ -11,12 +26,13 @@ function App() {
 
   return (
     <div className="app">
+      <a href="#main-content" className="skip-link">Skip to main content</a>
       <div className="header">
-        <h1>SuiSaga Living World</h1>
+        <h1 data-text="SuiSaga Living World">SuiSaga Living World</h1>
         <p>Unlimited Player Agency - Natural Language Action System</p>
       </div>
 
-      <div className="main-content">
+      <div className="main-content" id="main-content">
         <ActionInput onSubmit={handleActionSubmit} />
 
         {submittedActions.length > 0 && (
