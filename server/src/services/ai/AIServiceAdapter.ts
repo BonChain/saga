@@ -23,6 +23,7 @@ import {
 } from '../../types/ai'
 import { AuditLogger } from '../AuditLogger'
 import { perModelCircuitBreaker } from './PerModelCircuitBreaker'
+import { APIKeyValidator } from '../../utils/APIKeyValidator'
 
 // Simple Circuit Breaker Implementation
 interface CircuitBreakerState {
@@ -87,6 +88,34 @@ class CircuitBreaker {
       ).toISOString()
     }
   }
+
+  public isOpen(): boolean {
+    return this.state.isOpen
+  }
+
+  public getState(): 'CLOSED' | 'OPEN' | 'HALF_OPEN' {
+    if (!this.state.isOpen) {
+      return 'CLOSED'
+    }
+
+    if (this.shouldAttemptReset()) {
+      return 'HALF_OPEN'
+    }
+
+    return 'OPEN'
+  }
+
+  public getFailureCount(): number {
+    return this.state.failureCount
+  }
+
+  public getLastFailureTime(): string | undefined {
+    return this.state.lastFailureTime
+  }
+
+  public getNextAttemptTime(): string | undefined {
+    return this.state.nextAttemptTime
+  }
 }
 
 // Provider Configuration
@@ -150,6 +179,9 @@ export class AIServiceAdapter {
       enabled: !!process.env.OPENROUTER_API_KEY && process.env.OPENROUTER_API_KEY !== 'your_openrouter_key_here'
     })
 
+    // Validate API keys for enabled providers
+    this.validateProviderAPIKeys()
+
     // Set primary provider based on configuration
     const configuredProvider = process.env.AI_PROVIDER || 'openai'
     if (this.providers.has(configuredProvider) && this.providers.get(configuredProvider)?.enabled) {
@@ -160,6 +192,30 @@ export class AIServiceAdapter {
         if (provider.enabled) {
           this.currentProvider = key
           break
+        }
+      }
+    }
+  }
+
+  private validateProviderAPIKeys(): void {
+    for (const [providerKey, provider] of this.providers.entries()) {
+      if (provider.enabled && provider.apiKey) {
+        try {
+          switch (providerKey) {
+            case 'openai':
+              APIKeyValidator.validateOpenAIKey(provider.apiKey);
+              break;
+            case 'zai':
+              APIKeyValidator.validateZAIKey(provider.apiKey);
+              break;
+            case 'openrouter':
+              APIKeyValidator.validateOpenRouterKey(provider.apiKey);
+              break;
+          }
+        } catch (error) {
+          console.warn(`[${provider.name}] API key validation failed: ${(error as Error).message}`);
+          // Disable provider with invalid API key
+          provider.enabled = false;
         }
       }
     }
@@ -703,7 +759,7 @@ Be specific and reference the current world state.`
         details: {
           currentProvider: this.currentProvider,
           availableProviders: this.getAvailableProviders(),
-          circuitBreakerOpen: false // TODO: Get from circuit breaker
+          circuitBreakerOpen: this.circuitBreaker.isOpen() // Fixed: Get from circuit breaker
         }
       }
     } catch (error) {

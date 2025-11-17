@@ -1,0 +1,132 @@
+<story-context id="{bmad_folder}/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>3</epicId>
+    <storyId>3</storyId>
+    <title>Butterfly Effect Calculation</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-17</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>stories/story-3-3-butterfly-effect-calculation.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>As a player</asA>
+    <iWant>I want to see how my actions ripple through the world</iWant>
+    <soThat>so that I understand the impact of my choices</soThat>
+    <tasks>Phase 1: Effect Propagation Algorithm (AC: 1)
+- Implement effect propagation algorithm
+  - Create world system relationship mapping for effect propagation
+  - Implement secondary effect calculation across connected systems
+  - Add tertiary effect propagation for deep butterfly effects
+- Create relationship mapping between world systems
+  - Define system relationships (character ↔ environment ↔ economy)
+  - Create relationship strength and direction mapping
+  - Implement effect decay over distance and time
+
+Phase 2: Visual Map Data Structures (AC: 1)
+- Design visualization data structures for cascade diagrams
+  - Create ButterflyEffectNode interface with position, type, and metadata
+  - Implement EffectConnection interface with strength and animation data
+  - Create CascadeVisualizationData structure for frontend consumption
+- Generate cause-and-effect relationship data
+  - Build effect chain from action to primary consequences
+  - Create secondary effect branches with probability weighting
+  - Add temporal progression data for animation support
+
+Phase 3: Cross-Region and Time Persistence (AC: 1)
+- Add effect tracking and historical analysis
+  - Implement effect persistence in Layer 3 state storage
+  - Create effect history querying and retrieval system
+  - Add effect discovery mechanism for other players
+- Implement cross-region effect propagation
+  - Define regional boundaries and connections
+  - Create effect delay and travel time calculations
+  - Add region-specific effect modification logic
+
+Phase 4: Emergent Gameplay Systems (AC: 1)
+- Include effect intensity and duration calculations
+  - Create effect strength decay formulas over time
+  - Implement effect stacking and combination logic
+  - Add effect trigger conditions for player discoveries
+- Create emergent opportunity generation
+  - Implement action possibility creation from world changes
+  - Create chain reaction detection and notification system
+  - Add butterfly effect achievement and milestone tracking
+
+Phase 5: Integration with Existing Systems (Derived from Story 3.2)
+- Integrate with ConsequenceGenerator service
+  - Extend ConsequenceGenerator to create butterfly effect data
+  - Connect with CascadeProcessor for effect propagation
+  - Integrate with WorldStateUpdater for persistent storage
+- Connect to existing world state systems
+  - Use Layer 1 world rules for effect validation
+  - Extend Layer 3 state for effect history tracking
+  - Integrate with character relationship system
+
+Phase 6: Testing and Performance (Derived from Story 3.2 patterns)
+- Create comprehensive butterfly effect testing suite
+  - Unit tests for effect propagation and visualization data
+  - Integration tests with consequence generation system
+  - Performance tests for real-time effect calculation
+  - End-to-end tests for complete butterfly effect flow
+- Add effect quality and coherence validation
+  - Implement effect logical consistency checking
+  - Create emergent gameplay opportunity testing
+  - Add visualization data structure validation</tasks>
+  </story>
+
+  <acceptanceCriteria>1. Given a consequence has been generated,
+   When the system calculates butterfly effects,
+   Then it identifies related world systems that will be affected
+   And it calculates secondary effects on character relationships and environment
+   And it creates a visual map showing cause-and-effect relationships
+   And the effects persist across multiple world regions and time periods
+   And players can discover effects created by other players
+   And the butterfly effects create emergent gameplay opportunities</acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc path="docs/PRD.md" title="Product Requirements Document" section="AI World Logic Innovation" snippet="AI fine-tuned to understand 'World Logic' rather than just generate prose, creating intelligent butterfly effects and cascading world changes. Dragon defeat triggering coordinated village blessing, shop opening, and forest peacefulness cascade." />
+      <doc path="docs/tech-spec.md" title="Technical Specification" section="Data Flow Architecture" snippet="React Components (Vite) → API Calls → Express Backend → AI Processing → World State → Walrus Storage. Background Processing: Dedicated job queue for AI processing and world state updates." />
+      <doc path="docs/epics.md" title="Epic Breakdown" section="Story 3.3: Butterfly Effect Calculation" snippet="As a player, I want to see how my actions ripple through the world, so that I understand the impact of my choices. System calculates butterfly effects, identifies related world systems, creates visual map showing cause-and-effect relationships." />
+      <doc path="docs/epics.md" title="Epic Breakdown" section="Technical Notes" snippet="Implement effect propagation algorithm, Create relationship mapping between world systems, Design visualization data structures for cascade diagrams, Add effect tracking and historical analysis." />
+    </docs>
+    <code>
+      <code path="server/src/services/CascadeProcessor.ts" kind="service" symbol="CascadeProcessor" lines="1-100" reason="Foundation for butterfly effect calculation with existing world system relationship mapping and cascading effect generation. Ready for extension with visualization data structures." />
+      <code path="server/src/services/ConsequenceGenerator.ts" kind="service" symbol="ConsequenceGenerator" lines="1-100" reason="Multi-format consequence parsing service that generates AIConsequence objects. Extend with butterfly effect visualization data generation." />
+      <code path="server/src/services/WorldStateUpdater.ts" kind="service" symbol="WorldStateUpdater" lines="1-100" reason="Applies consequences to world state with Layer 3 integration. Extend with effect history tracking and persistence for butterfly effects." />
+      <code path="server/src/types/ai.ts" kind="types" symbol="AIConsequence, CascadingEffect" lines="8-64" reason="Core data models for consequences and cascading effects. Need to extend with visualization-specific interfaces for butterfly effect display." />
+    </code>
+    <dependencies>
+      <dependency ecosystem="Node.js" packages="express@4.18.2, uuid@9.0.1, openai@6.9.0, @mysten/walrus@0.8.4, @mysten/sui@1.45.0" />
+      <dependency ecosystem="TypeScript" packages="typescript@5.3.3, @types/node@20.10.5, @types/express@4.17.21, @types/uuid@9.0.7" />
+      <dependency ecosystem="Testing" packages="jest@30.2.0, @types/jest@30.0.0, ts-jest@29.4.5" />
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>Performance: All butterfly effect calculations must complete within 15 seconds to meet real-time requirements</constraint>
+    <constraint>Architecture: Must extend existing CascadeProcessor service rather than rebuild - reuse world system relationship mapping</constraint>
+    <constraint>Storage: Use Layer 3 state system for effect history tracking and persistence - integrate with existing WorldStateUpdater</constraint>
+    <constraint>Integration: Build on ConsequenceGenerator outputs - enhance existing AIConsequence objects with visualization data</constraint>
+    <constraint>Compatibility: Must work with existing consequence infrastructure from Story 3.2 without breaking changes</constraint>
+    <constraint>Data Structure: Visualization data must be frontend-consumable for cascade diagram components</constraint>
+  </constraints>
+  <interfaces>
+    <interface name="CascadeProcessor.processCascadingEffects" kind="function" signature="async processCascadingEffects(consequences: AIConsequence[], options?: CascadeProcessingOptions): Promise<CascadeNetwork>" path="server/src/services/CascadeProcessor.ts" />
+    <interface name="ConsequenceGenerator.generateConsequences" kind="function" signature="async generateConsequences(aiResponse: string, request: AIRequest, options?: ConsequenceParsingOptions): Promise<ConsequenceParsingResult>" path="server/src/services/ConsequenceGenerator.ts" />
+    <interface name="WorldStateUpdater.applyConsequences" kind="function" signature="async applyConsequences(consequences: AIConsequence[], currentWorldState?: WorldStateSnapshot): Promise<WorldStateUpdateResult>" path="server/src/services/WorldStateUpdater.ts" />
+    <interface name="AIConsequence" kind="interface" signature="{ id: string; actionId: string; type: ConsequenceType; description: string; impact: ConsequenceImpact; cascadingEffects: CascadingEffect[]; timestamp: string; confidence: number }" path="server/src/types/ai.ts" />
+  </interfaces>
+  <tests>
+    <standards>Unit tests with Jest framework achieving 80%+ coverage. Integration tests for effect propagation across world systems. Performance tests ensuring sub-15-second processing times. Visual data structure validation tests for frontend compatibility.</standards>
+    <locations>server/tests/unit/butterfly-effect/ for unit tests, server/tests/integration/butterfly-effect/ for integration tests, server/tests/performance/butterfly-effect/ for performance validation</locations>
+    <ideas>
+      <test idea="Test effect propagation algorithm with known world system relationships - verify cascade depth and probability calculations">
+      <test idea="Validate visualization data structure generation - ensure frontend consumption compatibility">
+      <test idea="Performance test with complex consequence sets - verify 15-second processing limit">
+      <test idea="Cross-region effect propagation test - verify delay and travel time calculations">
+      <test idea="Effect persistence test - verify Layer 3 state storage and retrieval">
+    </ideas>
+  </tests>
+</story-context>
