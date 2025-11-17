@@ -1,68 +1,346 @@
+/* Import retro gaming fonts */
+@import url('https://fonts.googleapis.com/css2?family=VT323&family=Roboto+Mono:wght@400;700&display=swap');
+
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
+  /* Retro Gaming Color Palette */
+  --terminal-black: #0a0a0a;
+  --terminal-dark: #1a1a1a;
+  --terminal-medium: #2d2d2d;
+  --terminal-light: #404040;
+
+  /* Neon Accent Colors */
+  --neon-green: #00ff41;
+  --neon-cyan: #00ffff;
+  --neon-pink: #ff66ff; /* Maximum brightness pink for AAA compliance */
+  --neon-yellow: #ffaa00;
+  --neon-red: #ff4141;
+
+  /* Color Variations */
+  --green-bright: #33ff33;
+  --green-dim: #00cc33;
+  --cyan-bright: #33ffff;
+  --cyan-dim: #00cccc;
+  --pink-bright: #ffffff; /* Use white text with pink glow */
+  --pink-dim: #ff33cc;
+
+  /* Typography */
+  --font-terminal: 'VT323', monospace;
+  --font-mono: 'Roboto Mono', monospace;
+
+  /* Effects */
+  --glow-intensity: 0 0 20px;
+  --glow-heavy: 0 0 40px;
+  --shadow-intense: 0 0 60px;
+
+  font-family: var(--font-terminal);
+  line-height: 1.4;
   font-weight: 400;
+  color: var(--neon-green);
+  background-color: var(--terminal-black);
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
+  color-scheme: dark;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Base retro link styles */
 a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--neon-cyan);
+  text-decoration: none;
+  text-shadow: var(--glow-intensity) var(--neon-cyan);
+  padding: 2px 4px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  transition: all 0.3s ease;
 }
 
+a:hover {
+  color: var(--cyan-bright);
+  border-color: var(--neon-cyan);
+  background: rgba(0, 255, 255, 0.1);
+  transform: translateY(-1px);
+}
+
+a:focus-visible {
+  outline: 2px solid var(--neon-cyan);
+  outline-offset: 2px;
+}
+
+/* Body and layout */
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
+  font-family: var(--font-terminal);
+  background: var(--terminal-black);
+  color: var(--neon-green);
   min-width: 320px;
   min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* CRT Scanline Effect */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.15),
+    rgba(0, 0, 0, 0.15) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+  pointer-events: none;
+  z-index: 1000;
+  animation: scanline 8s linear infinite;
+}
+
+@keyframes scanline {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(10px); }
+}
+
+/* CRT Screen Curve Effect */
+body::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 0%,
+    transparent 60%,
+    rgba(0, 0, 0, 0.1) 90%,
+    rgba(0, 0, 0, 0.3) 100%
+  );
+  pointer-events: none;
+  z-index: 999;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-terminal);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin: 0 0 1rem 0;
+  text-shadow:
+    var(--glow-intensity) currentColor,
+    var(--glow-heavy) rgba(0, 255, 65, 0.3);
 }
 
 h1 {
-  font-size: 3.2em;
+  font-size: clamp(2rem, 8vw, 4rem);
   line-height: 1.1;
+  color: var(--neon-green);
 }
 
+h2 {
+  font-size: clamp(1.5rem, 6vw, 2.5rem);
+  color: var(--neon-cyan);
+}
+
+h3 {
+  font-size: clamp(1.2rem, 4vw, 1.8rem);
+  color: var(--neon-pink);
+}
+
+p {
+  font-size: clamp(0.9rem, 3vw, 1.1rem);
+  line-height: 1.6;
+  margin: 0 0 1rem 0;
+  color: var(--green-dim);
+}
+
+/* Retro Button Base Styles */
 button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--terminal-black);
+  background: var(--neon-green);
+  border: 2px solid var(--neon-green);
+  border-radius: 4px;
+  padding: 0.75em 1.5em;
   cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--glow-intensity) rgba(0, 255, 65, 0.5);
 }
 
-@media (prefers-color-scheme: light) {
+/* Pixel border effect for buttons */
+button::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg,
+    var(--neon-green),
+    var(--neon-cyan),
+    var(--neon-pink),
+    var(--neon-green)
+  );
+  border-radius: 4px;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  animation: pixelGlow 3s linear infinite;
+}
+
+@keyframes pixelGlow {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 0.7; }
+}
+
+button:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    var(--glow-heavy) var(--neon-green),
+    0 4px 0 rgba(0, 255, 65, 0.3);
+}
+
+button:hover::before {
+  opacity: 1;
+}
+
+button:active {
+  transform: translateY(0);
+  box-shadow:
+    var(--glow-intensity) var(--neon-green),
+    0 1px 0 rgba(0, 255, 65, 0.3);
+}
+
+button:focus-visible {
+  outline: 2px solid var(--neon-cyan);
+  outline-offset: 2px;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Form elements */
+input, textarea, select {
+  font-family: var(--font-terminal);
+  background: var(--terminal-dark);
+  color: var(--neon-green);
+  border: 2px solid var(--green-dim);
+  border-radius: 4px;
+  padding: 0.75em;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: var(--neon-cyan);
+  box-shadow: var(--glow-intensity) rgba(0, 255, 255, 0.3);
+  background: rgba(0, 0, 0, 0.8);
+}
+
+/* Utility classes */
+.neon-text {
+  text-shadow: var(--glow-heavy) currentColor;
+}
+
+.pixel-border {
+  border: 2px solid currentColor;
+  border-radius: 4px;
+  position: relative;
+}
+
+.pixel-border::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  right: -1px;
+  bottom: -1px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+.glow-green { color: var(--neon-green); }
+.glow-cyan { color: var(--neon-cyan); }
+.glow-pink { color: var(--neon-pink); }
+.glow-yellow { color: var(--neon-yellow); }
+
+/* Flicker animation for retro effect */
+@keyframes flicker {
+  0%, 100% { opacity: 1; }
+  41.99% { opacity: 1; }
+  42% { opacity: 0; }
+  42.01% { opacity: 1; }
+  43.99% { opacity: 1; }
+  44% { opacity: 0; }
+  44.01% { opacity: 1; }
+}
+
+.flicker {
+  animation: flicker 3s infinite;
+}
+
+/* High contrast for accessibility */
+@media (prefers-contrast: high) {
   :root {
-    color: #213547;
-    background-color: #ffffff;
+    --neon-green: #00ff00;
+    --neon-cyan: #00ffff;
+    --neon-pink: #ff00ff;
+    --green-dim: #00cc00;
+    --cyan-dim: #00cccc;
+    --pink-dim: #ff00ff;
+    --pink-bright: #ffffff;
   }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
+}
+
+/* Enhanced focus indicators for keyboard navigation */
+:focus-visible {
+  outline: 3px solid var(--neon-cyan);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Skip link for accessibility */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 6px;
+  background: var(--neon-green);
+  color: var(--terminal-black);
+  padding: 8px;
+  text-decoration: none;
+  border-radius: 4px;
+  font-weight: 700;
+  z-index: 10000;
+}
+
+.skip-link:focus {
+  top: 6px;
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

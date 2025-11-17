@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Responsive Test - Retro Gaming UI</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'VT323', monospace;
+            background: #0a0a0a;
+            color: #00ff41;
+        }
+
+        .test-container {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .breakpoint-indicator {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 255, 65, 0.2);
+            border: 1px solid #00ff41;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 18px;
+            z-index: 1000;
+        }
+
+        .size-indicator {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            background: rgba(0, 255, 255, 0.2);
+            border: 1px solid #00ffff;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 16px;
+            z-index: 1000;
+        }
+
+        @media (max-width: 480px) {
+            .breakpoint-indicator {
+                background: rgba(255, 0, 128, 0.2);
+                border-color: #ff0080;
+                color: #ff0080;
+            }
+            body { font-size: 14px; }
+        }
+
+        @media (min-width: 481px) and (max-width: 768px) {
+            .breakpoint-indicator {
+                background: rgba(255, 170, 0, 0.2);
+                border-color: #ffaa00;
+                color: #ffaa00;
+            }
+            body { font-size: 16px; }
+        }
+
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .breakpoint-indicator {
+                background: rgba(0, 255, 65, 0.2);
+                border-color: #00ff41;
+                color: #00ff41;
+            }
+            body { font-size: 18px; }
+        }
+
+        @media (min-width: 1025px) {
+            .breakpoint-indicator {
+                background: rgba(0, 255, 255, 0.2);
+                border-color: #00ffff;
+                color: #00ffff;
+            }
+            body { font-size: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="breakpoint-indicator" id="breakpoint">Desktop (1024px+)</div>
+    <div class="size-indicator" id="screenSize">1920x1080</div>
+
+    <div class="test-container">
+        <h1>Responsive Design Test</h1>
+        <p>Resize your browser window to test different breakpoints</p>
+
+        <div style="margin: 20px 0;">
+            <p>🟱 Mobile: ≤ 480px (Pink indicator)</p>
+            <p>🟨 Tablet: 481px - 768px (Yellow indicator)</p>
+            <p>🟩 Small Desktop: 769px - 1024px (Green indicator)</p>
+            <p>🟦 Large Desktop: ≥ 1025px (Cyan indicator)</p>
+        </div>
+
+        <div style="margin: 40px 0; padding: 20px; border: 2px solid #00ff41; border-radius: 8px;">
+            <h2>Test Area</h2>
+            <p>This area should remain readable and functional at all screen sizes.</p>
+            <p>Font sizes should scale appropriately for each breakpoint.</p>
+        </div>
+    </div>
+
+    <script>
+        function updateScreenSize() {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            const screenSizeElement = document.getElementById('screenSize');
+            const breakpointElement = document.getElementById('breakpoint');
+
+            screenSizeElement.textContent = `${width}x${height}`;
+
+            if (width <= 480) {
+                breakpointElement.textContent = 'Mobile (≤480px)';
+            } else if (width <= 768) {
+                breakpointElement.textContent = 'Tablet (481-768px)';
+            } else if (width <= 1024) {
+                breakpointElement.textContent = 'Small Desktop (769-1024px)';
+            } else {
+                breakpointElement.textContent = 'Large Desktop (≥1025px)';
+            }
+        }
+
+        window.addEventListener('resize', updateScreenSize);
+        updateScreenSize();
+    </script>
+</body>
+</html>

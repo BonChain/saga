@@ -11,12 +11,13 @@ function App() {
 
   return (
     <div className="app">
+      <a href="#main-content" className="skip-link">Skip to main content</a>
       <div className="header">
-        <h1>SuiSaga Living World</h1>
+        <h1 data-text="SuiSaga Living World">SuiSaga Living World</h1>
         <p>Unlimited Player Agency - Natural Language Action System</p>
       </div>
 
-      <div className="main-content">
+      <div className="main-content" id="main-content">
         <ActionInput onSubmit={handleActionSubmit} />
 
         {submittedActions.length > 0 && (

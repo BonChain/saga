@@ -510,7 +510,7 @@ epic-8:
     story-8-1-retro-gaming-ui-design:
       title: "Retro Gaming UI Design"
       description: "As a player, I want an arcade-style interface with high-contrast retro aesthetics, so that the game feels nostalgic and professional for hackathon demonstration."
-      status: "backlog"
+      status: "ready-for-dev"
       prerequisites: ["story-2-3-immediate-action-confirmation"]
       estimated_hours: 3
       acceptance_criteria:

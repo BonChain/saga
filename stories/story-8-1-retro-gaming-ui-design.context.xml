@@ -1,0 +1,63 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>8</epicId>
+    <storyId>1</storyId>
+    <title>Retro Gaming UI Design</title>
+    <status>in_progress</status>
+    <generatedAt>2025-11-17</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>stories/story-8-1-retro-gaming-ui-design.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>a player</asA>
+    <iWant>an arcade-style interface with high-contrast retro aesthetics</iWant>
+    <soThat>the game feels nostalgic and professional for hackathon demonstration</soThat>
+    <tasks>Implement retro design system with CSS custom properties, Create consistent component library with retro styling, Add scanline and glow effects using CSS animations, Design responsive layouts for all screen sizes, Include accessibility features with retro aesthetics</tasks>
+  </story>
+
+  <acceptanceCriteria>AC 8.1.1: Design uses VT323 and Roboto Mono fonts for terminal aesthetics
+AC 8.1.2: Color scheme features dark backgrounds with neon green/cyan/pink accents
+AC 8.1.3: Interactive elements have glowing effects and pixel borders
+AC 8.1.4: Scanline effects simulate CRT monitor appearance
+AC 8.1.5: All text meets WCAG 2.1 AAA contrast requirements
+AC 8.1.6: Interface works seamlessly on desktop (1024px+) and mobile (320px+)</acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc path="docs/ux-design-specification.md" title="UX Design Specification" section="3.1 Color System & 4.1 Chosen Design Approach" snippet="Retro Gaming High Contrast theme with neon green (#00ff41), cyan (#00ffff), and pink (#ff0080) accents on dark backgrounds (#0a0a0a). Typography uses VT323 and Roboto Mono fonts with scanline effects and pixel borders."/>
+      <doc path="docs/tech-spec.md" title="Technical Specification" section="Implementation Details & Frontend Architecture" snippet="Vite + React frontend with TypeScript. Retro gaming interface optimized for hackathon demo with real-time updates and accessibility compliance. CSS custom properties for consistent theming."/>
+    </docs>
+    <code>
+      <file path="client/src/index.css" kind="stylesheet" symbol="CSS Custom Properties" lines="1-320" reason="Main retro design system with neon color palette, VT323 font integration, scanline effects, and accessibility features"/>
+      <file path="client/src/App.css" kind="stylesheet" symbol="App-Specific Styling" lines="1-400" reason="Enhanced retro styling for main application with multi-color gradients, animated borders, and responsive design"/>
+      <file path="client/src/components/ActionInput.tsx" kind="component" symbol="ActionInput" lines="1-100" reason="Retro-styled action input component with terminal aesthetics, character counter, and example actions"/>
+      <file path="client/src/components/ActionInput.css" kind="stylesheet" symbol="ActionInput Styling" lines="1-450" reason="Dedicated retro styling for action input with CRT effects, pixel borders, and responsive design"/>
+      <file path="client/src/App.tsx" kind="component" symbol="App" lines="1-50" reason="Main application component with retro title effects and accessibility skip link"/>
+      <file path="client/src/utils/contrastChecker.js" kind="utility" symbol="WCAG Validation" lines="1-85" reason="Contrast ratio validation tool ensuring WCAG 2.1 AAA compliance for all color combinations"/>
+    </code>
+    <dependencies>
+      <ecosystem name="frontend" packages="react@19.2.0, react-dom@19.2.0, typescript@5.9.3, vite@7.2.2" version="Latest"/>
+      <ecosystem name="fonts" packages="VT323 (Google Fonts), Roboto Mono (Google Fonts)" version="Web Fonts"/>
+      <ecosystem name="development" packages="@types/react@19.2.2, @types/node@24.10.0, eslint@9.39.1" version="Latest"/>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint name="WCAG 2.1 AAA Compliance" description="All text must meet 7:1 contrast ratio minimum. Use high contrast mode support and maintain accessibility in retro theming."/>
+    <constraint name="Responsive Design" description="Must work seamlessly on desktop (1024px+) and mobile (320px+). Use clamp() for font sizes and mobile-first CSS approach."/>
+    <constraint name="Retro Aesthetic" description="Maintain authentic arcade feel with VT323/Roboto Mono fonts, scanline effects, neon colors, and pixel borders while ensuring modern usability."/>
+    <constraint name="Performance" description="Keep CSS animations GPU-accelerated and bundle size impact under 5KB. Use CSS custom properties for efficient theming."/>
+    <constraint name="Browser Compatibility" description="Support modern browsers with CSS Grid, Flexbox, and CSS custom properties. Provide fallbacks for older browsers if needed."/>
+  </constraints>
+  <interfaces>
+    <interface name="CSS Custom Properties API" kind="Design System" signature="--neon-green: #00ff41; --neon-cyan: #00ffff; --neon-pink: #ff66ff; --font-terminal: 'VT323', monospace;" path="client/src/index.css"/>
+    <interface name="Responsive Typography" kind="CSS Function" signature="clamp(min-size, preferred-size, max-size)" path="client/src/index.css"/>
+    <interface name="Component Props" kind="React Interface" signature="ActionInputProps { onSubmit?: (action: string) => void; disabled?: boolean; }" path="client/src/components/ActionInput.tsx"/>
+  </interfaces>
+  <tests>
+    <standards>Use Jest for React component testing, axe-core for accessibility validation, and manual visual testing for retro effects. Test contrast ratios with automated checker. Validate responsive design at 320px, 768px, 1024px, and 1920px breakpoints.</standards>
+    <locations>Component tests in client/src/components/__tests__/, integration tests in client/src/__tests__/, visual regression tests in client/tests/visual/, accessibility tests using axe-core in CI pipeline.</locations>
+    <ideas>AC 8.1.1: Test font loading with Google Fonts integration. AC 8.1.2: Validate color contrast ratios exceed 7:1. AC 8.1.3: Test hover/focus states and animations. AC 8.1.4: Verify scanline effects perform well on mobile. AC 8.1.5: Run automated accessibility audit. AC 8.1.6: Test responsive breakpoints with device emulation.</ideas>
+  </tests>
+</story-context>
