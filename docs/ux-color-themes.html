@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SuiSaga - Color Theme Explorer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8fafc;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            color: #64748b;
+        }
+
+        .themes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .theme-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            overflow: hidden;
+            transition: transform 0.2s;
+        }
+
+        .theme-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .theme-header {
+            padding: 1.5rem;
+            color: white;
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+
+        .theme-description {
+            padding: 1rem 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .theme-content {
+            padding: 1.5rem;
+        }
+
+        .color-palette {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .color-swatch {
+            height: 80px;
+            border-radius: 8px;
+            display: flex;
+            align-items: flex-end;
+            padding: 0.5rem;
+            color: white;
+            font-size: 0.8rem;
+            font-weight: 500;
+            position: relative;
+        }
+
+        .color-hex {
+            position: absolute;
+            top: 0.5rem;
+            left: 0.5rem;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+        }
+
+        .semantic-colors {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .semantic-color {
+            height: 50px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .component-examples {
+            border-top: 1px solid #e2e8f0;
+            padding-top: 1.5rem;
+        }
+
+        .component-row {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .input-field {
+            padding: 0.5rem;
+            border-radius: 6px;
+            border: 1px solid;
+            font-size: 0.9rem;
+            width: 150px;
+        }
+
+        .card {
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid;
+        }
+
+        /* Theme 1: Blockchain Trust (Blue/Purple) */
+        .theme-1 .theme-header { background: linear-gradient(135deg, #3b82f6, #8b5cf6); }
+        .theme-1 .color-primary { background: #3b82f6; }
+        .theme-1 .color-secondary { background: #8b5cf6; }
+        .theme-1 .color-accent { background: #10b981; }
+        .theme-1 .color-neutral-light { background: #f1f5f9; color: #334155; }
+        .theme-1 .color-neutral-dark { background: #1e293b; }
+        .theme-1 .semantic-success { background: #10b981; }
+        .theme-1 .semantic-warning { background: #f59e0b; }
+        .theme-1 .semantic-error { background: #ef4444; }
+        .theme-1 .semantic-info { background: #3b82f6; }
+        .theme-1 .btn-primary { background: #3b82f6; color: white; }
+        .theme-1 .btn-secondary { background: #8b5cf6; color: white; }
+        .theme-1 .input-field { border-color: #cbd5e1; }
+        .theme-1 .card { border-color: #e2e8f0; background: #f8fafc; }
+
+        /* Theme 2: Living World (Green/Nature) */
+        .theme-2 .theme-header { background: linear-gradient(135deg, #10b981, #059669); }
+        .theme-2 .color-primary { background: #10b981; }
+        .theme-2 .color-secondary { background: #059669; }
+        .theme-2 .color-accent { background: #f59e0b; }
+        .theme-2 .color-neutral-light { background: #ecfdf5; color: #064e3b; }
+        .theme-2 .color-neutral-dark { background: #064e3b; }
+        .theme-2 .semantic-success { background: #10b981; }
+        .theme-2 .semantic-warning { background: #f59e0b; }
+        .theme-2 .semantic-error { background: #ef4444; }
+        .theme-2 .semantic-info { background: #3b82f6; }
+        .theme-2 .btn-primary { background: #10b981; color: white; }
+        .theme-2 .btn-secondary { background: #059669; color: white; }
+        .theme-2 .input-field { border-color: #d1fae5; }
+        .theme-2 .card { border-color: #a7f3d0; background: #ecfdf5; }
+
+        /* Theme 3: Innovation Energy (Orange/Bright) */
+        .theme-3 .theme-header { background: linear-gradient(135deg, #f59e0b, #ef4444); }
+        .theme-3 .color-primary { background: #f59e0b; }
+        .theme-3 .color-secondary { background: #ef4444; }
+        .theme-3 .color-accent { background: #3b82f6; }
+        .theme-3 .color-neutral-light { background: #fffbeb; color: #78350f; }
+        .theme-3 .color-neutral-dark { background: #78350f; }
+        .theme-3 .semantic-success { background: #10b981; }
+        .theme-3 .semantic-warning { background: #f59e0b; }
+        .theme-3 .semantic-error { background: #ef4444; }
+        .theme-3 .semantic-info { background: #3b82f6; }
+        .theme-3 .btn-primary { background: #f59e0b; color: white; }
+        .theme-3 .btn-secondary { background: #ef4444; color: white; }
+        .theme-3 .input-field { border-color: #fed7aa; }
+        .theme-3 .card { border-color: #fde68a; background: #fffbeb; }
+
+        /* Theme 4: Dark Cipher (Dark Mode) */
+        .theme-4 .theme-header { background: linear-gradient(135deg, #4c1d95, #1e3a8a); }
+        .theme-4 .color-primary { background: #6366f1; }
+        .theme-4 .color-secondary { background: #8b5cf6; }
+        .theme-4 .color-accent { background: #f59e0b; }
+        .theme-4 .color-neutral-light { background: #374151; color: #f9fafb; }
+        .theme-4 .color-neutral-dark { background: #111827; }
+        .theme-4 .semantic-success { background: #10b981; }
+        .theme-4 .semantic-warning { background: #f59e0b; }
+        .theme-4 .semantic-error { background: #ef4444; }
+        .theme-4 .semantic-info { background: #3b82f6; }
+        .theme-4 .btn-primary { background: #6366f1; color: white; }
+        .theme-4 .btn-secondary { background: #8b5cf6; color: white; }
+        .theme-4 .input-field { background: #374151; border-color: #4b5563; color: #f9fafb; }
+        .theme-4 .card { border-color: #4b5563; background: #1f2937; color: #f9fafb; }
+
+        .comparison-section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .comparison-item {
+            text-align: center;
+            padding: 1rem;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+
+        @media (max-width: 1024px) {
+            .comparison-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 640px) {
+            .themes-grid {
+                grid-template-columns: 1fr;
+            }
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>SuiSaga Color Theme Explorer</h1>
+            <p>Choose the visual foundation that best represents your living world innovation</p>
+        </div>
+
+        <div class="themes-grid">
+            <!-- Theme 1: Blockchain Trust -->
+            <div class="theme-card theme-1">
+                <div class="theme-header">
+                    <div>🔗 Blockchain Trust</div>
+                </div>
+                <div class="theme-description">
+                    Professional, secure, and innovative. Perfect for demonstrating technical credibility and building trust with hackathon judges. Blue conveys reliability, purple adds innovation, green shows success.
+                </div>
+                <div class="theme-content">
+                    <div class="color-palette">
+                        <div class="color-swatch color-primary">
+                            <span class="color-hex">#3b82f6</span>
+                            Primary
+                        </div>
+                        <div class="color-swatch color-secondary">
+                            <span class="color-hex">#8b5cf6</span>
+                            Secondary
+                        </div>
+                        <div class="color-swatch color-accent">
+                            <span class="color-hex">#10b981</span>
+                            Accent
+                        </div>
+                        <div class="color-swatch color-neutral-dark">
+                            <span class="color-hex">#1e293b</span>
+                            Text Dark
+                        </div>
+                    </div>
+
+                    <div class="semantic-colors">
+                        <div class="semantic-color semantic-success">Success</div>
+                        <div class="semantic-color semantic-warning">Warning</div>
+                        <div class="semantic-color semantic-error">Error</div>
+                        <div class="semantic-color semantic-info">Info</div>
+                    </div>
+
+                    <div class="component-examples">
+                        <h4 style="margin-bottom: 0.5rem; font-size: 0.9rem;">Component Examples:</h4>
+                        <div class="component-row">
+                            <button class="btn btn-primary">Primary Action</button>
+                            <button class="btn btn-secondary">Secondary</button>
+                        </div>
+                        <div class="component-row">
+                            <input class="input-field" placeholder="Enter action">
+                            <button class="btn btn-primary">Submit</button>
+                        </div>
+                        <div class="card">
+                            <strong>Proof Card</strong><br>
+                            <small>Action verified on blockchain</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Theme 2: Living World -->
+            <div class="theme-card theme-2">
+                <div class="theme-header">
+                    <div>🌿 Living World</div>
+                </div>
+                <div class="theme-description">
+                    Natural, evolving, and organic. Emphasizes the living, breathing nature of your world. Green represents growth and life, creating a sense of natural evolution and player impact.
+                </div>
+                <div class="theme-content">
+                    <div class="color-palette">
+                        <div class="color-swatch color-primary">
+                            <span class="color-hex">#10b981</span>
+                            Primary
+                        </div>
+                        <div class="color-swatch color-secondary">
+                            <span class="color-hex">#059669</span>
+                            Secondary
+                        </div>
+                        <div class="color-swatch color-accent">
+                            <span class="color-hex">#f59e0b</span>
+                            Accent
+                        </div>
+                        <div class="color-swatch color-neutral-dark">
+                            <span class="color-hex">#064e3b</span>
+                            Text Dark
+                        </div>
+                    </div>
+
+                    <div class="semantic-colors">
+                        <div class="semantic-color semantic-success">Success</div>
+                        <div class="semantic-color semantic-warning">Warning</div>
+                        <div class="semantic-color semantic-error">Error</div>
+                        <div class="semantic-color semantic-info">Info</div>
+                    </div>
+
+                    <div class="component-examples">
+                        <h4 style="margin-bottom: 0.5rem; font-size: 0.9rem;">Component Examples:</h4>
+                        <div class="component-row">
+                            <button class="btn btn-primary">Take Action</button>
+                            <button class="btn btn-secondary">Explore</button>
+                        </div>
+                        <div class="component-row">
+                            <input class="input-field" placeholder="World command">
+                            <button class="btn btn-primary">Execute</button>
+                        </div>
+                        <div class="card">
+                            <strong>World Evolution</strong><br>
+                            <small>Forest becomes peaceful</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Theme 3: Innovation Energy -->
+            <div class="theme-card theme-3">
+                <div class="theme-header">
+                    <div>⚡ Innovation Energy</div>
+                </div>
+                <div class="theme-description">
+                    Bold, exciting, and attention-grabbing. Perfect for hackathon demos that need to capture immediate attention. Orange creates energy and excitement, making your innovation impossible to ignore.
+                </div>
+                <div class="theme-content">
+                    <div class="color-palette">
+                        <div class="color-swatch color-primary">
+                            <span class="color-hex">#f59e0b</span>
+                            Primary
+                        </div>
+                        <div class="color-swatch color-secondary">
+                            <span class="color-hex">#ef4444</span>
+                            Secondary
+                        </div>
+                        <div class="color-swatch color-accent">
+                            <span class="color-hex">#3b82f6</span>
+                            Accent
+                        </div>
+                        <div class="color-swatch color-neutral-dark">
+                            <span class="color-hex">#78350f</span>
+                            Text Dark
+                        </div>
+                    </div>
+
+                    <div class="semantic-colors">
+                        <div class="semantic-color semantic-success">Success</div>
+                        <div class="semantic-color semantic-warning">Warning</div>
+                        <div class="semantic-color semantic-error">Error</div>
+                        <div class="semantic-color semantic-info">Info</div>
+                    </div>
+
+                    <div class="component-examples">
+                        <h4 style="margin-bottom: 0.5rem; font-size: 0.9rem;">Component Examples:</h4>
+                        <div class="component-row">
+                            <button class="btn btn-primary">Attack Dragon</button>
+                            <button class="btn btn-secondary">Cast Spell</button>
+                        </div>
+                        <div class="component-row">
+                            <input class="input-field" placeholder="Power move">
+                            <button class="btn btn-primary">Launch</button>
+                        </div>
+                        <div class="card">
+                            <strong>Cascade Effect!</strong><br>
+                            <small>World changes activated</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Theme 4: Dark Cipher -->
+            <div class="theme-card theme-4">
+                <div class="theme-header">
+                    <div>🌙 Dark Cipher</div>
+                </div>
+                <div class="theme-description">
+                    Sophisticated, mysterious, and futuristic. Dark mode creates a premium, technical feel perfect for showcasing blockchain innovation. Purple and blue suggest cutting-edge technology and cryptography.
+                </div>
+                <div class="theme-content">
+                    <div class="color-palette">
+                        <div class="color-swatch color-primary">
+                            <span class="color-hex">#6366f1</span>
+                            Primary
+                        </div>
+                        <div class="color-swatch color-secondary">
+                            <span class="color-hex">#8b5cf6</span>
+                            Secondary
+                        </div>
+                        <div class="color-swatch color-accent">
+                            <span class="color-hex">#f59e0b</span>
+                            Accent
+                        </div>
+                        <div class="color-swatch color-neutral-dark">
+                            <span class="color-hex">#111827</span>
+                            Background
+                        </div>
+                    </div>
+
+                    <div class="semantic-colors">
+                        <div class="semantic-color semantic-success">Success</div>
+                        <div class="semantic-color semantic-warning">Warning</div>
+                        <div class="semantic-color semantic-error">Error</div>
+                        <div class="semantic-color semantic-info">Info</div>
+                    </div>
+
+                    <div class="component-examples">
+                        <h4 style="margin-bottom: 0.5rem; font-size: 0.9rem;">Component Examples:</h4>
+                        <div class="component-row">
+                            <button class="btn btn-primary">Verify Action</button>
+                            <button class="btn btn-secondary">Explore Ledger</button>
+                        </div>
+                        <div class="component-row">
+                            <input class="input-field" placeholder="Blockchain query">
+                            <button class="btn btn-primary">Execute</button>
+                        </div>
+                        <div class="card">
+                            <strong>Cryptographic Proof</strong><br>
+                            <small>Immutable transaction hash</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="comparison-section">
+            <h3 style="margin-bottom: 1rem;">Side-by-Side Comparison</h3>
+            <div class="comparison-grid">
+                <div class="comparison-item theme-1">
+                    <strong>Blockchain Trust</strong><br>
+                    Professional & Secure
+                </div>
+                <div class="comparison-item theme-2">
+                    <strong>Living World</strong><br>
+                    Natural & Evolving
+                </div>
+                <div class="comparison-item theme-3">
+                    <strong>Innovation Energy</strong><br>
+                    Bold & Exciting
+                </div>
+                <div class="comparison-item theme-4">
+                    <strong>Dark Cipher</strong><br>
+                    Futuristic & Technical
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Add interactive hover effects
+        document.querySelectorAll('.theme-card').forEach(card => {
+            card.addEventListener('click', function() {
+                const themeName = this.querySelector('.theme-header div').textContent;
+                console.log(`Theme selected: ${themeName}`);
+            });
+        });
+    </script>
+</body>
+</html>

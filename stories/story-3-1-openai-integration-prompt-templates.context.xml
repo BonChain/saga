@@ -1,0 +1,1014 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<story-context>
+  <metadata>
+    <story-id>story-3-1-openai-integration-prompt-templates</story-id>
+    <story-title>Story 3.1: OpenAI Integration &amp; Prompt Templates</story-title>
+    <epic>AI-Driven World Logic Engine</epic>
+    <status>drafted</status>
+    <developer>TBD</developer>
+    <date>2025-11-16</date>
+    <estimated-hours>3</estimated-hours>
+    <context-generation-date>2025-11-16</context-generation-date>
+    <agent-model>Claude Sonnet 4.5</agent-model>
+  </metadata>
+
+  <!-- Project Overview and Context -->
+  <project-overview>
+    <project-name>Walrus Haulout 2025 Hackathon Project</project-name>
+    <project-type>Real-time multiplayer interactive world simulation</project-type>
+    <tech-stack>
+      <backend>Node.js + Express + TypeScript</backend>
+      <frontend>React + TypeScript + Vite</frontend>
+      <storage>3-layer Walrus architecture (Blueprint, Queue, State)</storage>
+      <ai>OpenAI GPT-3.5-turbo integration</ai>
+      <testing>Jest testing framework</testing>
+    </tech-stack>
+    <architecture>
+      <layer1 name="Blueprint">Immutable world state snapshots and blueprints</layer1>
+      <layer2 name="Queue">Action processing queue with immediate persistence</layer2>
+      <layer3 name="State">Current world state with real-time updates</layer3>
+    </architecture>
+  </project-overview>
+
+  <!-- Previous Stories Context -->
+  <previous-stories>
+    <story-2-1>
+      <title>Story 2.1: Natural Language Action Input</title>
+      <status>done</status>
+      <key-features>
+        <feature>Natural language action input system</feature>
+        <feature>Immediate user feedback (&lt;100ms)</feature>
+        <feature>Input validation and sanitization</feature>
+        <feature>Accessibility compliance (WCAG 2.1 AAA)</feature>
+      </key-features>
+      <integration-points>
+        <point>Frontend input components with retro gaming styling</point>
+        <point>Express API endpoints for action submission</point>
+        <point>Real-time validation feedback</point>
+      </integration-points>
+    </story-2-1>
+
+    <story-2-2>
+      <title>Story 2.2: Intent Parsing &amp; Action Creation</title>
+      <status>done</status>
+      <key-features>
+        <feature>IntentParser service for action analysis</feature>
+        <feature>Structured action object creation</feature>
+        <feature>UUID-based action identification</feature>
+        <feature>Action metadata generation</feature>
+      </key-features>
+      <integration-points>
+        <point>StorageManager.submitAction() method</point>
+        <point>Layer 2 storage integration</point>
+        <point>Action validation and type safety</point>
+      </integration-points>
+      <technical-debt>
+        <item>World state validation (Task 2.6.5) was not completed - opportunity for Story 3.1 integration</item>
+      </technical-debt>
+    </story-2-2>
+
+    <story-2-3>
+      <title>Story 2.3: Immediate Action Confirmation</title>
+      <status>done</status>
+      <key-features>
+        <feature>Enhanced immediate confirmation system</feature>
+        <feature>UUID v4 cryptographically unique action IDs</feature>
+        <feature>&lt;1 second confirmation response time</feature>
+        <feature>Recent actions monitoring API</feature>
+        <feature>AI processing status indicators</feature>
+      </key-features>
+      <integration-points>
+        <point>Enhanced /api/actions/submit endpoint</point>
+        <point>/api/actions/recent endpoint for real-time tracking</point>
+        <point>Action status enumeration (received, processing, completed)</point>
+      </integration-points>
+    </story-2-3>
+  </previous-stories>
+
+  <!-- Current Story Technical Requirements -->
+  <current-story-requirements>
+    <acceptance-criteria>
+      <ac number="1" description="Given an action has been parsed and recorded, When the AI engine processes the action, Then it connects to OpenAI GPT-3.5-turbo with proper authentication, And it uses world-specific prompt templates for context understanding, And it includes current world state, character relationships, and location context, And it handles API rate limits and quotas gracefully, And it implements retry logic for failed API calls, And it respects the MAX_API_CALLS safety mechanism">
+        <technical-requirements>
+          <requirement>OpenAI GPT-3.5-turbo API integration with proper authentication</requirement>
+          <requirement>World-specific prompt templates for context understanding</requirement>
+          <requirement>Real-time world state, character relationships, and location context integration</requirement>
+          <requirement>API rate limiting and quota management with graceful handling</requirement>
+          <requirement>Retry logic with exponential backoff for failed API calls</requirement>
+          <requirement>MAX_API_CALLS safety mechanism implementation</requirement>
+        </technical-requirements>
+        <performance-requirements>
+          <requirement>OpenAI calls complete within 15 seconds from action submission</requirement>
+          <requirement>Proper error handling and circuit breaker patterns</requirement>
+        </performance-requirements>
+      </ac>
+
+      <ac number="2" description="Given the OpenAI API returns consequences, When the system processes the AI response, Then consequences are logically consistent within the world's established rules, And the consequences create interesting cascading effects across multiple systems, And the results are surprising but coherent within world logic, And the changes affect character relationships, environment, and future possibilities, And the consequences are stored as structured data for world state updates, And each action generates 2-4 related consequences for richness">
+        <technical-requirements>
+          <requirement>AI response parsing into structured consequence data</requirement>
+          <requirement>Consequence validation against world rules and logic</requirement>
+          <requirement>Cascading effect calculation system</requirement>
+          <requirement>Character relationship, environment, and future possibility updates</requirement>
+          <requirement>Structured data storage for world state updates</requirement>
+          <requirement>2-4 related consequences generation per action</requirement>
+        </technical-requirements>
+        <performance-requirements>
+          <requirement>Consequence generation completes within 30 seconds after AI call</requirement>
+          <requirement>World state update processing and persistence</requirement>
+        </performance-requirements>
+      </ac>
+    </acceptance-criteria>
+  </current-story-requirements>
+
+  <!-- Existing Code Artifacts -->
+  <existing-code-artifacts>
+    <storage-manager>
+      <file-path>server/src/storage/StorageManager.ts</file-path>
+      <description>Core storage management with 3-layer Walrus architecture</description>
+      <key-methods>
+        <method name="submitAction" signature="submitAction(action: Action): Promise&lt;Action&gt;">
+          <description>Submits actions to Layer 2 queue with immediate persistence</description>
+          <integration-point>Story 3.1 should enhance this to trigger AI processing</integration-point>
+        </method>
+        <method name="generateActionId" signature="generateActionId(): string">
+          <description>Generates UUID v4 for unique action identification</description>
+          <status>Enhanced in Story 2.3 with UUID v4 implementation</status>
+        </method>
+      </key-methods>
+      <dependencies>
+        <dependency import="uuid" usage="UUID v4 generation for action IDs"/>
+      </dependencies>
+    </storage-manager>
+
+    <intent-parser>
+      <file-path>server/src/services/IntentParser.ts</file-path>
+      <description>Service for parsing natural language actions into structured intents</description>
+      <key-methods>
+        <method name="parseIntent" signature="parseIntent(input: string): ParsedIntent">
+          <description>Parses natural language into structured action intent</description>
+          <integration-point>Story 3.1 should use parsed intent for AI context generation</integration-point>
+        </method>
+      </key-methods>
+      <status>Completed in Story 2.2 with comprehensive parsing capabilities</status>
+    </intent-parser>
+
+    <api-endpoints>
+      <file-path>server/src/index.ts</file-path>
+      <description>Express server with enhanced API endpoints</description>
+      <key-endpoints>
+        <endpoint method="POST" path="/api/actions/submit">
+          <description>Enhanced action submission with immediate confirmation</description>
+          <enhancements>
+            <enhancement>Story 2.3: Added immediate confirmation response</enhancement>
+            <enhancement>Story 2.3: Added UUID generation and action tracking</enhancement>
+            <enhancement>Story 3.1: Should add AI processing trigger</enhancement>
+          </enhancements>
+        </endpoint>
+        <endpoint method="GET" path="/api/actions/recent">
+          <description>Recent actions monitoring with real-time status</description>
+          <status>Added in Story 2.3 for action tracking</status>
+        </endpoint>
+      </key-endpoints>
+    </api-endpoints>
+
+    <type-definitions>
+      <file-path>server/src/types/storage.ts</file-path>
+      <description>TypeScript interfaces for data structures</description>
+      <key-interfaces>
+        <interface name="Action">
+          <description>Action structure with enhanced status tracking</description>
+          <fields>
+            <field name="id" type="string">UUID v4 action identifier</field>
+            <field name="playerId" type="string">Player identifier</field>
+            <field name="intent" type="string">Parsed action intent</field>
+            <field name="originalInput" type="string">Original natural language input</field>
+            <field name="timestamp" type="string">ISO timestamp</field>
+            <field name="status" type="ActionStatus">Action status (received, processing, completed, failed)</field>
+            <field name="metadata" type="ActionMetadata">Action metadata including parsed intent</field>
+          </fields>
+          <enhancements>
+            <enhancement>Story 2.3: Added 'received' status to ActionStatus</enhancement>
+            <enhancement>Story 3.1: Should add AI processing status and consequences</enhancement>
+          </enhancements>
+        </interface>
+      </key-interfaces>
+    </type-definitions>
+
+    <data-validation>
+      <file-path>server/src/storage/DataValidation.ts</file-path>
+      <description>Data validation and integrity checking</description>
+      <key-methods>
+        <method name="validateAction" signature="validateAction(action: Action): ValidationResult">
+          <description>Validates action structure and data integrity</description>
+          <status>Enhanced in Story 2.3 to accept 'received' status</status>
+        </method>
+      </key-methods>
+    </data-validation>
+  </existing-code-artifacts>
+
+  <!-- Technical Implementation Guidance -->
+  <technical-implementation>
+    <openai-integration>
+      <strategy>Use OpenAI Node.js client with comprehensive error handling</strategy>
+      <dependencies>
+        <dependency name="openai" version="^4.20.0">Official OpenAI Node.js client</dependency>
+        <dependency name="dotenv" version="^16.0.0">Environment variable management for API keys</dependency>
+      </dependencies>
+      <implementation-steps>
+        <step>Implement OpenAI client initialization with proper authentication</step>
+        <step>Create prompt template system for world context generation</step>
+        <step>Implement rate limiting and quota management</step>
+        <step>Add retry logic with exponential backoff</step>
+        <step>Create circuit breaker pattern for API resilience</step>
+        <step>Implement usage tracking and cost controls</step>
+      </implementation-steps>
+    </openai-integration>
+
+    <prompt-templates>
+      <strategy>Create structured templates that reference world state, character relationships, and recent actions</strategy>
+      <template-categories>
+        <category name="world-logic-analysis">
+          <description>Templates for analyzing actions within world context</description>
+          <variables>
+            <variable name="worldState">Current world state snapshot</variable>
+            <variable name="characterRelationships">Character relationship data</variable>
+            <variable name="locationContext">Current location and environment</variable>
+            <variable name="recentActions">Recent player actions for context</variable>
+          </variables>
+        </category>
+        <category name="consequence-generation">
+          <description>Templates for generating logical consequences</description>
+          <variables>
+            <variable name="actionIntent">Parsed intent from Story 2.2</variable>
+            <variable name="actionContext">Action metadata and player information</variable>
+            <variable name="worldRules">Established world rules and constraints</variable>
+          </variables>
+        </category>
+      </template-categories>
+    </prompt-templates>
+
+    <context-integration>
+      <strategy>Leverage existing world state and character tracking systems</strategy>
+      <integration-points>
+        <point>Layer 3 world state system for real-time data access</point>
+        <point>IntentParser (Story 2.2) for action context</point>
+        <point>Confirmation system (Story 2.3) for action feedback</point>
+        <point>StorageManager for action persistence and retrieval</point>
+      </integration-points>
+      <context-generation>
+        <component name="worldStateSnapshot">Real-time world state generator</component>
+        <component name="characterRelationshipTracker">NPC interaction tracking</component>
+        <component name="locationAwareContext">Location-based context generation</component>
+      </context-generation>
+    </context-integration>
+
+    <consequence-processing>
+      <strategy>Parse AI responses into structured consequence data with cascading effects</strategy>
+      <data-structures>
+        <structure name="Consequence">
+          <description>Structured consequence data for world state updates</description>
+          <fields>
+            <field name="id" type="string">Unique consequence identifier</field>
+            <field name="actionId" type="string">Reference to originating action</field>
+            <field name="type" type="ConsequenceType">Type of consequence (relationship, environment, etc.)</field>
+            <field name="description" type="string">Human-readable consequence description</field>
+            <field name="impact" type="ConsequenceImpact">Impact level and affected systems</field>
+            <field name="cascadingEffects" type="CascadingEffect[]">Secondary consequences</field>
+          </fields>
+        </structure>
+      </data-structures>
+      <processing-steps>
+        <step>Parse AI response into structured consequence data</step>
+        <step>Validate consequences against world rules and logic</step>
+        <step>Calculate cascading effects across multiple systems</step>
+        <step>Prioritize consequences based on impact and relevance</step>
+        <step>Update world state with structured consequence data</step>
+      </processing-steps>
+    </consequence-processing>
+
+    <error-handling-resilience>
+      <strategy>Implement comprehensive error handling with graceful degradation</strategy>
+      <patterns>
+        <pattern name="retry-with-exponential-backoff">
+          <description>Retry failed API calls with increasing delays</description>
+          <configuration>
+            <max-attempts>3</max-attempts>
+            <base-delay>1000</base-delay>
+            <max-delay>10000</max-delay>
+          </configuration>
+        </pattern>
+        <pattern name="circuit-breaker">
+          <description>Prevent infinite loops and malformed responses</description>
+          <configuration>
+            <failure-threshold>5</failure-threshold>
+            <recovery-timeout>30000</recovery-timeout>
+          </configuration>
+        </pattern>
+        <pattern name="graceful-degradation">
+          <description>Fallback to basic consequence generation if AI fails</description>
+          <fallback>Rule-based consequence generation system</fallback>
+        </pattern>
+      </patterns>
+    </error-handling-resilience>
+
+    <performance-optimization>
+      <strategy>Optimize for quick response times and minimal token usage</strategy>
+      <optimizations>
+        <optimization name="caching">
+          <description>Cache repeated world state snapshots</description>
+          <implementation>LRU cache with TTL for world state data</implementation>
+        </optimization>
+        <optimization name="prompt-optimization">
+          <description>Minimize token usage in prompt templates</description>
+          <implementation>Concise prompt templates with essential context only</implementation>
+        </optimization>
+        <optimization name="batching">
+          <description>Batch multiple consequence generations</description>
+          <implementation>Request batching for improved efficiency</implementation>
+        </optimization>
+      </optimizations>
+    </performance-optimization>
+
+    <security-safety>
+      <strategy>Implement secure API key management and input validation</strategy>
+      <measures>
+        <measure name="api-key-management">
+          <description>Secure OpenAI API key storage and rotation</description>
+          <implementation>Environment variables with key validation</implementation>
+        </measure>
+        <measure name="input-sanitization">
+          <description>Sanitize all AI requests and validate responses</description>
+          <implementation>Input validation and output sanitization</implementation>
+        </measure>
+        <measure name="rate-limiting">
+          <description>Prevent abuse and control costs</description>
+          <implementation>Per-user and global rate limits</implementation>
+        </measure>
+        <measure name="audit-logging">
+          <description>Log all AI interactions for debugging</description>
+          <implementation>Structured logging with request/response tracking</implementation>
+        </measure>
+        <measure name="max-api-calls">
+          <description>SAFETY: Prevent infinite loops or excessive API calls</description>
+          <implementation>Global counter with hard limits</implementation>
+        </measure>
+      </measures>
+    </security-safety>
+  </technical-implementation>
+
+  <!-- Integration Points and Dependencies -->
+  <integration-points>
+    <layer2-storage>
+      <description>Enhance existing Layer 2 action processing</description>
+      <enhancements>
+        <enhancement>Add AI processing status to action metadata</enhancement>
+        <enhancement>Store AI-generated consequences with action data</enhancement>
+        <enhancement>Implement asynchronous AI processing trigger</enhancement>
+      </enhancements>
+    </layer2-storage>
+
+    <layer3-state>
+      <description>Connect to world state system for context generation</description>
+      <requirements>
+        <requirement>Real-time world state snapshot generation</requirement>
+        <requirement>Character relationship tracking integration</requirement>
+        <requirement>Location-aware context generation</requirement>
+      </requirements>
+    </layer3-state>
+
+    <api-enhancements>
+      <description>Extend existing API endpoints with AI capabilities</description>
+      <enhancements>
+        <enhancement>Enhance /api/actions/submit to trigger AI processing</enhancement>
+        <enhancement>Add /api/actions/consequences endpoint for consequence retrieval</enhancement>
+        <enhancement>Update /api/actions/recent to include AI processing status</enhancement>
+      </enhancements>
+    </api-enhancements>
+
+    <testing-infrastructure>
+      <description>Leverage existing Jest testing patterns</description>
+      <test-types>
+        <type name="unit-tests">OpenAI client, prompt templates, consequence parsing</type>
+        <type name="integration-tests">End-to-end AI processing workflow</type>
+        <type name="performance-tests">15-second response time requirement validation</type>
+        <type name="error-handling-tests">Retry logic, circuit breaker, fallback mechanisms</type>
+      </test-types>
+    </testing-infrastructure>
+  </integration-points>
+
+  <!-- File Structure and Modifications -->
+  <file-structure>
+    <new-files>
+      <file path="server/src/services/OpenAIIntegration.ts">
+        <description>OpenAI client and API integration service</description>
+        <components>
+          <component>OpenAI client initialization</component>
+          <component>Prompt template management</component>
+          <component>Rate limiting and quota management</component>
+          <component>Retry logic and error handling</component>
+        </components>
+      </file>
+
+      <file path="server/src/services/PromptTemplateEngine.ts">
+        <description>World-specific prompt template system</description>
+        <components>
+          <component>Template loading and rendering</component>
+          <component>Context data integration</component>
+          <component>Template optimization and caching</component>
+        </components>
+      </file>
+
+      <file path="server/src/services/ConsequenceProcessor.ts">
+        <description>AI response parsing and consequence generation</description>
+        <components>
+          <component>AI response parsing into structured data</component>
+          <component>Consequence validation and logic checking</component>
+          <component>Cascading effect calculation</component>
+          <component>World state update generation</component>
+        </components>
+      </file>
+
+      <file path="server/src/types/ai.ts">
+        <description>TypeScript interfaces for AI integration</description>
+        <interfaces>
+          <interface name="AIConsequence">Structured consequence data</interface>
+          <interface name="PromptContext">Context data for prompt generation</interface>
+          <interface name="WorldStateSnapshot">Real-time world state representation</interface>
+        </interfaces>
+      </file>
+
+      <file path="server/src/config/openai.ts">
+        <description>OpenAI configuration and settings</description>
+        <configuration>
+          <setting name="API_KEY">OpenAI API key management</setting>
+          <setting name="MAX_API_CALLS">Safety mechanism configuration</setting>
+          <setting name="RATE_LIMITS">Rate limiting configuration</setting>
+          <setting name="MODEL_SETTINGS">GPT-3.5-turbo configuration</setting>
+        </configuration>
+      </file>
+    </new-files>
+
+    <modified-files>
+      <file path="server/src/index.ts">
+        <description>Enhance API endpoints with AI processing</description>
+        <modifications>
+          <modification>Update /api/actions/submit to trigger AI processing</modification>
+          <modification>Add AI processing status to responses</modification>
+          <modification>Add /api/actions/consequences endpoint</modification>
+        </modifications>
+      </file>
+
+      <file path="server/src/storage/StorageManager.ts">
+        <description>Enhance storage with AI processing capabilities</description>
+        <modifications>
+          <modification>Add AI processing trigger to submitAction method</modification>
+          <modification>Add consequence storage and retrieval</modification>
+          <modification>Enhance action metadata with AI status</modification>
+        </modifications>
+      </file>
+
+      <file path="server/src/types/storage.ts">
+        <description>Update type definitions for AI integration</description>
+        <modifications>
+          <modification>Add AI processing status to Action interface</modification>
+          <modification>Add AIConsequence interface</modification>
+          <modification>Update ActionStatus enumeration</modification>
+        </modifications>
+      </file>
+
+      <file path="server/package.json">
+        <description>Add OpenAI dependencies</description>
+        <modifications>
+          <modification>Add openai package dependency</modification>
+          <modification>Add dotenv package dependency</modification>
+        </modifications>
+      </file>
+    </modified-files>
+
+    <test-files>
+      <file path="server/tests/unit/OpenAIIntegration.test.ts">
+        <description>Unit tests for OpenAI client and integration</description>
+        <test-coverage>
+          <coverage>OpenAI client initialization</coverage>
+          <coverage>Prompt template rendering</coverage>
+          <coverage>Rate limiting and retry logic</coverage>
+          <coverage>Error handling and fallbacks</coverage>
+        </test-coverage>
+      </file>
+
+      <file path="server/tests/unit/ConsequenceProcessor.test.ts">
+        <description>Unit tests for consequence processing</description>
+        <test-coverage>
+          <coverage>AI response parsing</coverage>
+          <coverage>Consequence validation</coverage>
+          <coverage>Cascading effect calculation</coverage>
+          <coverage>World state update generation</coverage>
+        </test-coverage>
+      </file>
+
+      <file path="server/tests/integration/test-story-3-1-openai-integration.ts">
+        <description>Integration tests for complete AI processing workflow</description>
+        <test-coverage>
+          <coverage>End-to-end action-to-consequence workflow</coverage>
+          <coverage>Performance requirement validation</coverage>
+          <coverage>Error handling and resilience testing</coverage>
+          <coverage>Security and safety mechanism validation</coverage>
+        </test-coverage>
+      </file>
+    </test-files>
+  </file-structure>
+
+  <!-- Testing Strategy -->
+  <testing-strategy>
+    <unit-testing>
+      <framework>Jest with TypeScript support</framework>
+      <coverage-areas>
+        <area>OpenAI client initialization and configuration</area>
+        <area>Prompt template rendering and optimization</area>
+        <area>Consequence parsing and validation</area>
+        <area>Rate limiting and retry logic</area>
+        <area>Error handling and fallback mechanisms</area>
+      </coverage-areas>
+      <mock-strategy>
+        <mock>OpenAI API responses for consistent testing</mock>
+        <mock>World state data for context generation</mock>
+        <mock>External dependencies for isolation</mock>
+      </mock-strategy>
+    </unit-testing>
+
+    <integration-testing>
+      <framework>Jest with Supertest for API testing</framework>
+      <coverage-areas>
+        <area>End-to-end action processing workflow</area>
+        <area>API integration with AI processing</area>
+        <area>Storage integration with consequence storage</area>
+        <area>Error propagation and handling</area>
+      </coverage-areas>
+      <test-environment>
+        <environment>Local development server</environment>
+        <mock-services>Mock OpenAI API for testing</mock-services>
+        <test-data>Pre-configured world state and actions</test-data>
+      </test-environment>
+    </integration-testing>
+
+    <performance-testing>
+      <framework>Custom performance measurement with Jest</framework>
+      <requirements>
+        <requirement>OpenAI calls complete within 15 seconds</requirement>
+        <requirement>Consequence generation within 30 seconds</requirement>
+        <requirement>Concurrent action processing capability</requirement>
+      </requirements>
+      <measurement-points>
+        <point>Action submission to AI processing start</point>
+        <point>AI processing completion to consequence generation</point>
+        <point>Total end-to-end workflow time</point>
+      </measurement-points>
+    </performance-testing>
+
+    <security-testing>
+      <framework>Jest with security-focused test cases</framework>
+      <coverage-areas>
+        <area>API key management and security</area>
+        <area>Input sanitization and validation</area>
+        <area>Rate limiting enforcement</area>
+        <area>MAX_API_CALLS safety mechanism</area>
+        <area>Audit logging completeness</area>
+      </coverage-areas>
+    </security-testing>
+
+    <error-scenario-testing>
+      <framework>Jest with comprehensive error simulation</framework>
+      <scenarios>
+        <scenario>OpenAI API service unavailable</scenario>
+        <scenario>Rate limit exceeded</scenario>
+        <scenario>Invalid AI response format</scenario>
+        <scenario>Network connectivity issues</scenario>
+        <scenario>Malformed AI responses</scenario>
+      </scenarios>
+      <validation-points>
+        <point>Graceful degradation to fallback systems</point>
+        <point>Circuit breaker pattern activation</point>
+        <point>Retry logic with exponential backoff</point>
+        <point>Error logging and user feedback</point>
+      </validation-points>
+    </error-scenario-testing>
+  </testing-strategy>
+
+  <!-- Performance Requirements -->
+  <performance-requirements>
+    <response-times>
+      <requirement name="action-to-ai-processing">
+        <description>Action submission to AI processing start</description>
+        <maximum>&lt; 5 seconds</maximum>
+        <target>&lt; 3 seconds</target>
+        <measurement>Time from action submission to AI API call</measurement>
+      </requirement>
+
+      <requirement name="ai-processing-completion">
+        <description>AI processing completion time</description>
+        <maximum>&lt; 15 seconds</maximum>
+        <target>&lt; 10 seconds</target>
+        <measurement>Time from AI API call to response receipt</measurement>
+      </requirement>
+
+      <requirement name="consequence-generation">
+        <description>Consequence generation and world state update</description>
+        <maximum>&lt; 30 seconds</maximum>
+        <target>&lt; 20 seconds</target>
+        <measurement>Time from AI response to world state update</measurement>
+      </requirement>
+
+      <requirement name="total-workflow">
+        <description>Complete action-to-consequence workflow</description>
+        <maximum>&lt; 45 seconds</maximum>
+        <target>&lt; 30 seconds</target>
+        <measurement>Time from action submission to consequence availability</measurement>
+      </requirement>
+    </response-times>
+
+    <concurrency>
+      <requirement name="concurrent-actions">
+        <description>Handle multiple simultaneous action submissions</description>
+        <minimum>5 concurrent actions</minimum>
+        <target>10 concurrent actions</target>
+        <measurement>Successful processing of concurrent actions</measurement>
+      </requirement>
+    </concurrency>
+
+    <scalability>
+      <requirement name="api-call-scaling">
+        <description>Scale with increasing AI processing demand</description>
+        <metrics>
+          <metric name="throughput">Actions processed per minute</metric>
+          <metric name="latency">95th percentile response time</metric>
+          <metric name="error-rate">Percentage of failed AI processing</metric>
+        </metrics>
+      </requirement>
+    </scalability>
+  </performance-requirements>
+
+  <!-- Security and Safety Requirements -->
+  <security-requirements>
+    <api-security>
+      <requirement name="api-key-management">
+        <description>Secure OpenAI API key storage and access</description>
+        <implementation>Environment variables with restricted access</implementation>
+        <rotation>Regular API key rotation capability</rotation>
+      </requirement>
+
+      <requirement name="input-validation">
+        <description>Validate and sanitize all AI requests</description>
+        <implementation>Input validation middleware and sanitization</implementation>
+        <scope>All user-generated content sent to AI</scope>
+      </requirement>
+    </api-security>
+
+    <rate-limiting>
+      <requirement name="usage-controls">
+        <description>Prevent abuse and control costs</description>
+        <implementation>Per-user and global rate limits</implementation>
+        <limits>
+          <limit name="per-user">10 actions per minute per user</limit>
+          <limit name="global">100 actions per minute total</limit>
+        </limits>
+      </requirement>
+    </rate-limiting>
+
+    <safety-mechanisms>
+      <requirement name="max-api-calls">
+        <description>SAFETY: Prevent infinite loops or excessive API calls</description>
+        <implementation>Global counter with hard limits</implementation>
+        <limits>
+          <limit name="daily">1000 AI API calls per day</limit>
+          <limit name="hourly">100 AI API calls per hour</limit>
+        </limits>
+        <enforcement>Hard stop with user notification</enforcement>
+      </requirement>
+    </safety-mechanisms>
+
+    <audit-logging>
+      <requirement name="comprehensive-logging">
+        <description>Log all AI interactions for debugging and audit</description>
+        <implementation>Structured logging with request/response tracking</implementation>
+        <data>
+          <field>Timestamp</field>
+          <field>Action ID</field>
+          <field>User ID</field>
+          <field>Request content (sanitized)</field>
+          <field>Response summary</field>
+          <field>Token usage</field>
+          <field>Processing time</field>
+          <field>Error details (if applicable)</field>
+        </data>
+      </requirement>
+    </audit-logging>
+  </security-requirements>
+
+  <!-- Dependencies and Environment Setup -->
+  <dependencies>
+    <production-dependencies>
+      <dependency name="openai" version="^4.20.0">
+        <description>Official OpenAI Node.js client library</description>
+        <purpose>API integration with GPT-3.5-turbo</purpose>
+      </dependency>
+
+      <dependency name="dotenv" version="^16.0.0">
+        <description>Environment variable management</description>
+        <purpose>Secure API key and configuration management</purpose>
+      </dependency>
+    </production-dependencies>
+
+    <development-dependencies>
+      <dependency name="@types/jest" version="^29.0.0">
+        <description>TypeScript definitions for Jest testing</description>
+        <purpose>Testing framework support</purpose>
+      </dependency>
+
+      <dependency name="supertest" version="^6.0.0">
+        <description>HTTP assertion library for API testing</description>
+        <purpose>Integration testing of API endpoints</purpose>
+      </dependency>
+    </development-dependencies>
+
+    <environment-variables>
+      <variable name="OPENAI_API_KEY" required="true">
+        <description>OpenAI API key for GPT-3.5-turbo access</description>
+        <source>Environment configuration</source>
+      </variable>
+
+      <variable name="MAX_API_CALLS_PER_DAY" default="1000">
+        <description>Daily limit for AI API calls (safety mechanism)</description>
+        <purpose>Prevent excessive usage and cost overruns</purpose>
+      </variable>
+
+      <variable name="OPENAI_MODEL" default="gpt-3.5-turbo">
+        <description>OpenAI model to use for consequence generation</description>
+        <purpose>Configurable model selection</purpose>
+      </variable>
+
+      <variable name="AI_RATE_LIMIT_PER_USER" default="10">
+        <description>Rate limit per user (actions per minute)</description>
+        <purpose>Fair usage enforcement</purpose>
+      </variable>
+    </environment-variables>
+  </dependencies>
+
+  <!-- Constraints and Considerations -->
+  <constraints>
+    <technical-constraints>
+      <constraint name="performance">
+        <description>15-second maximum AI processing time requirement</description>
+        <impact>Requires efficient prompt engineering and caching</impact>
+        <mitigation>Optimize prompt templates and implement caching</mitigation>
+      </constraint>
+
+      <constraint name="integration">
+        <description>Must integrate with existing Stories 2.1-2.3 systems</description>
+        <impact>Limited ability to modify existing architecture</impact>
+        <mitigation>Enhance existing endpoints and data structures</mitigation>
+      </constraint>
+
+      <constraint name="reliability">
+        <description>AI service availability and response quality variability</description>
+        <impact>Requires robust error handling and fallbacks</impact>
+        <mitigation>Implement retry logic, circuit breakers, and rule-based fallbacks</mitigation>
+      </constraint>
+    </technical-constraints>
+
+    <business-constraints>
+      <constraint name="cost">
+        <description>OpenAI API usage costs and budget limitations</description>
+        <impact>Requires usage monitoring and cost controls</impact>
+        <mitigation>Implement rate limiting, token optimization, and usage tracking</mitigation>
+      </constraint>
+
+      <constraint name="time">
+        <description>Hackathon development timeline constraints</description>
+        <impact>Limited development and testing time</impact>
+        <mitigation>Focus on core functionality with robust testing</mitigation>
+      </constraint>
+    </business-constraints>
+
+    <security-constraints>
+      <constraint name="api-key-security">
+        <description>OpenAI API key must be securely managed</description>
+        <impact>Requires secure storage and access controls</impact>
+        <mitigation>Environment variables with restricted access</mitigation>
+      </constraint>
+
+      <constraint name="input-safety">
+        <description>All user inputs sent to AI must be sanitized</description>
+        <impact>Requires comprehensive input validation</impact>
+        <mitigation>Input sanitization and content filtering</mitigation>
+      </constraint>
+    </security-constraints>
+  </constraints>
+
+  <!-- Success Criteria and Validation -->
+  <success-criteria>
+    <functional-criteria>
+      <criterion name="ai-integration">
+        <description>Successful integration with OpenAI GPT-3.5-turbo</description>
+        <validation>
+          <check>API authentication and connection successful</check>
+          <check>Prompt templates render with proper context</check>
+          <check>AI responses are parsed into structured consequences</check>
+        </validation>
+      </criterion>
+
+      <criterion name="consequence-quality">
+        <description>AI generates coherent, logical consequences</description>
+        <validation>
+          <check>Consequences follow world rules and logic</check>
+          <check>Consequences create interesting cascading effects</check>
+          <check>2-4 consequences generated per action</check>
+        </validation>
+      </criterion>
+
+      <criterion name="integration-compatibility">
+        <description>Seamless integration with existing systems</description>
+        <validation>
+          <check>Story 2.1-2.3 systems continue to function</check>
+          <check>API endpoints maintain backward compatibility</check>
+          <check>Data structures remain consistent</check>
+        </validation>
+      </criterion>
+    </functional-criteria>
+
+    <performance-criteria>
+      <criterion name="response-times">
+        <description>Meet all performance requirements</description>
+        <validation>
+          <check>&lt;15 seconds for AI processing</check>
+          <check>&lt;30 seconds for consequence generation</check>
+          <check>&lt;45 seconds total workflow time</check>
+        </validation>
+      </criterion>
+
+      <criterion name="concurrency">
+        <description>Handle concurrent action processing</description>
+        <validation>
+          <check>5+ concurrent actions processed successfully</check>
+          <check>No race conditions or data corruption</check>
+          <check>Consistent performance under load</check>
+        </validation>
+      </criterion>
+    </performance-criteria>
+
+    <quality-criteria>
+      <criterion name="error-handling">
+        <description>Robust error handling and graceful degradation</description>
+        <validation>
+          <check>Retry logic with exponential backoff</check>
+          <check>Circuit breaker pattern prevents infinite loops</check>
+          <check>Fallback to rule-based consequence generation</check>
+        </validation>
+      </criterion>
+
+      <criterion name="testing-coverage">
+        <description>Comprehensive testing of all functionality</description>
+        <validation>
+          <check>&gt;90% unit test coverage</check>
+          <check>Complete integration test coverage</check>
+          <check>Performance and security test validation</check>
+        </validation>
+      </criterion>
+    </quality-criteria>
+  </success-criteria>
+
+  <!-- Risk Assessment and Mitigation -->
+  <risk-assessment>
+    <high-risks>
+      <risk name="api-performance">
+        <description>OpenAI API response times exceed 15-second requirement</description>
+        <probability>Medium</probability>
+        <impact>High</impact>
+        <mitigation>
+          <strategy>Optimize prompt templates for minimal token usage</strategy>
+          <strategy>Implement aggressive caching of world state context</strategy>
+          <strategy>Use faster OpenAI models if available</strategy>
+        </mitigation>
+      </risk>
+
+      <risk name="ai-quality">
+        <description>AI generates incoherent or illogical consequences</description>
+        <probability>Medium</probability>
+        <impact>High</impact>
+        <mitigation>
+          <strategy>Comprehensive prompt engineering and testing</strategy>
+          <strategy>Consequence validation against world rules</strategy>
+          <strategy>Fallback to rule-based generation</strategy>
+        </mitigation>
+      </risk>
+    </high-risks>
+
+    <medium-risks>
+      <risk name="api-availability">
+        <description>OpenAI API service becomes unavailable</description>
+        <probability>Low</probability>
+        <impact>Medium</impact>
+        <mitigation>
+          <strategy>Implement circuit breaker pattern</strategy>
+          <strategy>Graceful degradation to rule-based system</strategy>
+          <strategy>User notification of service issues</strategy>
+        </mitigation>
+      </risk>
+
+      <risk name="cost-overrun">
+        <description>API usage exceeds budget constraints</description>
+        <probability>Medium</probability>
+        <impact>Medium</impact>
+        <mitigation>
+          <strategy>Strict rate limiting and usage tracking</strategy>
+          <strategy>MAX_API_CALLS safety mechanism</strategy>
+          <strategy>Regular monitoring and alerts</strategy>
+        </mitigation>
+      </risk>
+    </medium-risks>
+
+    <low-risks>
+      <risk name="integration-complexity">
+        <description>Integration with existing systems proves complex</description>
+        <probability>Low</probability>
+        <impact>Low</impact>
+        <mitigation>
+          <strategy>Enhance existing endpoints rather than create new ones</strategy>
+          <strategy>Maintain backward compatibility</strategy>
+          <strategy>Incremental integration approach</strategy>
+        </mitigation>
+      </risk>
+    </low-risks>
+  </risk-assessment>
+
+  <!-- Development Timeline and Milestones -->
+  <development-timeline>
+    <phase-1 duration="1 hour">
+      <title>OpenAI Client Implementation</title>
+      <tasks>
+        <task>Install and configure OpenAI Node.js client</task>
+        <task>Implement basic API authentication and connection</task>
+        <task>Create OpenAI configuration management</task>
+        <task>Add basic error handling and logging</task>
+      </tasks>
+      <deliverables>
+        <deliverable>OpenAIIntegration service with basic functionality</deliverable>
+        <deliverable>Configuration management for API keys and settings</deliverable>
+      </deliverables>
+    </phase-1>
+
+    <phase-2 duration="1 hour">
+      <title>Prompt Template System</title>
+      <tasks>
+        <task>Design and implement prompt template structure</task>
+        <task>Create world-logic-analysis templates</task>
+        <task>Create consequence-generation templates</task>
+        <task>Implement template rendering with context data</task>
+        <task>Add template caching and optimization</task>
+      </tasks>
+      <deliverables>
+        <deliverable>PromptTemplateEngine service</deliverable>
+        <deliverable>World-specific prompt templates</deliverable>
+      </deliverables>
+    </phase-2>
+
+    <phase-3 duration="1 hour">
+      <title>Consequence Processing and Integration</title>
+      <tasks>
+        <task>Implement AI response parsing into structured data</task>
+        <task>Create consequence validation and logic checking</task>
+        <task>Integrate with existing StorageManager and API endpoints</task>
+        <task>Add comprehensive error handling and fallbacks</task>
+        <task>Create basic unit and integration tests</task>
+      </tasks>
+      <deliverables>
+        <deliverable>ConsequenceProcessor service</deliverable>
+        <deliverable>Enhanced API endpoints with AI processing</deliverable>
+        <deliverable>Basic test coverage</deliverable>
+      </deliverables>
+    </phase-3>
+  </development-timeline>
+
+  <!-- References and Resources -->
+  <references>
+    <internal-references>
+      <reference path="docs/epics.md" lines="196-226">Epic 3: AI-Driven World Logic Engine</reference>
+      <reference path="docs/PRD.md" lines="188-191">Functional requirements for AI integration</reference>
+      <reference path="docs/tech-spec.md" lines="30-34">Technical specifications for OpenAI integration</reference>
+      <reference path="docs/test-design-epic-3.md">Comprehensive testing strategy for Epic 3</reference>
+      <reference path="stories/story-2-1-natural-language-action-input.md">Story 2.1 implementation details</reference>
+      <reference path="stories/story-2-2-intent-parsing-action-creation.md">Story 2.2 implementation details</reference>
+      <reference path="stories/story-2-3-immediate-action-confirmation.md">Story 2.3 implementation details</reference>
+      <reference path="server/src/storage/StorageManager.ts">Existing storage system</reference>
+      <reference path="server/src/services/IntentParser.ts">Intent parsing service</reference>
+      <reference path="server/src/index.ts">Current API implementation</reference>
+    </internal-references>
+
+    <external-references>
+      <reference url="https://platform.openai.com/docs/api-reference">OpenAI API Documentation</reference>
+      <reference url="https://platform.openai.com/docs/models/gpt-3-5-turbo">GPT-3.5-turbo Model Documentation</reference>
+      <reference url="https://github.com/openai/openai-node">OpenAI Node.js Client Library</reference>
+      <reference url="https://jestjs.io/docs/getting-started">Jest Testing Framework</reference>
+      <reference url="https://expressjs.com/en/guide/error-handling.html">Express.js Error Handling</reference>
+    </external-references>
+  </references>
+</story-context>

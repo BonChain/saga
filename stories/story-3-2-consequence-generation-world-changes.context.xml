@@ -1,0 +1,181 @@
+<story-context id="stories/story-3-2-consequence-generation-world-changes.context.xml" v="1.0">
+  <metadata>
+    <epicId>epic-3</epicId>
+    <storyId>story-3-2</storyId>
+    <title>Consequence Generation & World Changes</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-17</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>stories/story-3-2-consequence-generation-world-changes.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>system</asA>
+    <iWant>generate logical, surprising consequences from player actions</iWant>
+    <soThat>the world feels alive and unpredictable</soThat>
+    <tasks>
+### Phase 1: Consequence Parsing Engine (AC: 1)
+- [ ] Implement consequence parsing from AI responses
+  - [ ] Parse AI response text into structured consequence objects
+  - [ ] Handle different consequence types (character, environment, relationship)
+  - [ ] Validate consequence logical consistency with world rules
+- [ ] Create consequence validation against world rules
+  - [ ] Implement rule-based consequence validation system
+  - [ ] Add world consistency checks for generated consequences
+  - [ ] Create consequence conflict detection and resolution
+
+### Phase 2: Structured Consequence Data Models (AC: 1)
+- [ ] Create structured consequence data models for world state updates
+  - [ ] Define Consequence interface with type, impact, and metadata
+  - [ ] Create consequence relationship tracking system
+  - [ ] Implement consequence priority and severity classification
+- [ ] Add consequence storage and retrieval system
+  - [ ] Integrate with Layer 3 state storage for consequence persistence
+  - [ ] Create consequence history and audit trail
+  - [ ] Implement consequence rollback capability
+
+### Phase 3: Cascading Effect System (AC: 1)
+- [ ] Create cascading effect calculation system
+  - [ ] Implement effect propagation algorithm across world systems
+  - [ ] Create relationship mapping between world entities
+  - [ ] Add secondary and tertiary effect calculation
+- [ ] Add consequence prioritization algorithm
+  - [ ] Implement consequence impact scoring system
+  - [ ] Create consequence filtering based on world context
+  - [ ] Add consequence randomness for unpredictability
+
+### Phase 4: World Integration (AC: 1)
+- [ ] Connect consequence system to character relationships
+  - [ ] Update character relationship scores based on consequences
+  - [ ] Create character reaction system to world changes
+  - [ ] Add relationship consequence persistence
+- [ ] Integrate with environmental state system
+  - [ ] Update region conditions based on consequences
+  - [ ] Create environmental change propagation
+  - [ ] Add location-specific consequence effects
+- [ ] Connect to future possibilities system
+  - [ ] Create new action opportunities based on consequences
+  - [ ] Implement world state branching logic
+  - [ ] Add consequence-driven narrative generation
+
+### Phase 5: Testing and Validation (AC: 1)
+- [ ] Create comprehensive testing suite for consequence generation
+  - [ ] Unit tests for consequence parsing and validation
+  - [ ] Integration tests for cascading effect system
+  - [ ] End-to-end tests for complete consequence flow
+- [ ] Add consequence quality assurance checks
+  - [ ] Implement consequence coherence validation
+  - [ ] Create consequence randomness testing
+  - [ ] Add performance testing for consequence generation
+
+### Phase 6: Performance Optimization (Derived from Story 3.1)
+- [ ] Optimize consequence generation for real-time performance
+  - [ ] Implement consequence caching for similar world states
+  - [ ] Add asynchronous consequence processing
+  - [ ] Create consequence generation monitoring and metrics
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+Given the AI has analyzed player intent and world context,
+When it generates consequences,
+Then the changes are logical within the world's established rules
+And the consequences create interesting cascading effects across multiple systems
+And the results are surprising but coherent within world logic
+And the changes affect character relationships, environment, and future possibilities
+And the consequences are stored as structured data for world state updates
+And each action generates 2-4 related consequences for richness
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc path="docs/PRD.md" title="Product Requirements Document" section="AI World Logic Innovation" snippet="AI fine-tuned to understand 'World Logic' rather than just generate prose, creating intelligent butterfly effects and cascading world changes">
+        Core innovation document describing AI consequence generation as a key differentiator for creating living, evolving worlds.
+      </doc>
+      <doc path="docs/tech-spec.md" title="Technical Specification" section="AI Integration Strategy" snippet="AI Integration: OpenAI GPT-3.5-turbo with custom prompt templates for world logic processing">
+        Technical architecture showing direct OpenAI integration for consequence processing and world state management.
+      </doc>
+      <doc path="docs/epics.md" title="Epic Breakdown" section="Epic 3: AI-Driven World Logic Engine" snippet="Create AI system that generates coherent, surprising consequences while maintaining logical world consistency">
+        Epic-level requirements and acceptance criteria for consequence generation and butterfly effect calculation.
+      </doc>
+    </docs>
+    <code>
+      <artifact path="server/src/types/ai.ts" kind="type-definitions" symbol="AIConsequence" lines="8-17" reason="Core consequence data model with cascading effects and impact assessment">
+        Defines the complete structure for AI-generated consequences including types, impacts, and cascading effects.
+      </artifact>
+      <artifact path="server/src/types/ai.ts" kind="type-definitions" symbol="ConsequenceType" lines="19-29" reason="Enumeration of all possible consequence types for world interactions">
+        Categorizes consequences into relationship, environment, character, world_state, economic, social, combat, and exploration types.
+      </artifact>
+      <artifact path="server/src/types/ai.ts" kind="type-definitions" symbol="CascadingEffect" lines="56-63" reason="Secondary and tertiary consequence propagation mechanism">
+        Implements the butterfly effect system with delays, probabilities, and parent-child relationships.
+      </artifact>
+      <artifact path="server/src/services/OpenAIIntegration.ts" kind="service" symbol="processRequest" lines="47-50" reason="Entry point for AI consequence generation using OpenAI API">
+        Main AI processing service that accepts action requests and generates consequence responses.
+      </artifact>
+      <artifact path="server/src/services/ai/AIServiceAdapter.ts" kind="service" symbol="parseConsequences" lines="270-270" reason="Consequence parsing logic from AI responses">
+        Parses AI text responses into structured consequence objects with proper validation.
+      </artifact>
+      <artifact path="server/src/storage/StorageManager.ts" kind="service" symbol="StorageManager" lines="21-31" reason="Integration point for consequence persistence in Layer 3 state">
+        Main storage coordinator that manages consequence persistence and world state updates.
+      </artifact>
+    </code>
+    <dependencies>
+      <ecosystem name="node">
+        <package name="openai" version="4.x" usage="AI consequence generation and world logic processing"/>
+        <package name="uuid" version="9.x" usage="Unique consequence and action tracking"/>
+      </ecosystem>
+      <external_api name="OpenAI GPT-3.5-turbo" usage="Primary consequence generation engine"/>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    - Must integrate with existing AI Service Adapter pattern from Story 3.1
+    - Must use Layer 3 state system for consequence persistence
+    - Must maintain logical consistency with world rules from world_rules.json
+    - Must support 2-4 consequences per action for richness
+    - Must implement cascading effects across multiple world systems
+    - Must validate consequences against existing world state
+    - Must handle consequence conflicts and resolution
+    - Must maintain audit trail for all consequence applications
+    - Must support real-time performance requirements (<15 seconds)
+    - Must implement proper error handling and rollback capabilities
+  </constraints>
+
+  <interfaces>
+    <interface name="ConsequenceGenerator" kind="class-interface" signature="generateConsequences(action: Action, worldState: WorldState): Promise&lt;AIConsequence[]&gt;" path="server/src/services/ConsequenceGenerator.ts">
+      Main interface for generating consequences based on player actions and current world state.
+    </interface>
+    <interface name="ConsequenceValidator" kind="class-interface" signature="validateConsequence(consequence: AIConsequence, worldRules: WorldRule[]): ValidationResult" path="server/src/services/ConsequenceValidator.ts">
+      Validates that consequences are logically consistent with world rules and current state.
+    </interface>
+    <interface name="CascadeProcessor" kind="class-interface" signature="processCascadingEffects(consequences: AIConsequence[]): Promise&lt;CascadingEffect[]&gt;" path="server/src/services/CascadeProcessor.ts">
+      Calculates secondary and tertiary effects that propagate through world systems.
+    </interface>
+    <interface name="WorldStateUpdater" kind="class-interface" signature="applyConsequences(consequences: AIConsequence[]): Promise&lt;WorldState&gt;" path="server/src/services/WorldStateUpdater.ts">
+      Applies validated consequences to the world state and ensures consistency.
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Unit testing with Jest framework for consequence parsing, validation, and cascade processing. Integration testing for end-to-end consequence flow from AI generation to world state updates. Performance testing to ensure real-time processing requirements are met.
+    </standards>
+    <locations>
+      server/tests/unit/consequence/ - Unit tests for consequence parsing and validation
+      server/tests/integration/consequence/ - Integration tests for complete consequence flow
+      server/tests/performance/consequence/ - Performance tests for real-time processing
+    </locations>
+    <ideas>
+      test_ac_1_parsing: Unit test parsing AI responses into structured consequence objects
+      test_ac_1_validation: Unit test consequence validation against world rules
+      test_ac_1_cascading: Integration test cascading effects across world systems
+      test_ac_1_world_changes: Integration test world state updates from consequences
+      test_ac_1_richness: Unit test generating 2-4 related consequences per action
+      test_ac_1_logical_consistency: Integration test maintaining world logical consistency
+      test_performance_15_seconds: Performance test complete consequence generation within 15 seconds
+      test_integration_openai: Integration test with actual OpenAI API responses
+      test_error_handling: Unit test consequence generation failures and fallbacks
+      test_rollback: Integration test consequence rollback capabilities
+    </ideas>
+  </tests>
+</story-context>

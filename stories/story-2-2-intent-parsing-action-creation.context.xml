@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<story-context id="story-2-2-intent-parsing-action-creation" v="1.0">
+  <metadata>
+    <epicId>2</epicId>
+    <storyId>2</storyId>
+    <title>Intent Parsing &amp; Action Creation</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-11-15T10:30:00Z</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>stories/story-2-2-intent-parsing-action-creation.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>system</asA>
+    <iWant>to understand player intent from natural language</iWant>
+    <soThat>I can process actions meaningfully</soThat>
+    <tasks>6 main tasks with 26 subtasks:
+  1. Implement intent parsing algorithm (6 subtasks)
+  2. Create Action object structure (5 subtasks)
+  3. Implement world state validation (5 subtasks)
+  4. Create confidence thresholding system (5 subtasks)
+  5. Layer 2 storage integration (5 subtasks)
+  6. Create comprehensive testing (6 subtasks)</tasks>
+  </story>
+
+  <acceptanceCriteria>1. Given a player submits an action like &quot;attack the dragon with my sword&quot;
+   When the system processes the intent
+   Then it extracts the action type (combat), target (dragon), and method (sword)
+   And it creates a structured Action object with intent, timestamp, and player ID
+   And it validates that the action is logically possible within world rules
+   And it handles ambiguous or unclear intents with clarification prompts
+   And it saves the action to Layer 2 storage with unique ID</acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc path="docs/test-design-epic-2.md" title="Test Design: Epic 2 - Critical Risk R-002" section="Risk Assessment Matrix" snippet="Intent parsing accuracy &lt;70% leading to wrong world state changes - Score 9/9 CRITICAL risk. Mitigation: Comprehensive test scenarios, confidence thresholds, fallback mechanisms, human review triggers. Test distribution: 35 unit tests (40%), 30 API tests (35%), 13 component tests (15%), 9 E2E tests (10%)."/>
+      <doc path="docs/epics.md" title="Epic 2: Unlimited Action Input System" section="Story 2.2" snippet="Goal: Enable players to input any action they can imagine using natural language and receive immediate confirmation. AC: Extracts action type (combat), target (dragon), and method (sword). Creates structured Action object with intent, timestamp, and player ID."/>
+      <doc path="docs/tech-spec.md" title="Technical Specification" section="Source Tree Changes" snippet="3-layer Walrus architecture: Layer 1 (Blueprint) immutable rules, Layer 2 (Queue) action storage, Layer 3 (State) versioned world state. Node.js + Express backend with TypeScript strict mode."/>
+      <doc path="docs/PRD.md" title="Product Requirements Document" section="Core Innovation" snippet="Unlimited Agency: Players input any action (andquot;I want to burn the village tavern and marry the dragonandquot;) and AI processes intent within game logic. Unexpected Events: AI generates surprising but logical consequences."/>
+    </docs>
+    <code>
+      <code path="server/src/index.ts" kind="server" symbol="app.post('/api/actions/submit')" lines="206-265" reason="Existing action submission endpoint from Story 2.1. Handles input validation, creates default parsedIntent, calls storageManager.submitAction(), returns immediate confirmation. Story 2.2 needs to enhance this endpoint to parse intent before submitAction() call."/>
+      <code path="server/src/storage/StorageManager.ts" kind="service" symbol="submitAction()" lines="143-191" reason="Core storage integration point. Creates Action object with id, playerId, intent, originalInput, timestamp, metadata.confidence, metadata.parsedIntent. Validates action and stores in Layer 2. Story 2.2 must call this with properly parsed intent."/>
+      <code path="server/src/types/storage.ts" kind="interface" symbol="ParsedIntent" lines="58-65" reason="TypeScript interface defining parsed intent structure: actionType ('combat'|'social'|'exploration'|'economic'|'creative'|'other'), target, method, objects, location, urgency. Story 2.2 must implement parsing to create objects matching this interface."/>
+      <code path="server/src/types/storage.ts" kind="interface" symbol="Action" lines="42-56" reason="Core Action type with id, playerId, intent, originalInput, timestamp, status, metadata.confidence, metadata.parsedIntent. Story 2.2 must create objects matching this structure for storage compatibility."/>
+      <code path="client/src/components/ActionInput.tsx" kind="component" symbol="ActionInput" lines="1-300" reason="React component from Story 2.1 with retro gaming UI. Handles 500-char limit, immediate feedback, loading states. Story 2.2 builds on this foundation by adding intent parsing to the action flow."/>
+    </code>
+    <dependencies>
+      <ecosystem name="nodejs">
+        <package name="@mysten/sui" version="1.45.0" purpose="Sui blockchain integration"/>
+        <package name="@mysten/walrus" version="0.8.4" purpose="Walrus storage for 3-layer architecture"/>
+        <package name="express" version="4.18.2" purpose="Web server and API endpoints"/>
+        <package name="typescript" version="5.3.3" purpose="Type safety and strict mode development"/>
+        <package name="uuid" version="9.0.1" purpose="Unique action ID generation"/>
+      </ecosystem>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint id="R-002-MITIGATION" severity="critical">Intent parsing accuracy must be ≥70% for automatic processing. Must implement confidence thresholding, fallback mechanisms, and human review triggers for &lt;50% confidence. This is identified as CRITICAL risk (Score 9/9) in test design.</constraint>
+    <constraint id="PERFORMANCE" severity="high">Intent parsing must complete in &lt;100ms per action (test design requirement). Total action processing must stay &lt;15s for hackathon demo success.</constraint>
+    <constraint id="INTEGRATION" severity="high">Must integrate with existing StorageManager.submitAction() method from Story 2.1. Cannot break existing action flow or API contracts.</constraint>
+    <constraint id="VALIDATION" severity="medium">Must validate actions against current world state from Layer 3. Check character existence, locations, item availability, and logical consistency.</constraint>
+    <constraint id="SECURITY" severity="high">Must handle injection attacks (R-001 security risk). Input sanitization required before parsing. Use existing DataValidation.validateAction() patterns.</constraint>
+    <constraint id="TYPE-SAFETY" severity="medium">Must use TypeScript strict mode. All intent parsing functions must have proper type definitions and error handling.</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface name="StorageManager.submitAction()" kind="method" signature="submitAction(playerId: string, intent: string, originalInput: string, parsedIntent?: any): Promise&lt;{success: boolean, error?: string, action?: Action}&gt;" path="server/src/storage/StorageManager.ts:143-191">
+      Integration point for Story 2.2. Call this method with properly parsed ParsedIntent object containing actionType, target, method, and confidence scoring. Already implemented from Story 2.1.
+    </interface>
+    <interface name="POST /api/actions/submit" kind="REST endpoint" signature="POST /api/actions/submit" path="server/src/index.ts:206-265">
+      Existing endpoint from Story 2.1 that accepts playerId, intent, originalInput, parsedIntent. Story 2.2 must enhance this endpoint to parse intent before calling StorageManager.submitAction().
+    </interface>
+    <interface name="ParsedIntent" kind="TypeScript interface" signature="interface ParsedIntent { actionType: 'combat'|'social'|'exploration'|'economic'|'creative'|'other'; target?: string; method?: string; objects?: string[]; location?: string; urgency: 'low'|'medium'|'high'; }" path="server/src/types/storage.ts:58-65">
+      Target interface for intent parsing output. Story 2.2 must create objects matching this structure. Already defined in types/storage.ts.
+    </interface>
+    <interface name="Action" kind="TypeScript interface" signature="interface Action { id: string; playerId: string; intent: string; originalInput: string; timestamp: string; status: 'pending'|'processing'|'completed'|'failed'; metadata: {confidence: number; parsedIntent?: ParsedIntent; walrusUrl?: string; verificationHash?: string;}; }" path="server/src/types/storage.ts:42-56">
+      Core action object for storage. Story 2.2 must create objects matching this structure with confidence scoring ≥0.7 for automatic processing.
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>Comprehensive test strategy from test-design-epic-2.md: 35 unit tests (40%) for intent parsing algorithms, edge cases, confidence scoring. 30 API tests (35%) for action creation, storage integration, world validation. 13 component tests (15%) for UI interactions. 9 E2E tests (10%) for complete user journeys. Security testing for injection attacks (R-001). Performance testing with k6 for &lt;100ms intent parsing latency. All tests must pass 100% for story completion.</standards>
+    <locations>server/tests/integration/ - For API tests with Express test server. server/tests/unit/ - For intent parsing algorithm tests. server/src/__tests__/ - For component tests. tests/e2e/ - For end-to-end user journey tests. Use Jest/Vitest for unit tests, Playwright for API/E2E tests.</locations>
+    <ideas>
+      <test id="AC1-PAR-001" ac="1">Test intent parsing with simple combat actions: &quot;attack the dragon with sword&quot; → actionType: combat, target: dragon, method: sword, confidence ≥0.8</test>
+      <test id="AC1-PAR-002" ac="1">Test intent parsing with social actions: &quot;befriend the goblin king&quot; → actionType: social, target: goblin king, method: befriend, confidence ≥0.7</test>
+      <test id="AC1-PAR-003" ac="1">Test intent parsing with exploration actions: &quot;explore the dark forest&quot; → actionType: exploration, target: dark forest, method: explore, confidence ≥0.9</test>
+      <test id="AC1-PAR-004" ac="1">Test intent parsing with economic actions: &quot;buy potions from merchant&quot; → actionType: economic, target: merchant, method: buy potions, confidence ≥0.8</test>
+      <test id="AC1-PAR-005" ac="1">Test intent parsing with creative actions: &quot;compose epic poem about victory&quot; → actionType: creative, method: compose epic poem, confidence ≥0.7</test>
+      <test id="AC1-PAR-006" ac="1">Test edge cases: empty input, gibberish, special characters, Unicode characters, extremely long inputs</test>
+      <test id="AC1-PAR-007" ac="1">Test compound actions: &quot;attack dragon with sword then flee&quot; → parse primary action (attack) and secondary action (flee)</test>
+      <test id="AC1-PAR-008" ac="1">Test confidence scoring accuracy with known inputs and expected thresholds</test>
+      <test id="AC1-OBJ-001" ac="1">Test Action object creation with required fields: id, playerId, intent, originalInput, timestamp, metadata.confidence</test>
+      <test id="AC1-OBJ-002" ac="1">Test Action serialization/deserialization for Layer 2 storage compatibility</test>
+      <test id="AC1-OBJ-003" ac="1">Test unique ID generation using UUID or timestamp-based approach</test>
+      <test id="AC1-VAL-001" ac="1">Test world state validation with existing characters from Story 1.3 (Green Valley Village, Dragon's Peak)</test>
+      <test id="AC1-VAL-002" ac="1">Test logical consistency validation (can player actually do this action?)</test>
+      <test id="AC1-VAL-003" ac="1">Test impossible scenario detection and appropriate error responses</test>
+      <test id="AC1-THR-001" ac="1">Test confidence thresholding: ≥70% automatic processing, &lt;70% fallback, &lt;50% human review</test>
+      <test id="AC1-THR-002" ac="1">Test fallback responses for low-confidence intents with clarification prompts</test>
+      <test id="AC1-STO-001" ac="1">Test Layer 2 storage integration using existing StorageManager.submitAction() method</test>
+      <test id="AC1-STO-002" ac="1">Test error handling for storage failures and retry logic</test>
+      <test id="PERF-001" ac="1">Performance test: intent parsing &lt;100ms for 100 concurrent requests (k6)</test>
+      <test id="SEC-001" ac="1">Security test: SQL injection attempts in natural language input</test>
+      <test id="SEC-002" ac="1">Security test: XSS payload attempts in action descriptions</test>
+    </ideas>
+  </tests>
+</story-context>

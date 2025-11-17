@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SuiSaga - Design Direction Showcase</title>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&family=Press+Start+2P&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto Mono', monospace;
+            background: #0a0a0a;
+            color: #ffffff;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Retro scanline effect */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 255, 65, 0.03) 0px,
+                transparent 1px,
+                transparent 2px,
+                rgba(0, 255, 65, 0.03) 3px
+            );
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+
+        .header {
+            text-align: center;
+            padding: 2rem;
+            border-bottom: 2px solid #00ff41;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            font-family: 'VT323', cursive;
+            font-size: 3rem;
+            color: #00ff41;
+            text-shadow: 0 0 10px #00ff41;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            font-size: 1rem;
+            color: #cccccc;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            padding: 0.75rem 1.5rem;
+            background: transparent;
+            border: 2px solid #00ff41;
+            color: #00ff41;
+            font-family: 'VT323', cursive;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+        }
+
+        .nav-btn:hover {
+            background: #00ff41;
+            color: #0a0a0a;
+            box-shadow: 0 0 20px #00ff41;
+        }
+
+        .nav-btn.active {
+            background: #00ff41;
+            color: #0a0a0a;
+        }
+
+        .mockup-container {
+            background: #1a1a1a;
+            border: 2px solid #00ff41;
+            border-radius: 8px;
+            padding: 2rem;
+            min-height: 600px;
+            box-shadow: 0 0 30px rgba(0, 255, 65, 0.3);
+        }
+
+        /* Direction 1: Terminal Dashboard */
+        .direction-1 {
+            display: none;
+        }
+
+        .terminal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #333333;
+        }
+
+        .terminal-title {
+            font-family: 'VT323', cursive;
+            font-size: 1.5rem;
+            color: #00ff41;
+        }
+
+        .terminal-stats {
+            display: flex;
+            gap: 2rem;
+            font-size: 0.9rem;
+        }
+
+        .stat-item {
+            color: #00ccff;
+        }
+
+        .command-line {
+            background: #0a0a0a;
+            border: 1px solid #333333;
+            border-radius: 4px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .command-prompt {
+            color: #00ff41;
+            margin-bottom: 0.5rem;
+        }
+
+        .command-input {
+            background: transparent;
+            border: none;
+            color: #ffffff;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 1rem;
+            width: 100%;
+            outline: none;
+        }
+
+        .command-input:focus {
+            text-shadow: 0 0 5px #00ff41;
+        }
+
+        .action-log {
+            background: #0a0a0a;
+            border: 1px solid #333333;
+            border-radius: 4px;
+            padding: 1rem;
+            height: 300px;
+            overflow-y: auto;
+        }
+
+        .log-entry {
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
+            border-left: 2px solid #00ff41;
+            padding-left: 1rem;
+        }
+
+        .log-entry.success {
+            border-left-color: #00ff41;
+            color: #00ff41;
+        }
+
+        .log-entry.processing {
+            border-left-color: #ffaa00;
+            color: #ffaa00;
+        }
+
+        .log-entry.error {
+            border-left-color: #ff3366;
+            color: #ff3366;
+        }
+
+        .timestamp {
+            color: #666666;
+            font-size: 0.8rem;
+        }
+
+        /* Direction 2: Arcade Game Interface */
+        .direction-2 {
+            display: none;
+        }
+
+        .arcade-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: linear-gradient(90deg, #ff0080, #00ff41);
+            border-radius: 8px;
+        }
+
+        .game-title {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.2rem;
+            text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.5);
+        }
+
+        .score-display {
+            font-family: 'VT323', cursive;
+            font-size: 1.5rem;
+            color: #0a0a0a;
+        }
+
+        .world-map {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .area-card {
+            background: #0a0a0a;
+            border: 2px solid #333333;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .area-card:hover {
+            border-color: #00ff41;
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .area-card.active {
+            border-color: #ff0080;
+            box-shadow: 0 0 30px rgba(255, 0, 128, 0.5);
+        }
+
+        .area-name {
+            font-family: 'VT323', cursive;
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+            color: #00ccff;
+        }
+
+        .area-status {
+            font-size: 0.9rem;
+            color: #cccccc;
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .action-btn {
+            padding: 1rem;
+            background: #1a1a1a;
+            border: 2px solid #00ff41;
+            border-radius: 8px;
+            color: #00ff41;
+            font-family: 'VT323', cursive;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+        }
+
+        .action-btn:hover {
+            background: #00ff41;
+            color: #0a0a0a;
+            transform: scale(1.05);
+            box-shadow: 0 0 30px #00ff41;
+        }
+
+        .action-btn:active {
+            transform: scale(0.95);
+        }
+
+        .action-btn.danger {
+            border-color: #ff3366;
+            color: #ff3366;
+        }
+
+        .action-btn.danger:hover {
+            background: #ff3366;
+            color: #ffffff;
+            box-shadow: 0 0 30px #ff3366;
+        }
+
+        /* Direction 3: Hacker Terminal */
+        .direction-3 {
+            display: none;
+        }
+
+        .hacker-header {
+            background: #0a0a0a;
+            border: 1px solid #00ff41;
+            border-radius: 4px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .hacker-title {
+            font-family: 'VT323', cursive;
+            font-size: 1.5rem;
+            color: #00ff41;
+            text-align: center;
+        }
+
+        .matrix-rain {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            opacity: 0.1;
+            z-index: 0;
+        }
+
+        .proof-card {
+            background: #0a0a0a;
+            border: 2px solid #00ff41;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .proof-card::before {
+            content: "◉ VERIFIED";
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: #00ff41;
+            color: #0a0a0a;
+            padding: 0.2rem 0.5rem;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .proof-title {
+            font-family: 'VT323', cursive;
+            font-size: 1.3rem;
+            color: #00ccff;
+            margin-bottom: 1rem;
+        }
+
+        .proof-details {
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: #cccccc;
+        }
+
+        .proof-link {
+            display: inline-block;
+            margin-top: 1rem;
+            padding: 0.5rem 1rem;
+            background: transparent;
+            border: 1px solid #00ccff;
+            color: #00ccff;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+
+        .proof-link:hover {
+            background: #00ccff;
+            color: #0a0a0a;
+            box-shadow: 0 0 15px #00ccff;
+        }
+
+        .verification-hash {
+            background: #1a1a1a;
+            border: 1px solid #333333;
+            border-radius: 4px;
+            padding: 1rem;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 0.8rem;
+            color: #666666;
+            word-break: break-all;
+            margin-top: 1rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .world-map {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                grid-template-columns: 1fr;
+            }
+
+            .navigation {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+
+        /* Loading animation */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .loading {
+            animation: pulse 2s infinite;
+        }
+
+        /* Show active mockup */
+        .direction-1.active,
+        .direction-2.active,
+        .direction-3.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- Matrix rain effect background -->
+    <div class="matrix-rain" id="matrixRain"></div>
+
+    <div class="container">
+        <div class="header">
+            <h1>SUI SAGA</h1>
+            <p>RETRO GAMING DESIGN DIRECTIONS</p>
+        </div>
+
+        <div class="navigation">
+            <button class="nav-btn active" onclick="showDirection(1)">Terminal Dashboard</button>
+            <button class="nav-btn" onclick="showDirection(2)">Arcade Interface</button>
+            <button class="nav-btn" onclick="showDirection(3)">Hacker Terminal</button>
+        </div>
+
+        <!-- Direction 1: Terminal Dashboard -->
+        <div class="mockup-container direction-1 active">
+            <div class="terminal-header">
+                <div class="terminal-title">> SUI_SAGA_TERMINAL v1.0</div>
+                <div class="terminal-stats">
+                    <div class="stat-item">PLAYERS: <span id="playerCount">3</span></div>
+                    <div class="stat-item">ACTIONS: <span id="actionCount">47</span></div>
+                    <div class="stat-item">WORLD_STATE: <span style="color: #00ff41;">EVOLVING</span></div>
+                </div>
+            </div>
+
+            <div class="command-line">
+                <div class="command-prompt">$> EXECUTE WORLD_ACTION</div>
+                <input type="text" class="command-input" placeholder="dragon_attack --player=TENNY --damage=15" />
+            </div>
+
+            <div class="action-log">
+                <div class="log-entry success">
+                    <div>[15:42:31] ACTION_0x8F2C1: dragon_attack SUCCESSFULLY RECORDED</div>
+                    <div class="timestamp">Block: #1847 | Transaction: 0x9A3B...</div>
+                </div>
+                <div class="log-entry processing">
+                    <div>[15:42:32] AI_PROCESSING: calculating butterfly effects...</div>
+                    <div class="timestamp">Nodes: village, lair, forest | Status: 75%</div>
+                </div>
+                <div class="log-entry success">
+                    <div>[15:42:47] CASCADE_COMPLETE: village_blessed activated</div>
+                    <div class="timestamp">Economic boost: +20% | Reputation: +15</div>
+                </div>
+                <div class="log-entry processing">
+                    <div>[15:43:01] PLAYER_ALEX: shop_trade --item=sword --price=120</div>
+                    <div class="timestamp">Processing in queue... Position: #2</div>
+                </div>
+                <div class="log-entry success">
+                    <div>[15:43:18] WORLD_STATE: forest_peaceful -- dragon_defeat_cascade</div>
+                    <div class="timestamp">Migration alert: +3 NPCs arrived</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Direction 2: Arcade Interface -->
+        <div class="mockup-container direction-2">
+            <div class="arcade-header">
+                <div class="game-title">SUI SAGA</div>
+                <div class="score-display">SCORE: 1250</div>
+            </div>
+
+            <div class="world-map">
+                <div class="area-card active">
+                    <div class="area-name">DRAGON LAIR</div>
+                    <div class="area-status">⚔️ BATTLE READY</div>
+                    <div class="area-status">HP: 100/100</div>
+                </div>
+                <div class="area-card">
+                    <div class="area-name">VILLAGE</div>
+                    <div class="area-status">🏠 PROSPEROUS</div>
+                    <div class="area-status">POP: 24</div>
+                </div>
+                <div class="area-card">
+                    <div class="area-name">FOREST</div>
+                    <div class="area-status">🌲 MYSTERIOUS</div>
+                    <div class="area-status">DANGER: HIGH</div>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="action-btn">⚔️ Attack</button>
+                <button class="action-btn">🛡️ Defend</button>
+                <button class="action-btn danger">💀 Ultimate</button>
+                <button class="action-btn">🏃 Run</button>
+            </div>
+        </div>
+
+        <!-- Direction 3: Hacker Terminal -->
+        <div class="mockup-container direction-3">
+            <div class="hacker-header">
+                <div class="hacker-title">▓ BLOCKCHAIN PROOF TERMINAL</div>
+            </div>
+
+            <div class="proof-card">
+                <div class="proof-title">◉ DRAGON DEFEAT PROOF</div>
+                <div class="proof-details">
+                    <strong>Player:</strong> TENNY<br>
+                    <strong>Action:</strong> dragon_attack --damage=25<br>
+                    <strong>Timestamp:</strong> 2025-11-14T15:42:31.847Z<br>
+                    <strong>World Impact:</strong> village_blessed + shop_opened + forest_peaceful<br>
+                    <strong>Reputation Change:</strong> +25 Dragon Slayer
+                </div>
+                <a href="#" class="proof-link">🔗 VERIFY ON BLOCKCHAIN →</a>
+                <div class="verification-hash">
+                    TRANSACTION_HASH: 0x9a3b2c1d8e7f6a5b4c3d2e1f0a9b8c7d6e5f4a3b2c1d0e9f8a7b6c5d4e3f2a1
+                </div>
+            </div>
+
+            <div class="proof-card">
+                <div class="proof-title">◉ CASCADE EFFECT PROOF</div>
+                <div class="proof-details">
+                    <strong>Cascade ID:</strong> CASCADE_0x4F8D<br>
+                    <strong>Trigger:</strong> dragon_defeat<br>
+                    <strong>Effects Applied:</strong><br>
+                    • village_fear: -8 → 2<br>
+                    • village_hope: +8 → 18<br>
+                    • forest_animals: hostile → peaceful<br>
+                    • shop_inventory: +30% equipment<br>
+                    <strong>Processing Time:</strong> 14.7 seconds
+                </div>
+                <a href="#" class="proof-link">🔗 VIEW CASCADE LOG →</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mock real-time updates
+        function updateStats() {
+            const playerCount = document.getElementById('playerCount');
+            const actionCount = document.getElementById('actionCount');
+
+            if (playerCount) {
+                const currentPlayers = parseInt(playerCount.textContent);
+                playerCount.textContent = currentPlayers + Math.floor(Math.random() * 3) - 1;
+            }
+
+            if (actionCount) {
+                const currentActions = parseInt(actionCount.textContent);
+                actionCount.textContent = currentActions + Math.floor(Math.random() * 2);
+            }
+        }
+
+        // Add new log entries
+        function addLogEntry() {
+            const actionLog = document.querySelector('.action-log');
+            if (!actionLog) return;
+
+            const actions = [
+                '[TIME] PLAYER_NEW: connected_from_mobile_device',
+                '[TIME] BLOCK_MINED: #1848 - gas: 0.001234 SUI',
+                '[TIME] AI_COMPLETE: world_consistency_validation PASSED',
+                '[TIME] REPUTATION_UPDATE: player_SARAH +5 helper_achievement'
+            ];
+
+            const action = actions[Math.floor(Math.random() * actions.length)]
+                .replace('TIME', new Date().toLocaleTimeString().slice(0, 8));
+
+            const entry = document.createElement('div');
+            entry.className = 'log-entry success';
+            entry.innerHTML = `<div>${action}</div><div class="timestamp">System Generated</div>`;
+
+            actionLog.appendChild(entry);
+            actionLog.scrollTop = actionLog.scrollHeight;
+        }
+
+        // Show different directions
+        function showDirection(direction) {
+            // Hide all directions
+            document.querySelectorAll('.direction-1, .direction-2, .direction-3')
+                .forEach(el => el.classList.remove('active'));
+
+            // Remove active class from all buttons
+            document.querySelectorAll('.nav-btn')
+                .forEach(btn => btn.classList.remove('active'));
+
+            // Show selected direction
+            document.querySelector(`.direction-${direction}`).classList.add('active');
+
+            // Add active class to clicked button
+            event.target.classList.add('active');
+        }
+
+        // Simple matrix rain effect
+        function createMatrixRain() {
+            const matrixRain = document.getElementById('matrixRain');
+            if (!matrixRain) return;
+
+            const characters = '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン';
+
+            for (let i = 0; i < 50; i++) {
+                const column = document.createElement('div');
+                column.style.position = 'absolute';
+                column.style.left = Math.random() * 100 + '%';
+                column.style.fontSize = Math.random() * 10 + 10 + 'px';
+                column.style.color = `rgba(0, 255, 65, ${Math.random() * 0.5 + 0.1})`;
+                column.textContent = characters[Math.floor(Math.random() * characters.length)];
+                column.style.animation = `fall ${Math.random() * 5 + 5}s linear infinite`;
+                matrixRain.appendChild(column);
+            }
+        }
+
+        // Add falling animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fall {
+                to { transform: translateY(100vh); }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Initialize
+        createMatrixRain();
+        setInterval(updateStats, 5000);
+        setInterval(addLogEntry, 8000);
+    </script>
+</body>
+</html>

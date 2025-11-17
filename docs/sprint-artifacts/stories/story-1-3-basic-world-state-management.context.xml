@@ -1,0 +1,144 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>1</epicId>
+    <storyId>3</storyId>
+    <title>Basic World State Management</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-15</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>stories/story-1-3-basic-world-state-management.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>player</asA>
+    <iWant>the world to have a persistent state that remembers all changes</iWant>
+    <soThat>my actions have lasting meaning</soThat>
+    <tasks>1. Implement world state API endpoints (AC: 1, 2)
+   - GET /api/world-state - Get current world state with all regions
+   - GET /api/world-state/regions - Get status of specific regions
+   - GET /api/world-state/characters - Get character locations and relationships
+2. Create world state data structures (AC: 2)
+   - Define RegionState interface with status, population, conditions
+   - Define Character interface with location, attributes, relationships
+   - Define Environment interface with weather, time, conditions
+3. Implement state persistence using Layer 3 storage (AC: 3)
+   - Save world state to state_*.json files using StorageManager
+   - Load world state on server startup from latest version
+   - Handle migration between state versions
+4. Build world state history system (AC: 4)
+   - GET /api/world-state/history - Get complete state change history
+   - GET /api/world-state/history/:version - Get specific state version
+   - Track state transitions with metadata and timestamps
+5. Ensure atomic state updates (AC: 5)
+   - Implement state transition validation before saving
+   - Add rollback capability for failed state updates
+   - Include consistency checks across related data</tasks>
+  </story>
+
+  <acceptanceCriteria>1. Can see status of village, lair, and forest regions
+2. World state includes character locations, relationships, and environmental conditions
+3. State persists across server restarts
+4. Complete history of world state changes is accessible
+5. State updates are atomic and consistent</acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc path="docs/epics.md" title="Epic 1: Foundation & Infrastructure" section="Epic 1.3: Basic World State Management" snippet="Story 1.3 provides world state persistence with regional status, character tracking, and environmental conditions. Technical notes specify WorldState interface, state transitions, validation, initialization with defaults, and rollback capability.">
+        Epic 1.3 establishes the foundation for persistent world state management, building on the 3-layer storage architecture from Story 1.2.
+      </doc>
+      <doc path="docs/sprint-artifacts/sprint-status.yaml" title="Sprint Status Tracking" section="Story 1.3 Details" snippet="Story 1.3 focuses on basic world state management with 5 acceptance criteria covering regional status, character locations, persistence, history access, and atomic updates. Estimated 3 hours with Story 1.2 prerequisites.">
+        Complete story details with acceptance criteria and implementation requirements for world state management system.
+      </doc>
+    </docs>
+    <code>
+      <artifact path="server/src/types/storage.ts" kind="type-definitions" symbol="WorldState" lines="79-95" reason="Core WorldState interface with versioning, regions, characters, relationships, economy, environment, and metadata. Foundation for all world state operations.">
+        Complete WorldState type definition already implemented in Story 1.2, providing comprehensive structure for persistent world state.
+      </artifact>
+      <artifact path="server/src/types/storage.ts" kind="type-definitions" symbol="RegionState" lines="97-110" reason="RegionState interface defining regional properties: id, name, type, status, population, economy, events, and custom properties. Essential for AC 1 (regional status visibility).">
+        Detailed region state definition supporting village, lair, forest types with status tracking and economic systems.
+      </artifact>
+      <artifact path="server/src/types/storage.ts" kind="type-definitions" symbol="CharacterState" lines="112-125" reason="CharacterState interface with location, type, attributes, relationships, inventory, and quests. Critical for AC 2 (character location and relationships).">
+        Comprehensive character tracking including position, relationships, and progression states.
+      </artifact>
+      <artifact path="server/src/storage/Layer3State.ts" kind="storage-layer" symbol="Layer3State" lines="6-150" reason="Versioned world state storage implementation with StorageLayer interface. Provides write(), read(), getLatestVersion(), and list() methods for state persistence (AC 3).">
+        Complete Layer 3 storage system ready for world state management with versioning and validation capabilities.
+      </artifact>
+      <artifact path="server/src/storage/StorageManager.ts" kind="manager" symbol="getCurrentWorldState" lines="275-285" reason="High-level interface to Layer3State storage. Returns current world state with proper error handling and success validation.">
+        Existing method for retrieving current world state, ready for API endpoint implementation.
+      </artifact>
+      <artifact path="server/src/storage/StorageManager.ts" kind="manager" symbol="getWorldStateHistory" lines="333-350" reason="Retrieves historical world states with pagination support. Essential for AC 4 (history access) with version tracking.">
+        Existing history retrieval system supporting state change tracking and version management.
+      </artifact>
+      <artifact path="server/src/index.ts" kind="api-endpoint" symbol="/api/storage/world-state" lines="292-312" reason="Existing world state API endpoint template. Provides basic structure for current world state retrieval with proper error handling.">
+        Current API endpoint foundation that needs extension for comprehensive world state functionality.
+      </artifact>
+      <artifact path="server/src/storage/DataValidation.ts" kind="validation" symbol="validateWorldState" lines="150-180" reason="Existing world state validation system for data integrity and consistency checking. Essential for AC 5 (atomic and consistent updates).">
+        Validation framework ensuring world state data integrity across all layers and operations.
+      </artifact>
+      <artifact path="server/src/storage/StorageLogger.ts" kind="logging" symbol="StorageLogger" lines="1-50" reason="Comprehensive logging system for all storage operations. Critical for tracking state changes, debugging, and audit trails (AC 4).">
+        Established logging framework for monitoring world state operations and changes over time.
+      </artifact>
+    </code>
+    <dependencies>
+      <artifact ecosystem="Node.js/TypeScript" packages="@mysten/sui, @mysten/walrus, express" version="Latest" purpose="Backend runtime and blockchain integration">
+        Node.js runtime with TypeScript for type safety, Express for API server, and Walrus SDK for blockchain persistence.
+      </artifact>
+      <artifact ecosystem="Testing" packages="ts-node, nodemon" version="Development" purpose="Development tooling for TypeScript compilation and hot-reloading">
+        Development dependencies for efficient development workflow and testing.
+      </artifact>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint type="architectural" severity="high">Must use existing 3-layer storage architecture (Story 1.2 foundation). World state operations must go through StorageManager and Layer3State interfaces.</constraint>
+    <constraint type="interface" severity="high">Must implement StorageLayer&lt;WorldState&gt; interface consistently. All world state operations must follow established patterns from other layers.</constraint>
+    <constraint type="data-integrity" severity="high">All state updates must be atomic and consistent. Use existing validation framework (DataValidation.ts) and ensure rollback capability for failed operations.</constraint>
+    <constraint type="versioning" severity="medium">Must maintain versioning system for world states. Each state change should increment version number and maintain history for rollback capability.</constraint>
+    <constraint type="performance" severity="medium">State persistence must be efficient for real-time game experience. Leverage existing caching and optimization patterns from Story 1.2.</constraint>
+    <constraint type="testing" severity="medium">Must follow established testing patterns. Create integration tests following existing test structure in server/tests/integration/ directory.</constraint>
+    <constraint type="security" severity="medium">All API endpoints must follow existing security patterns (input validation, error handling, environment variable usage).</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface name="StorageManager.getWorldState()" kind="method" signature="async getCurrentWorldState(): Promise&lt;{ success: boolean, error?: string, state?: WorldState }&gt;" path="server/src/storage/StorageManager.ts:275">
+      High-level method for retrieving current world state with proper error handling and success validation.
+    </interface>
+    <interface name="StorageManager.saveWorldState()" kind="method" signature="async saveWorldState(state: WorldState): Promise&lt;{ success: boolean, error?: string, state?: WorldState }&gt;" path="server/src/storage/StorageManager.ts">
+      Method for persisting world state changes with validation and atomic update guarantees.
+    </interface>
+    <interface name="StorageManager.getWorldStateHistory()" kind="method" signature="async getWorldStateHistory(limit: number = 10): Promise&lt;{ success: boolean, states?: WorldState[], error?: string }&gt;" path="server/src/storage/StorageManager.ts:333">
+      Method for retrieving historical world states with pagination support for state change tracking.
+    </interface>
+    <interface name="Layer3State.write()" kind="method" signature="async write(state: WorldState): Promise&lt;StorageResult&lt;WorldState&gt;&gt;" path="server/src/storage/Layer3State.ts:24">
+      Core storage method for persisting world state with versioning and checksum validation.
+    </interface>
+    <interface name="Layer3State.getLatestVersion()" kind="method" signature="async getLatestVersion(): Promise&lt;StorageResult&lt;WorldState&gt;&gt;" path="server/src/storage/Layer3State.ts">
+      Method for retrieving most recent world state version from persistent storage.
+    </interface>
+    <interface name="Layer3State.list()" kind="method" signature="async list(options?: ListOptions): Promise&lt;StorageResult&lt;WorldState[]&gt;&gt;" path="server/src/storage/Layer3State.ts">
+      Method for listing multiple world state versions with sorting and pagination for history access.
+    </interface>
+    <interface name="DataValidation.validateWorldState()" kind="method" signature="validateWorldState(state: WorldState): ValidationResult" path="server/src/storage/DataValidation.ts">
+      Validation method ensuring world state data integrity and consistency before persistence.
+    </interface>
+    <interface name="GET /api/storage/world-state" kind="REST endpoint" signature="GET /api/storage/world-state" path="server/src/index.ts:292">
+      API endpoint for retrieving current world state with all regions, characters, and environmental data.
+    </interface>
+    <interface name="GET /api/storage/world-state/history" kind="REST endpoint" signature="GET /api/storage/world-state/history?limit=N" path="server/src/index.ts">
+      API endpoint for retrieving world state change history with pagination support.
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>Follow existing integration testing patterns from server/tests/integration/. Use TypeScript with ts-node for test execution. Include comprehensive validation for world state persistence, versioning, and rollback capabilities. Tests must cover all acceptance criteria with realistic world state scenarios.</standards>
+    <locations>server/tests/integration/test-world-state-management.ts (new file), server/tests/integration/test-basic-walrus.ts (existing patterns), server/tests/integration/test-simple-backup.ts (storage testing patterns)</locations>
+    <ideas>
+      <test idea="Test world state persistence across server restarts" ac="3">Initialize world state, modify regions/characters, restart server, verify state persistence and data integrity.</test>
+      <test idea="Test regional status visibility (village, lair, forest)" ac="1">Create world state with different regional statuses, verify API returns correct regional information.</test>
+      <test idea="Test character location and relationship tracking" ac="2">Add characters with locations and relationships, modify through API, verify persistent storage and retrieval.</test>
+      <test idea="Test world state history access" ac="4">Create multiple state versions, verify history API returns complete change sequence with proper versioning.</test>
+      <test idea="Test atomic state updates with rollback" ac="5">Simulate failed state update, verify rollback to previous valid state and data consistency.</test>
+      <test idea="Test concurrent state updates" ac="5">Multiple simultaneous state modifications, verify atomic behavior and conflict resolution.</test>
+    </ideas>
+  </tests>
+</story-context>

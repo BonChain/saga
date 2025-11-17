@@ -1,0 +1,640 @@
+# Sprint Status Tracking: SuiSaga - Living World Blockchain Game
+# Generated: 2025-11-14
+# Project: 3-day hackathon build with unlimited agency + AI consequences innovation
+# Total Epics: 8 | Total Stories: 28
+
+metadata:
+  project_name: "SuiSaga"
+  project_type: "Living World Blockchain Game"
+  development_context: "3-day hackathon MVP with Full Product Vision"
+  total_epics: 8
+  total_stories: 28
+  generation_date: "2025-11-14"
+  last_updated: "2025-11-14"
+  hackathon_duration: "3 days"
+  core_innovation: "Unlimited player agency with AI-generated unexpected events"
+
+status_definitions:
+  backlog: "Not started, ready for development"
+  in_progress: "Currently being developed"
+  ready_for_review: "Development complete, needs review"
+  done: "Complete and verified"
+  blocked: "Blocked by dependencies or issues"
+
+workflow_notes:
+  - "Stories progress in sequence: backlog → in_progress → ready_for_review → done"
+  - "Epic retrospectives are created when all stories in epic are done"
+  - "Status updates should reference specific story files and evidence"
+  - "Dependencies between stories must be resolved before starting work"
+  - "Each story is sized for single-session completion (1-8 hours)"
+
+# Epic 1: Foundation & Infrastructure (3 stories)
+epic-1:
+  title: "Foundation & Infrastructure"
+  goal: "Establish technical foundation for living world architecture with 3-layer Walrus system, Express backend, and React frontend"
+  status: "backlog"
+  stories:
+    story-1-1-project-setup-build-system:
+      title: "Project Setup & Build System"
+      description: "As a developer, I want a properly structured project with build automation, so that I can develop efficiently and deploy reliably."
+      status: "done"
+      prerequisites: []
+      estimated_hours: 2
+      implementation_date: "2025-11-14"
+      story_file: "stories/story-1-1-project-setup-build-system.md"
+      acceptance_criteria:
+        - "Project structure created with separate client/, server/, and contract/ directories"
+        - "Vite build system configured for React frontend"
+        - "Express TypeScript server configured with nodemon"
+        - "All dependencies installed and versions locked"
+        - "Build completes without errors"
+        - "Development servers start on configured ports (5173 frontend, 3001 backend)"
+      technical_notes:
+        - "Use separate package.json files for client/server/contract"
+        - "Configure TypeScript with strict mode enabled"
+        - "Set up ESLint and Prettier for code consistency"
+        - "Add basic health check endpoint at /health"
+        - "Include README with development setup instructions"
+
+    story-1-2-three-layer-walrus-architecture:
+      title: "3-Layer Walrus Architecture"
+      description: "As a system, I want a 3-layer storage architecture for world persistence, so that actions, rules, and state are properly separated and verifiable."
+      status: "done"
+      prerequisites: ["story-1-1-project-setup-build-system"]
+      estimated_hours: 4
+      implementation_date: "2025-11-14"
+      actual_hours: 5.5
+      completion_date: "2025-11-15"
+      story_file: "stories/story-1-2-three-layer-walrus-architecture.md"
+      acceptance_criteria:
+        - "Layer 1 (Blueprint) creates immutable world rules and butterfly effect logic in world_rules.json"
+        - "Layer 2 (Queue) creates individual action files in action_*.json format (one per action)"
+        - "Layer 3 (State) creates versioned world state shards in state_*_vN.json files"
+        - "All layers communicate through consistent interfaces"
+        - "System can write and read from each layer independently"
+        - "Data integrity is maintained across all layers"
+      technical_notes:
+        - "Implement storage interfaces for each layer"
+        - "Add retry logic for Walrus storage operations"
+        - "Include backup local storage for demo reliability"
+        - "Create validation functions for data consistency"
+        - "Add logging for all storage operations"
+
+    story-1-3-basic-world-state-management:
+      title: "Basic World State Management"
+      description: "As a player, I want the world to have a persistent state that remembers all changes, so that my actions have lasting meaning."
+      status: "done"
+      prerequisites: ["story-1-2-three-layer-walrus-architecture"]
+      estimated_hours: 3
+      story_file: "stories/story-1-3-basic-world-state-management.md"
+      completion_date: "2025-11-15"
+      acceptance_criteria:
+        - "Can see status of village, lair, and forest regions"
+        - "World state includes character locations, relationships, and environmental conditions"
+        - "State persists across server restarts"
+        - "Complete history of world state changes is accessible"
+        - "State updates are atomic and consistent"
+      technical_notes:
+        - "Define WorldState interface with region-specific properties"
+        - "Implement state transition functions"
+        - "Add state validation before applying changes"
+        - "Create world state initialization with default values"
+        - "Include state rollback capability for testing"
+
+  retrospective:
+    status: "pending"
+    lessons_learned: []
+    next_improvements: []
+
+# Epic 2: Unlimited Action Input System (3 stories)
+epic-2:
+  title: "Unlimited Action Input System"
+  goal: "Enable players to input any action they can imagine using natural language and receive immediate confirmation"
+  status: "backlog"
+  stories:
+    story-2-1-natural-language-action-input:
+      title: "Natural Language Action Input"
+      description: "As a player, I want to type any action I can think of in plain English, so that I can attempt unlimited behaviors in the world."
+      status: "done"
+      completion_date: "2025-11-15"
+      prerequisites: ["story-1-3-basic-world-state-management"]
+      estimated_hours: 3
+      acceptance_criteria:
+        - "System accepts free-text input without validation errors"
+        - "Input field supports up to 500 characters"
+        - "Immediate visual feedback that action was received"
+        - "Interface provides helpful examples of possible actions"
+        - "Can enter actions like 'befriend the goblin king' or 'cast a spell to make it rain'"
+      technical_notes:
+        - "Implement multi-line text input with character counter"
+        - "Add input sanitization and basic validation"
+        - "Include action history and suggested actions"
+        - "Design responsive input interface for mobile"
+        - "Add loading states for action processing"
+
+    story-2-2-intent-parsing-action-creation:
+      title: "Intent Parsing & Action Creation"
+      description: "As a system, I want to understand player intent from natural language, so that I can process actions meaningfully."
+      status: "done"
+      story_file: "stories/story-2-2-intent-parsing-action-creation.md"
+      creation_date: "2025-11-15"
+      prerequisites: ["story-2-1-natural-language-action-input"]
+      estimated_hours: 4
+      acceptance_criteria:
+        - "Extracts action type (combat), target (dragon), and method (sword)"
+        - "Creates structured Action object with intent, timestamp, and player ID"
+        - "Validates that action is logically possible within world rules"
+        - "Handles ambiguous or unclear intents with clarification prompts"
+        - "Saves action to Layer 2 storage with unique ID"
+      technical_notes:
+        - "Implement intent parsing using keyword matching and pattern recognition"
+        - "Create Action interface with intent, parameters, and metadata"
+        - "Add action validation against current world state"
+        - "Include confidence scoring for intent extraction"
+        - "Handle edge cases and malformed inputs gracefully"
+
+    story-2-3-immediate-action-confirmation:
+      title: "Immediate Action Confirmation"
+      description: "As a player, I want instant confirmation that my action was recorded, so that I feel my input mattered and the system is working."
+      status: "done"
+      story_file: "stories/story-2-3-immediate-action-confirmation.md"
+      creation_date: "2025-11-16"
+      prerequisites: ["story-2-2-intent-parsing-action-creation"]
+      estimated_hours: 2
+      acceptance_criteria:
+        - "Receive confirmation within 1 second showing action was recorded"
+        - "See unique action ID for tracking request"
+        - "Get message like 'Action received! Processing world changes...'"
+        - "Can see action in recent actions list"
+        - "Confirmation includes timestamp and action description"
+        - "Know AI is working on consequences in background"
+      technical_notes:
+        - "Implement synchronous action recording with immediate response"
+        - "Create unique action IDs using UUID generation"
+        - "Add action status tracking (received, processing, completed)"
+        - "Design confirmation UI with clear visual feedback"
+        - "Include action metadata for user reference"
+
+  retrospective:
+    status: "pending"
+    lessons_learned: []
+    next_improvements: []
+
+# Epic 3: AI-Driven World Logic Engine (3 stories)
+epic-3:
+  title: "AI-Driven World Logic Engine"
+  goal: "Create AI system that generates coherent, surprising consequences while maintaining logical world consistency"
+  status: "backlog"
+  stories:
+    story-3-1-openai-integration-prompt-templates:
+      title: "OpenAI Integration & Prompt Templates"
+      description: "As a system, I want to integrate with OpenAI API using specialized prompts, so that I can generate intelligent world responses."
+      status: "done"
+      prerequisites: ["story-2-3-immediate-action-confirmation"]
+      completion_date: "2025-11-17"
+      implementation_notes: "Completed comprehensive OpenAI integration with per-model circuit breaker and rate limiting. Z.ai controls enabled, OpenAI/OpenRouter disabled as requested. Multi-provider AI service architecture with automatic fallback capabilities."
+      estimated_hours: 3
+      acceptance_criteria:
+        - "Connects to OpenAI GPT-3.5-turbo with proper authentication"
+        - "Uses world-specific prompt templates for context understanding"
+        - "Includes current world state, character relationships, and location context"
+        - "Handles API rate limits and quotas gracefully"
+        - "Implements retry logic for failed API calls"
+        - "Respects the MAX_API_CALLS safety mechanism"
+      technical_notes:
+        - "Implement OpenAI client with proper error handling"
+        - "Create prompt templates for world logic analysis"
+        - "Add API key management and security"
+        - "Include usage tracking and cost controls"
+        - "Design prompt engineering for consistent output"
+
+    story-3-2-consequence-generation-world-changes:
+      title: "Consequence Generation & World Changes"
+      description: "As a system, I want to generate logical, surprising consequences from player actions, so that the world feels alive and unpredictable."
+      status: "done"
+      completion_date: "2025-11-17"
+      implementation_notes: "Complete consequence generation system with multi-format AI response parsing, rule-based validation, cascading effects, and world state integration. 20/23 tests passing with core functionality working correctly."
+      creation_date: "2025-11-17"
+      story_file: "stories/story-3-2-consequence-generation-world-changes.md"
+      prerequisites: ["story-3-1-openai-integration-prompt-templates"]
+      estimated_hours: 5
+      acceptance_criteria:
+        - "Changes are logical within world's established rules"
+        - "Consequences create interesting cascading effects across multiple systems"
+        - "Results are surprising but coherent within world logic"
+        - "Changes affect character relationships, environment, and future possibilities"
+        - "Consequences stored as structured data for world state updates"
+        - "Each action generates 2-4 related consequences for richness"
+      technical_notes:
+        - "Implement consequence parsing from AI responses"
+        - "Create structured consequence data models"
+        - "Add consequence validation against world rules"
+        - "Design cascading effect calculation system"
+        - "Include consequence prioritization and filtering"
+
+    story-3-3-butterfly-effect-calculation:
+      title: "Butterfly Effect Calculation"
+      description: "As a player, I want to see how my actions ripple through the world, so that I understand the impact of my choices."
+      status: "backlog"
+      prerequisites: ["story-3-2-consequence-generation-world-changes"]
+      estimated_hours: 4
+      acceptance_criteria:
+        - "Identifies related world systems that will be affected"
+        - "Calculates secondary effects on character relationships and environment"
+        - "Creates visual map showing cause-and-effect relationships"
+        - "Effects persist across multiple world regions and time periods"
+        - "Players can discover effects created by other players"
+        - "Butterfly effects create emergent gameplay opportunities"
+      technical_notes:
+        - "Implement effect propagation algorithm"
+        - "Create relationship mapping between world systems"
+        - "Design visualization data structures for cascade diagrams"
+        - "Add effect tracking and historical analysis"
+        - "Include effect intensity and duration calculations"
+
+  retrospective:
+    status: "pending"
+    lessons_learned: []
+    next_improvements: []
+
+# Epic 4: Living Character System (2 stories)
+epic-4:
+  title: "Living Character System"
+  goal: "NPCs with genuine memories, relationships, and emotional responses to player actions"
+  status: "backlog"
+  stories:
+    story-4-1-character-memory-relationship-tracking:
+      title: "Character Memory & Relationship Tracking"
+      description: "As a character, I want to remember every interaction with players and other characters, so that I can develop authentic relationships and respond appropriately."
+      status: "backlog"
+      prerequisites: ["story-3-3-butterfly-effect-calculation"]
+      estimated_hours: 4
+      acceptance_criteria:
+        - "Each NPC maintains complete memory of all player actions affecting them"
+        - "NPCs track relationship scores (friendship, hostility, loyalty) with each player"
+        - "NPCs develop relationships with other NPCs based on shared experiences"
+        - "Character memories influence future dialogue and behavior"
+        - "Relationship changes are permanent and visible to players"
+        - "Characters have distinct personalities that affect their responses"
+      technical_notes:
+        - "Implement Character interface with memories and relationships"
+        - "Create relationship scoring system with multiple dimensions"
+        - "Add memory persistence in world state storage"
+        - "Design personality traits affecting behavior"
+        - "Include relationship visualization for players"
+
+    story-4-2-dynamic-dialogue-generation:
+      title: "Dynamic Dialogue Generation"
+      description: "As a player, I want NPCs to say things that reflect their unique experiences with me and the world, so that conversations feel authentic and meaningful."
+      status: "backlog"
+      prerequisites: ["story-4-1-character-memory-relationship-tracking"]
+      estimated_hours: 4
+      acceptance_criteria:
+        - "Dialogue references specific shared experiences and history"
+        - "Emotional tone reflects current relationship status"
+        - "Characters mention other characters and world events they've experienced"
+        - "Dialogue stays consistent with established personality"
+        - "Characters have unique things to say based on recent world changes"
+        - "Can build genuine connections through repeated interactions"
+      technical_notes:
+        - "Implement AI-driven dialogue generation with character context"
+        - "Create dialogue templates reflecting relationship states"
+        - "Add emotional tone analysis and response"
+        - "Design memory-based conversation topics"
+        - "Include dialogue consistency checking"
+
+  retrospective:
+    status: "pending"
+    lessons_learned: []
+    next_improvements: []
+
+# Epic 5: Blockchain Proof & Verification (3 stories)
+epic-5:
+  title: "Blockchain Proof & Verification"
+  goal: "Immutable action recording with blockchain verification creating authentic digital legacies"
+  status: "backlog"
+  stories:
+    story-5-1-action-recording-walrus-integration:
+      title: "Action Recording & Walrus Integration"
+      description: "As a system, I want to record every player action on blockchain storage, so that all world changes are permanently verifiable."
+      status: "backlog"
+      prerequisites: ["story-1-2-three-layer-walrus-architecture"]
+      estimated_hours: 3
+      acceptance_criteria:
+        - "Complete action data (intent, consequences, timestamp, player ID) stored on Walrus"
+        - "Action receives unique blockchain verification link"
+        - "Storage is immutable and tamper-proof"
+        - "Recording includes cryptographic proof of authenticity"
+        - "System handles storage errors gracefully with retry logic"
+        - "Action accessible through Walrus Gateway for verification"
+      technical_notes:
+        - "Implement Walrus storage client with authentication"
+        - "Create action serialization for blockchain storage"
+        - "Add cryptographic hashing for verification"
+        - "Include storage status tracking and confirmation"
+        - "Design error handling and recovery procedures"
+
+    story-5-2-proof-card-generation-display:
+      title: "Proof Card Generation & Display"
+      description: "As a player, I want to see visual proof cards showing my actions are permanently recorded, so that I have tangible evidence of my impact on the world."
+      status: "backlog"
+      prerequisites: ["story-5-1-action-recording-walrus-integration"]
+      estimated_hours: 3
+      acceptance_criteria:
+        - "See proof cards with action description and consequences"
+        - "Each card includes clickable verification link to Walrus Gateway"
+        - "Cards show blockchain confirmation status and timestamp"
+        - "Cards use retro gaming aesthetics with neon borders"
+        - "Can share proof links with others to demonstrate actions"
+        - "Cards display processing status and world impact summary"
+      technical_notes:
+        - "Design ProofCard component with blockchain data"
+        - "Implement verification link generation"
+        - "Add visual status indicators (processing, confirmed, verified)"
+        - "Create share functionality for proof links"
+        - "Include retro gaming styling and animations"
+
+    story-5-3-demo-reliability-fallback-systems:
+      title: "Demo Reliability & Fallback Systems"
+      description: "As a presenter, I want backup systems ensuring the demo works even if blockchain or AI services fail, so that hackathon success is guaranteed."
+      status: "backlog"
+      prerequisites: ["story-5-2-proof-card-generation-display"]
+      estimated_hours: 3
+      acceptance_criteria:
+        - "System automatically switches to cached responses for AI processing"
+        - "Backup video plays if live demo fails completely"
+        - "Pre-recorded proof links demonstrate blockchain verification"
+        - "Interface continues functioning with local data storage"
+        - "All critical demo flows work without internet dependency"
+        - "Emergency mode provides complete functionality for presentation"
+      technical_notes:
+        - "Implement cached response library for common actions"
+        - "Create offline mode with local fallback data"
+        - "Add automatic service failure detection"
+        - "Design emergency mode UI indicators"
+        - "Include pre-recorded demo video integration"
+
+  retrospective:
+    status: "pending"
+    lessons_learned: []
+    next_improvements: []
+
+# Epic 6: Asynchronous Multiplayer Coordination (3 stories)
+epic-6:
+  title: "Asynchronous Multiplayer Coordination"
+  goal: "Multiple players affecting shared world without real-time coordination requirements"
+  status: "backlog"
+  stories:
+    story-6-1-real-time-activity-monitoring:
+      title: "Real-Time Activity Monitoring"
+      description: "As a player, I want to see what other players are doing in the world, so that I feel part of a living, evolving community."
+      status: "backlog"
+      prerequisites: ["story-3-3-butterfly-effect-calculation"]
+      estimated_hours: 4
+      acceptance_criteria:
+        - "See real-time updates showing activities in activity feed"
+        - "Can filter activities by region, player, or action type"
+        - "Updates appear within 1 second of action completion"
+        - "Can click on activities to see detailed consequences"
+        - "Feed shows most recent 50 activities"
+        - "Can discover interesting world changes created by others"
+      technical_notes:
+        - "Implement WebSocket or Server-Sent Events for real-time updates"
+        - "Create ActivityFeed component with filtering"
+        - "Add activity pagination and search functionality"
+        - "Design activity detail views with consequence information"
+        - "Include activity subscription and notification systems"
+
+    story-6-2-conflict-resolution-sequential-processing:
+      title: "Conflict Resolution & Sequential Processing"
+      description: "As a system, I want to process multiple player actions without conflicts, so that world state remains consistent and logical."
+      status: "backlog"
+      prerequisites: ["story-6-1-real-time-activity-monitoring"]
+      estimated_hours: 4
+      acceptance_criteria:
+        - "Each action processed sequentially to prevent conflicts"
+        - "System maintains queue of pending actions with priority ordering"
+        - "Conflicting actions resolved using established world rules"
+        - "Players receive notifications when their actions affect others"
+        - "Processing order based on submission timestamp"
+        - "World state remains consistent throughout processing"
+      technical_notes:
+        - "Implement action queue with priority and ordering"
+        - "Create conflict detection and resolution logic"
+        - "Add action dependency tracking"
+        - "Design processing status communication"
+        - "Include rollback capabilities for failed actions"
+
+    story-6-3-offline-world-evolution:
+      title: "Offline World Evolution"
+      description: "As a player, I want the world to continue evolving even when I'm offline, so that I return to discover new changes created by others."
+      status: "backlog"
+      prerequisites: ["story-6-2-conflict-resolution-sequential-processing"]
+      estimated_hours: 4
+      acceptance_criteria:
+        - "World state continues updating based on others' actions"
+        - "Character relationships evolve even in absence"
+        - "New world events and opportunities created by other players"
+        - "Can review everything that happened while gone"
+        - "World shows clear evidence of collective player activity"
+        - "Receive notifications about actions that affect interests"
+      technical_notes:
+        - "Implement background processing for offline world evolution"
+        - "Create world change notification system"
+        - "Add offline activity summarization"
+        - "Design return experience with world state highlights"
+        - "Include persistent world simulation running 24/7"
+
+  retrospective:
+    status: "pending"
+    lessons_learned: []
+    next_improvements: []
+
+# Epic 7: Combat & World Interaction (2 stories)
+epic-7:
+  title: "Combat & World Interaction"
+  goal: "Basic dragon combat and world-changing triggers demonstrating the living world concept"
+  status: "backlog"
+  stories:
+    story-7-1-dragon-combat-mechanics:
+      title: "Dragon Combat Mechanics"
+      description: "As a player, I want to engage in combat with dragons using various strategies, so that I can experience challenging interactions with meaningful consequences."
+      status: "backlog"
+      prerequisites: ["story-4-2-dynamic-dialogue-generation"]
+      estimated_hours: 4
+      acceptance_criteria:
+        - "Can select from different combat approaches (aggressive, defensive, diplomatic)"
+        - "Combat uses simple HP/damage calculations with clear outcomes"
+        - "Dragons have individual personalities affecting their responses"
+        - "Combat results trigger significant world changes and cascading effects"
+        - "Can befriend dragons instead of fighting them through diplomacy"
+        - "Combat outcomes affect character relationships and world state"
+      technical_notes:
+        - "Implement Combat system with HP, damage, and strategy options"
+        - "Create Dragon AI with personality-driven responses"
+        - "Add combat outcome calculation and world triggers"
+        - "Design combat interface with clear feedback"
+        - "Include relationship-based combat alternatives"
+
+    story-7-2-world-change-triggers:
+      title: "World-Change Triggers"
+      description: "As a system, I want combat victories and failures to trigger significant world changes, so that player actions have visible, lasting impact."
+      status: "backlog"
+      prerequisites: ["story-7-1-dragon-combat-mechanics"]
+      estimated_hours: 3
+      acceptance_criteria:
+        - "Dragon's death triggers cascading world changes across regions"
+        - "Nearby villagers celebrate and the economy improves"
+        - "New opportunities open up for all players in the area"
+        - "Character relationships evolve based on the outcome"
+        - "World permanently remembers the heroic victory"
+        - "Future players discover the consequences of this action"
+      technical_notes:
+        - "Implement world change trigger system"
+        - "Create cascading effect calculation for major events"
+        - "Design regional impact propagation"
+        - "Add historical recording of significant events"
+        - "Include discovery mechanics for future players"
+
+  retrospective:
+    status: "pending"
+    lessons_learned: []
+    next_improvements: []
+
+# Epic 8: Retro Gaming Interface & Demo Experience (3 stories)
+epic-8:
+  title: "Retro Gaming Interface & Demo Experience"
+  goal: "Polished hackathon demonstration interface with retro gaming aesthetics and reliable demo flow"
+  status: "backlog"
+  stories:
+    story-8-1-retro-gaming-ui-design:
+      title: "Retro Gaming UI Design"
+      description: "As a player, I want an arcade-style interface with high-contrast retro aesthetics, so that the game feels nostalgic and professional for hackathon demonstration."
+      status: "backlog"
+      prerequisites: ["story-2-3-immediate-action-confirmation"]
+      estimated_hours: 3
+      acceptance_criteria:
+        - "Design uses VT323 and Roboto Mono fonts for terminal aesthetics"
+        - "Color scheme features dark backgrounds with neon green/cyan/pink accents"
+        - "Interactive elements have glowing effects and pixel borders"
+        - "Scanline effects simulate CRT monitor appearance"
+        - "All text meets WCAG 2.1 AAA contrast requirements"
+        - "Interface works seamlessly on desktop (1024px+) and mobile (320px+)"
+      technical_notes:
+        - "Implement retro design system with CSS custom properties"
+        - "Create consistent component library with retro styling"
+        - "Add scanline and glow effects using CSS animations"
+        - "Design responsive layouts for all screen sizes"
+        - "Include accessibility features with retro aesthetics"
+
+    story-8-2-cascade-visualization-engine:
+      title: "Cascade Visualization Engine"
+      description: "As a player, I want to see visual diagrams showing how my actions create ripple effects through the world, so that I understand the living world mechanics."
+      status: "backlog"
+      prerequisites: ["story-3-3-butterfly-effect-calculation"]
+      estimated_hours: 5
+      acceptance_criteria:
+        - "See animated diagram showing cause-and-effect relationships"
+        - "Visualization connects action to direct consequences and butterfly effects"
+        - "Related world systems are color-coded and clearly labeled"
+        - "Can interact with diagram to explore detailed consequences"
+        - "Visualization updates in real-time as new effects emerge"
+        - "Retro styling makes it visually appealing for demo presentation"
+      technical_notes:
+        - "Implement cascade visualization component with D3.js or similar"
+        - "Create animated connection lines and node positioning"
+        - "Add interactive hover states and detail views"
+        - "Design real-time update system for live effects"
+        - "Include retro styling with neon effects and animations"
+
+    story-8-3-demo-flow-presentation-mode:
+      title: "Demo Flow & Presentation Mode"
+      description: "As a presenter, I want a polished demo experience that showcases all innovations within 5 minutes, so that hackathon judges understand the complete concept quickly."
+      status: "backlog"
+      prerequisites: ["story-8-2-cascade-visualization-engine"]
+      estimated_hours: 4
+      acceptance_criteria:
+        - "Complete innovation story told within 5 minutes"
+        - "Demo showcases unlimited player agency with surprising AI consequences"
+        - "Multi-device coordination proves scalability without technical failures"
+        - "Blockchain verification links demonstrate permanent impact"
+        - "Backup systems ensure 100% reliability during presentation"
+        - "Judges understand core innovation within 2 minutes"
+      technical_notes:
+        - "Design scripted demo flow with clear narrative"
+        - "Create presenter mode with optimized interface"
+        - "Add multi-device synchronization for demonstration"
+        - "Implement emergency backup systems and offline mode"
+        - "Include presenter notes and timing guides"
+
+  retrospective:
+    status: "pending"
+    lessons_learned: []
+    next_improvements: []
+
+# Development Phases
+development_phases:
+  phase-1-foundation:
+    title: "Phase 1: Foundation"
+    epics: ["epic-1", "epic-2"]
+    stories: 6
+    estimated_hours: 18
+    description: "Technical foundation and core action input system"
+
+  phase-2-core-logic:
+    title: "Phase 2: Core Logic"
+    epics: ["epic-3", "epic-5"]
+    stories: 6
+    estimated_hours: 18
+    description: "AI consequence engine and blockchain verification"
+
+  phase-3-living-world:
+    title: "Phase 3: Living World"
+    epics: ["epic-4", "epic-6", "epic-7"]
+    stories: 8
+    estimated_hours: 28
+    description: "Character relationships, multiplayer, and combat"
+
+  phase-4-polish:
+    title: "Phase 4: Polish & Demo"
+    epics: ["epic-8"]
+    stories: 3
+    estimated_hours: 12
+    description: "Retro interface and presentation flow"
+
+# Risk Assessment
+risk_assessment:
+  high_risk:
+    - "AI service availability during demo (mitigated by Epic 5.3)"
+    - "Complex integration between multiple systems"
+    - "Demo reliability under time pressure"
+
+  medium_risk:
+    - "Walrus storage learning curve and availability"
+    - "Real-time multiplayer coordination complexity"
+    - "Story interdependencies creating bottlenecks"
+
+  low_risk:
+    - "Basic UI development and styling"
+    - "Local state management"
+    - "Individual component development"
+
+# Success Metrics
+success_metrics:
+  functional:
+    - "All 25 functional requirements implemented and verified"
+    - "End-to-end action flow working in < 10 seconds"
+    - "Multi-device coordination demonstrated successfully"
+    - "Blockchain verification links accessible and verifiable"
+
+  technical:
+    - "Zero critical bugs during demo presentation"
+    - "System remains responsive under concurrent load"
+    - "Backup systems ensure 100% demo reliability"
+    - "Code quality meets TypeScript strict mode standards"
+
+  user_experience:
+    - "Core innovation (unlimited agency + AI consequences) clear within 2 minutes"
+    - "Retro gaming aesthetics professional and engaging"
+    - "Interface intuitive for hackathon demonstration"
+    - "Cascade visualization effectively shows living world mechanics"
