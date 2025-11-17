@@ -82,4 +82,4 @@ tests.forEach(test => {
   console.log('');
 });
 
-module.exports = { validateContrast, getContrastRatio };
+export { validateContrast, getContrastRatio };
