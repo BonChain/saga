@@ -15,7 +15,11 @@ import {
   ConsequenceType,
   ConsequenceImpact,
   ImpactLevel,
-  DurationType
+  DurationType,
+  ButterflyEffectNode,
+  EffectConnection,
+  CascadeVisualizationData,
+  EffectHistory
 } from '../types/ai'
 
 export interface CascadeProcessingOptions {
@@ -50,6 +54,17 @@ export interface WorldSystemInfluence {
   name: string
   connectedSystems: string[]
   influenceFactors: Record<string, number>
+}
+
+export interface CrossRegionPropagation {
+  sourceRegion: string
+  targetRegions: Array<{
+    region: string
+    distance: number
+    travelTime: number
+    effectDecay: number
+  }>
+  regionalModifiers: Record<string, number> // How effects are modified by different regions
 }
 
 export class CascadeProcessor {
@@ -731,6 +746,465 @@ export class CascadeProcessor {
     }
 
     return systems
+  }
+
+  /**
+   * Generate Butterfly Effect Visualization Data (Story 3.3)
+   *
+   * Creates comprehensive visualization data for frontend consumption including
+   * nodes, connections, temporal progression, and emergent opportunities.
+   */
+  async generateButterflyEffectVisualization(
+    actionId: string,
+    actionDescription: string,
+    consequences: AIConsequence[],
+    network?: CascadeNetwork
+  ): Promise<CascadeVisualizationData> {
+    this.logger('info', 'Generating butterfly effect visualization', {
+      actionId,
+      consequenceCount: consequences.length
+    })
+
+    const startTime = Date.now()
+
+    // Process cascading effects if not provided
+    const cascadeNetwork = network || await this.processCascadingEffects(consequences)
+
+    // Generate visualization nodes
+    const nodes = await this.generateVisualizationNodes(actionId, actionDescription, cascadeNetwork)
+
+    // Generate connections between nodes
+    const connections = await this.generateVisualizationConnections(cascadeNetwork)
+
+    // Create temporal progression data
+    const temporalProgression = this.generateTemporalProgression(nodes, connections)
+
+    // Calculate cross-region effects
+    const crossRegionEffects = this.calculateCrossRegionEffects(nodes)
+
+    // Generate emergent opportunities
+    const emergentOpportunities = this.generateEmergentOpportunities(nodes, connections)
+
+    const visualizationData: CascadeVisualizationData = {
+      rootNode: nodes[0], // Action node is always first
+      nodes,
+      connections,
+      temporalProgression,
+      crossRegionEffects,
+      emergentOpportunities,
+      metadata: {
+        totalNodes: nodes.length,
+        totalConnections: connections.length,
+        maxCascadeDepth: this.calculateMaxCascadeDepth(nodes),
+        processingTime: Date.now() - startTime,
+        lastUpdated: new Date().toISOString()
+      }
+    }
+
+    this.logger('info', 'Butterfly effect visualization generated', {
+      totalNodes: visualizationData.metadata.totalNodes,
+      totalConnections: visualizationData.metadata.totalConnections,
+      processingTime: visualizationData.metadata.processingTime
+    })
+
+    return visualizationData
+  }
+
+  /**
+   * Generate visualization nodes from consequences and cascading effects
+   */
+  private async generateVisualizationNodes(
+    actionId: string,
+    actionDescription: string,
+    network: CascadeNetwork
+  ): Promise<ButterflyEffectNode[]> {
+    const nodes: ButterflyEffectNode[] = []
+
+    // Create root action node
+    const rootNode: ButterflyEffectNode = {
+      id: actionId,
+      type: 'action',
+      position: { x: 0, y: 0, layer: 0 },
+      metadata: {
+        title: 'Player Action',
+        description: actionDescription,
+        severity: ImpactLevel.MINOR,
+        confidence: 1.0,
+        affectedSystems: [],
+        affectedRegions: [],
+        duration: DurationType.TEMPORARY,
+        magnitude: 1
+      },
+      visualProperties: {
+        color: '#4CAF50', // Green for player actions
+        size: 20,
+        opacity: 1.0,
+        pulseSpeed: 2.0
+      }
+    }
+    nodes.push(rootNode)
+
+    // Create nodes for primary consequences
+    for (let i = 0; i < network.primaryConsequences.length; i++) {
+      const consequence = network.primaryConsequences[i]
+      const angle = (2 * Math.PI * i) / network.primaryConsequences.length
+      const distance = 150
+
+      const node = this.createConsequenceNode(
+        consequence,
+        distance * Math.cos(angle),
+        distance * Math.sin(angle),
+        1 // Primary level
+      )
+      nodes.push(node)
+    }
+
+    // Create nodes for cascading effects
+    for (let i = 0; i < network.cascadingEffects.length; i++) {
+      const effect = network.cascadingEffects[i]
+      const parentIndex = nodes.findIndex(n => n.id === effect.parentConsequenceId)
+
+      if (parentIndex >= 0) {
+        const parentNode = nodes[parentIndex]
+        const angle = (2 * Math.PI * i) / Math.max(1, network.cascadingEffects.length - 1)
+        const distance = 100
+
+        const node = this.createCascadingEffectNode(
+          effect,
+          parentNode.position.x + distance * Math.cos(angle),
+          parentNode.position.y + distance * Math.sin(angle),
+          2 // Secondary level
+        )
+        nodes.push(node)
+      }
+    }
+
+    return nodes
+  }
+
+  /**
+   * Create visualization connections between nodes
+   */
+  private async generateVisualizationConnections(
+    network: CascadeNetwork
+  ): Promise<EffectConnection[]> {
+    const connections: EffectConnection[] = []
+
+    // Create connections from action to primary consequences
+    for (const relationship of network.relationships) {
+      const connection: EffectConnection = {
+        id: uuidv4(),
+        sourceNodeId: relationship.parentId,
+        targetNodeId: relationship.childId,
+        relationshipType: relationship.relationshipType,
+        strength: relationship.strength,
+        delay: relationship.delay,
+        probability: 0.8, // Default probability
+        visualProperties: {
+          color: this.getConnectionColor(relationship.relationshipType),
+          thickness: Math.max(1, Math.floor(relationship.strength * 5)),
+          dashPattern: this.getDashPattern(relationship.relationshipType),
+          animationType: 'curved'
+        },
+        temporalData: {
+          startTime: relationship.delay,
+          endTime: relationship.delay + 2000, // 2 second animation
+          animationDuration: 2000
+        }
+      }
+      connections.push(connection)
+    }
+
+    return connections
+  }
+
+  /**
+   * Generate temporal progression data for animations
+   */
+  private generateTemporalProgression(
+    nodes: ButterflyEffectNode[],
+    connections: EffectConnection[]
+  ): CascadeVisualizationData['temporalProgression'] {
+    const totalDuration = Math.max(
+      ...connections.map(c => c.temporalData.endTime),
+      15000 // Default 15 second total duration
+    )
+
+    const keyFrames: CascadeVisualizationData['temporalProgression']['keyFrames'] = []
+
+    // Generate keyframes at 2-second intervals
+    for (let time = 0; time <= totalDuration; time += 2000) {
+      const activeNodes = nodes.filter(n => {
+        // Nodes are active immediately (no delay for nodes)
+        return true
+      }).map(n => n.id)
+
+      const activeConnections = connections
+        .filter(c => time >= c.temporalData.startTime && time <= c.temporalData.endTime)
+        .map(c => c.id)
+
+      keyFrames.push({
+        time,
+        activeNodes,
+        activeConnections
+      })
+    }
+
+    return {
+      totalDuration,
+      keyFrames
+    }
+  }
+
+  /**
+   * Calculate cross-region effects for butterfly effect propagation
+   */
+  private calculateCrossRegionEffects(nodes: ButterflyEffectNode[]): CascadeVisualizationData['crossRegionEffects'] {
+    const crossRegionEffects: CascadeVisualizationData['crossRegionEffects'] = []
+
+    for (const node of nodes) {
+      if (node.metadata.affectedRegions.length > 1) {
+        const primaryRegion = node.metadata.affectedRegions[0]
+
+        for (let i = 1; i < node.metadata.affectedRegions.length; i++) {
+          const targetRegion = node.metadata.affectedRegions[i]
+          const distance = this.calculateRegionalDistance(primaryRegion, targetRegion)
+          const travelTime = distance * 1000 // 1 second per distance unit
+
+          crossRegionEffects.push({
+            nodeId: node.id,
+            sourceRegion: primaryRegion,
+            targetRegion,
+            travelTime
+          })
+        }
+      }
+    }
+
+    return crossRegionEffects
+  }
+
+  /**
+   * Generate emergent gameplay opportunities from butterfly effects
+   */
+  private generateEmergentOpportunities(
+    nodes: ButterflyEffectNode[],
+    connections: EffectConnection[]
+  ): CascadeVisualizationData['emergentOpportunities'] {
+    const opportunities: CascadeVisualizationData['emergentOpportunities'] = []
+
+    // Look for combinations that create new gameplay possibilities
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const node1 = nodes[i]
+        const node2 = nodes[j]
+
+        // Check for interesting combinations
+        if (this.createEmergentOpportunity(node1, node2)) {
+          const opportunity = this.createEmergentOpportunity(node1, node2)
+          if (opportunity) {
+            opportunities.push(opportunity)
+          }
+        }
+      }
+    }
+
+    return opportunities
+  }
+
+  /**
+   * Create a visualization node from a consequence
+   */
+  private createConsequenceNode(
+    consequence: AIConsequence,
+    x: number,
+    y: number,
+    layer: number
+  ): ButterflyEffectNode {
+    return {
+      id: consequence.id,
+      type: 'consequence',
+      position: { x, y, layer },
+      metadata: {
+        title: this.getConsequenceTitle(consequence.type),
+        description: consequence.description,
+        severity: consequence.impact.level,
+        confidence: consequence.confidence,
+        affectedSystems: [consequence.type],
+        affectedRegions: consequence.impact.affectedLocations || [],
+        duration: consequence.impact.duration,
+        magnitude: consequence.impact.magnitude
+      },
+      visualProperties: {
+        color: this.getConsequenceColor(consequence.type, consequence.impact.level),
+        size: Math.max(10, consequence.impact.magnitude * 3),
+        opacity: Math.max(0.3, consequence.confidence),
+        pulseSpeed: consequence.impact.magnitude > 7 ? 3.0 : 1.5
+      }
+    }
+  }
+
+  /**
+   * Create a visualization node from a cascading effect
+   */
+  private createCascadingEffectNode(
+    effect: CascadingEffect,
+    x: number,
+    y: number,
+    layer: number
+  ): ButterflyEffectNode {
+    return {
+      id: effect.id,
+      type: 'cascading_effect',
+      position: { x, y, layer },
+      metadata: {
+        title: 'Secondary Effect',
+        description: effect.description,
+        severity: effect.impact.level,
+        confidence: effect.probability,
+        affectedSystems: effect.impact.affectedSystems as ConsequenceType[],
+        affectedRegions: [],
+        duration: effect.impact.duration,
+        magnitude: effect.impact.magnitude
+      },
+      visualProperties: {
+        color: this.getConsequenceColor(effect.impact.affectedSystems[0] as ConsequenceType, effect.impact.level),
+        size: Math.max(8, effect.impact.magnitude * 2),
+        opacity: Math.max(0.2, effect.probability),
+        pulseSpeed: 1.0
+      }
+    }
+  }
+
+  /**
+   * Helper methods for visualization properties
+   */
+  private getConsequenceTitle(type: ConsequenceType): string {
+    const titles = {
+      [ConsequenceType.RELATIONSHIP]: 'Relationship Change',
+      [ConsequenceType.ENVIRONMENT]: 'Environmental Effect',
+      [ConsequenceType.CHARACTER]: 'Character Impact',
+      [ConsequenceType.WORLD_STATE]: 'World Change',
+      [ConsequenceType.ECONOMIC]: 'Economic Impact',
+      [ConsequenceType.SOCIAL]: 'Social Effect',
+      [ConsequenceType.COMBAT]: 'Combat Outcome',
+      [ConsequenceType.EXPLORATION]: 'Discovery',
+      [ConsequenceType.OTHER]: 'Unknown Effect'
+    }
+    return titles[type] || 'Unknown Effect'
+  }
+
+  private getConsequenceColor(type: ConsequenceType, severity: ImpactLevel): string {
+    const colors = {
+      [ConsequenceType.RELATIONSHIP]: '#2196F3', // Blue
+      [ConsequenceType.ENVIRONMENT]: '#4CAF50', // Green
+      [ConsequenceType.CHARACTER]: '#9C27B0', // Purple
+      [ConsequenceType.WORLD_STATE]: '#FF9800', // Orange
+      [ConsequenceType.ECONOMIC]: '#F44336', // Red
+      [ConsequenceType.SOCIAL]: '#00BCD4', // Cyan
+      [ConsequenceType.COMBAT]: '#FF5722', // Deep Orange
+      [ConsequenceType.EXPLORATION]: '#795548', // Brown
+      [ConsequenceType.OTHER]: '#607D8B' // Blue Grey
+    }
+
+    const baseColor = colors[type] || colors[ConsequenceType.OTHER]
+
+    // Adjust opacity based on severity
+    const severityOpacity = {
+      [ImpactLevel.MINOR]: 0.4,
+      [ImpactLevel.MODERATE]: 0.6,
+      [ImpactLevel.MAJOR]: 0.8,
+      [ImpactLevel.SIGNIFICANT]: 0.9,
+      [ImpactLevel.CRITICAL]: 1.0
+    }
+
+    return baseColor
+  }
+
+  private getConnectionColor(relationshipType: string): string {
+    const colors = {
+      'direct': '#4CAF50',
+      'indirect': '#2196F3',
+      'amplifying': '#FF9800',
+      'mitigating': '#F44336',
+      'delayed': '#9C27B0'
+    }
+    return colors[relationshipType as keyof typeof colors] || '#607D8B'
+  }
+
+  private getDashPattern(relationshipType: string): 'solid' | 'dashed' | 'dotted' {
+    const patterns: Record<string, 'solid' | 'dashed' | 'dotted'> = {
+      'direct': 'solid',
+      'indirect': 'dashed',
+      'amplifying': 'solid',
+      'mitigating': 'dotted',
+      'delayed': 'dashed'
+    }
+    return patterns[relationshipType] || 'solid'
+  }
+
+  private calculateMaxCascadeDepth(nodes: ButterflyEffectNode[]): number {
+    return Math.max(...nodes.map(n => n.position.layer))
+  }
+
+  private calculateRegionalDistance(region1: string, region2: string): number {
+    // Simplified distance calculation - could be enhanced with actual map data
+    const regionCoordinates: Record<string, { x: number; y: number }> = {
+      'village': { x: 0, y: 0 },
+      'forest': { x: 5, y: 3 },
+      'mountain': { x: -3, y: 7 },
+      'river': { x: 4, y: -2 },
+      'castle': { x: -2, y: 1 },
+      'market': { x: 2, y: -1 },
+      'town': { x: 3, y: 2 }
+    }
+
+    const coord1 = regionCoordinates[region1] || { x: 0, y: 0 }
+    const coord2 = regionCoordinates[region2] || { x: 0, y: 0 }
+
+    return Math.sqrt(
+      Math.pow(coord2.x - coord1.x, 2) + Math.pow(coord2.y - coord1.y, 2)
+    )
+  }
+
+  private createEmergentOpportunity(
+    node1: ButterflyEffectNode,
+    node2: ButterflyEffectNode
+  ): CascadeVisualizationData['emergentOpportunities'][0] | null {
+    // Simple emergent opportunity detection
+    const systems1 = node1.metadata.affectedSystems
+    const systems2 = node2.metadata.affectedSystems
+
+    // Check for complementary systems
+    if (
+      (systems1.includes(ConsequenceType.ECONOMIC) && systems2.includes(ConsequenceType.SOCIAL)) ||
+      (systems1.includes(ConsequenceType.SOCIAL) && systems2.includes(ConsequenceType.ECONOMIC))
+    ) {
+      return {
+        id: uuidv4(),
+        title: 'Market Social Event',
+        description: 'Economic and social changes create opportunity for community gathering',
+        requiredConditions: ['Economic stability', 'Social harmony'],
+        potentialOutcomes: ['Increased prosperity', 'Improved relationships'],
+        relatedNodes: [node1.id, node2.id]
+      }
+    }
+
+    if (
+      (systems1.includes(ConsequenceType.ENVIRONMENT) && systems2.includes(ConsequenceType.EXPLORATION)) ||
+      (systems1.includes(ConsequenceType.EXPLORATION) && systems2.includes(ConsequenceType.ENVIRONMENT))
+    ) {
+      return {
+        id: uuidv4(),
+        title: 'Hidden Discovery',
+        description: 'Environmental changes reveal new areas to explore',
+        requiredConditions: ['Environmental change', 'Curiosity'],
+        potentialOutcomes: ['New locations', 'Rare resources'],
+        relatedNodes: [node1.id, node2.id]
+      }
+    }
+
+    return null
   }
 
   /**

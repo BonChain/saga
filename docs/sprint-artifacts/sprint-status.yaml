@@ -235,7 +235,7 @@ epic-3:
     story-3-3-butterfly-effect-calculation:
       title: "Butterfly Effect Calculation"
       description: "As a player, I want to see how my actions ripple through the world, so that I understand the impact of my choices."
-      status: "backlog"
+      status: "review"
       prerequisites: ["story-3-2-consequence-generation-world-changes"]
       estimated_hours: 4
       acceptance_criteria:

@@ -1,0 +1,26 @@
+{
+  "type": "action",
+  "timestamp": "2025-11-17T17:19:24.374Z",
+  "originalChecksum": "1634e348d2f384c6e15748114465737bd8816d0430ca0891119d7c65c1c03b42",
+  "data": {
+    "id": "f05c7330-76b6-4a39-9305-7500230539c4",
+    "playerId": "test-player-123",
+    "intent": "I strike the ancient dragon with my enchanted sword, aiming for its heart as it breathes fire across the valley!",
+    "originalInput": "I strike the ancient dragon with my enchanted sword, aiming for its heart as it breathes fire across the valley!",
+    "timestamp": "2025-11-17T17:19:24.270Z",
+    "status": "pending",
+    "metadata": {
+      "confidence": 0.8,
+      "parsedIntent": {
+        "actionType": "combat",
+        "target": "strike",
+        "method": "my enchanted sword",
+        "urgency": "medium",
+        "objects": [
+          "sword"
+        ]
+      },
+      "verificationHash": "1634e348d2f384c6e15748114465737bd8816d0430ca0891119d7c65c1c03b42"
+    }
+  }
+}

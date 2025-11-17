@@ -15,5 +15,6 @@ module.exports = {
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov', 'html'],
   verbose: true,
-  testTimeout: 10000,
+  testTimeout: 30000, // Increased timeout for AI requests
+  // Removed setupFiles and globalSetup references
 };
