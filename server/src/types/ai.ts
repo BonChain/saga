@@ -402,3 +402,109 @@ export interface ValidationResult {
   warnings: string[]
   details?: any
 }
+
+// Butterfly Effect Visualization Types (Story 3.3)
+export interface ButterflyEffectNode {
+  id: string
+  type: 'action' | 'consequence' | 'cascading_effect' | 'environmental_change' | 'relationship_change'
+  position: {
+    x: number
+    y: number
+    layer: number // For Z-axis visualization (primary, secondary, tertiary effects)
+  }
+  metadata: {
+    title: string
+    description: string
+    severity: ImpactLevel
+    confidence: number
+    affectedSystems: ConsequenceType[]
+    affectedRegions: string[]
+    duration: DurationType
+    magnitude: number
+  }
+  visualProperties: {
+    color: string // Based on consequence type and severity
+    size: number // Based on magnitude
+    opacity: number // Based on confidence
+    pulseSpeed?: number // For active animations
+  }
+}
+
+export interface EffectConnection {
+  id: string
+  sourceNodeId: string
+  targetNodeId: string
+  relationshipType: 'direct' | 'indirect' | 'amplifying' | 'mitigating' | 'delayed'
+  strength: number // 0-1, determines line thickness
+  delay: number // milliseconds before effect triggers
+  probability: number // 0-1 chance of occurring
+  visualProperties: {
+    color: string
+    thickness: number
+    dashPattern?: 'solid' | 'dashed' | 'dotted' // For different relationship types
+    animationType?: 'linear' | 'curved' | 'stepped' // For different propagation styles
+  }
+  temporalData: {
+    startTime: number
+    endTime: number
+    animationDuration: number
+  }
+}
+
+export interface CascadeVisualizationData {
+  rootNode: ButterflyEffectNode
+  nodes: ButterflyEffectNode[]
+  connections: EffectConnection[]
+  temporalProgression: {
+    totalDuration: number
+    keyFrames: Array<{
+      time: number
+      activeNodes: string[]
+      activeConnections: string[]
+    }>
+  }
+  crossRegionEffects: Array<{
+    nodeId: string
+    sourceRegion: string
+    targetRegion: string
+    travelTime: number
+  }>
+  emergentOpportunities: Array<{
+    id: string
+    title: string
+    description: string
+    requiredConditions: string[]
+    potentialOutcomes: string[]
+    relatedNodes: string[]
+  }>
+  metadata: {
+    totalNodes: number
+    totalConnections: number
+    maxCascadeDepth: number
+    processingTime: number
+    lastUpdated: string
+    performance?: {
+      memoryUsage: {
+        initial: Partial<NodeJS.MemoryUsage>
+        final: NodeJS.MemoryUsage
+        peak: Partial<NodeJS.MemoryUsage>
+        optimization: any
+      }
+      nodePoolStats?: any
+      cacheEfficiency?: {
+        hitRate: number
+        totalRequests: number
+      }
+    }
+  }
+}
+
+export interface EffectHistory {
+  id: string
+  originalActionId: string
+  timestamp: string
+  visualizationData: CascadeVisualizationData
+  discoveredBy: string[] // Player IDs who discovered this effect
+  achievementUnlocked: boolean
+  persistentEffects: string[] // Effect IDs that persist over time
+}

@@ -1,0 +1,35 @@
+{
+  "id": "65ee5bab-4f22-4c3f-aa92-f2aec97de362",
+  "playerId": "test-player-789",
+  "intent": "I deliver a persuasive speech to the merchant council, proposing trade agreements that will benefit our entire region.",
+  "originalInput": "I deliver a persuasive speech to the merchant council, proposing trade agreements that will benefit our entire region.",
+  "timestamp": "2025-11-17T17:19:42.645Z",
+  "status": "completed",
+  "metadata": {
+    "confidence": 0.8,
+    "parsedIntent": {
+      "actionType": "social",
+      "target": "deliver",
+      "urgency": "medium",
+      "objects": [
+        "merchant"
+      ]
+    },
+    "verificationHash": "1beffe8adb46eafcb5e8d02031e7c4e3a120a8fa0c304f7b6832942a1443ae87"
+  },
+  "consequences": [
+    {
+      "id": "7609bbb5-0f5a-4f5f-9ba8-a5df3e313347",
+      "actionId": "65ee5bab-4f22-4c3f-aa92-f2aec97de362",
+      "description": "Action processed successfully",
+      "impact": "minor",
+      "affectedSystems": [
+        "world_state"
+      ],
+      "timestamp": "2025-11-17T17:19:53.587Z",
+      "duration": 0,
+      "permanent": false,
+      "butterflyEffects": []
+    }
+  ]
+}

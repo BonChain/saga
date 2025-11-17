@@ -6,6 +6,7 @@
  */
 
 import { OpenAIConfig, LogLevel } from '../types/ai'
+import { APIKeyValidator } from '../utils/APIKeyValidator'
 
 export class OpenAIConfigManager {
   private config: OpenAIConfig
@@ -72,27 +73,9 @@ export class OpenAIConfigManager {
    * Validate API key format and security requirements
    */
   private validateAPIKey(apiKey: string): void {
-    // Check API key format (OpenAI API keys start with 'sk-')
-    if (!apiKey.startsWith('sk-')) {
-      throw new Error('Invalid OpenAI API key format. API keys should start with "sk-"')
-    }
-
-    // Check for common placeholder values first
-    const placeholders = [
-      'your_openai_api_key_here',
-      'sk-yourkeyhere',
-      'sk-xxxx',
-      'example_key',
-      'test_key'
-    ]
-
-    if (placeholders.some(placeholder => apiKey.toLowerCase().includes(placeholder))) {
-      throw new Error('OpenAI API key appears to be a placeholder. Please set a real API key.')
-    }
-
-    // Check API key length (OpenAI API keys are typically 48+ characters)
-    if (apiKey.length < 20) {
-      throw new Error('OpenAI API key appears to be too short')
+    const validation = APIKeyValidator.validateOpenAIKey(apiKey);
+    if (!validation.valid) {
+      throw new Error(validation.error || 'OpenAI API key validation failed');
     }
   }
 

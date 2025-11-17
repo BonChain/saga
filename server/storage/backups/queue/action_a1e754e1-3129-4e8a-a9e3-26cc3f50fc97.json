@@ -1,0 +1,23 @@
+{
+  "type": "action",
+  "timestamp": "2025-11-17T17:19:38.975Z",
+  "originalChecksum": "6c9aa4a78e11ce8a9dbddf83aa8d81edabeee50134bbf82599af2d041daf726e",
+  "data": {
+    "id": "a1e754e1-3129-4e8a-a9e3-26cc3f50fc97",
+    "playerId": "test-player-456",
+    "intent": "I trace the glowing runes on the ancient stone tablet, channeling my magical energy to unlock their hidden power.",
+    "originalInput": "I trace the glowing runes on the ancient stone tablet, channeling my magical energy to unlock their hidden power.",
+    "timestamp": "2025-11-17T17:19:38.866Z",
+    "status": "pending",
+    "metadata": {
+      "confidence": 0.8,
+      "parsedIntent": {
+        "actionType": "other",
+        "target": "trace",
+        "urgency": "medium",
+        "objects": []
+      },
+      "verificationHash": "6c9aa4a78e11ce8a9dbddf83aa8d81edabeee50134bbf82599af2d041daf726e"
+    }
+  }
+}

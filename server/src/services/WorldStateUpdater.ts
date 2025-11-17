@@ -19,7 +19,9 @@ import {
   CharacterState,
   RegionState,
   EconomyState,
-  EnvironmentState
+  EnvironmentState,
+  CascadeVisualizationData,
+  EffectHistory
 } from '../types/ai'
 import { Layer3State } from '../storage/Layer3State'
 import { Layer1Blueprint } from '../storage/Layer1Blueprint'
@@ -60,6 +62,47 @@ export interface AuditEntry {
   change: string
   previousValue?: any
   newValue?: any
+}
+
+// Butterfly Effect Persistence Interfaces (Story 3.3)
+export interface ButterflyEffectPersistenceOptions {
+  includeVisualizationData?: boolean
+  trackCrossRegionEffects?: boolean
+  enablePlayerDiscovery?: boolean
+  persistEmergentOpportunities?: boolean
+}
+
+export interface EffectDiscoveryRecord {
+  effectId: string
+  playerId: string
+  discoveryTimestamp: string
+  discoveryMethod: 'direct' | 'indirect' | 'exploration' | 'social_interaction'
+  rewardClaimed: boolean
+}
+
+export interface CrossRegionEffectRecord {
+  effectId: string
+  sourceRegion: string
+  targetRegion: string
+  arrivalTimestamp: string
+  modifiedImpact: ConsequenceImpact
+  propagationPath: string[]
+}
+
+export interface EffectWorldStorage {
+  effectHistories: EffectHistory[]
+  discoveryRecords: EffectDiscoveryRecord[]
+  crossRegionEffects: CrossRegionEffectRecord[]
+  persistentEffects: string[] // Effect IDs that persist across sessions
+  emergentOpportunities: Array<{
+    id: string
+    title: string
+    description: string
+    requiredConditions: string[]
+    potentialOutcomes: string[]
+    discoveredBy: string[]
+    isActive: boolean
+  }>
 }
 
 export class WorldStateUpdater {
@@ -1002,6 +1045,400 @@ export class WorldStateUpdater {
     if (desc.includes('explore') || desc.includes('discover')) return ConsequenceType.EXPLORATION
 
     return ConsequenceType.WORLD_STATE
+  }
+
+  /**
+   * Persist Butterfly Effect Data (Story 3.3)
+   *
+   * Stores complete butterfly effect visualization data, cross-region effects,
+   * and emergent opportunities in Layer 3 state storage for historical analysis
+   * and player discovery.
+   */
+  async persistButterflyEffect(
+    actionId: string,
+    visualizationData: CascadeVisualizationData,
+    options: ButterflyEffectPersistenceOptions = {}
+  ): Promise<EffectHistory> {
+    this.logger('info', 'Persisting butterfly effect data', {
+      actionId,
+      totalNodes: visualizationData.metadata.totalNodes,
+      totalConnections: visualizationData.metadata.totalConnections
+    })
+
+    const defaultOptions: Required<ButterflyEffectPersistenceOptions> = {
+      includeVisualizationData: true,
+      trackCrossRegionEffects: true,
+      enablePlayerDiscovery: true,
+      persistEmergentOpportunities: true
+    }
+
+    const finalOptions = { ...defaultOptions, ...options }
+
+    // Create effect history record
+    const effectHistory: EffectHistory = {
+      id: uuidv4(),
+      originalActionId: actionId,
+      timestamp: new Date().toISOString(),
+      visualizationData: finalOptions.includeVisualizationData ? visualizationData : {
+        rootNode: visualizationData.rootNode,
+        nodes: [],
+        connections: [],
+        temporalProgression: {
+          totalDuration: visualizationData.temporalProgression.totalDuration,
+          keyFrames: []
+        },
+        crossRegionEffects: [],
+        emergentOpportunities: [],
+        metadata: visualizationData.metadata
+      },
+      discoveredBy: [], // Will be populated as players discover effects
+      achievementUnlocked: false,
+      persistentEffects: this.identifyPersistentEffects(visualizationData)
+    }
+
+    try {
+      // Store in Layer 3 state
+      await this.storeEffectHistory(effectHistory)
+
+      // Handle cross-region effects if enabled
+      if (finalOptions.trackCrossRegionEffects && visualizationData.crossRegionEffects.length > 0) {
+        await this.processCrossRegionEffects(effectHistory.id, visualizationData.crossRegionEffects)
+      }
+
+      // Handle emergent opportunities if enabled
+      if (finalOptions.persistEmergentOpportunities && visualizationData.emergentOpportunities.length > 0) {
+        await this.storeEmergentOpportunities(effectHistory.id, visualizationData.emergentOpportunities)
+      }
+
+      this.logger('info', 'Butterfly effect data persisted successfully', {
+        effectHistoryId: effectHistory.id,
+        persistentEffectsCount: effectHistory.persistentEffects.length,
+        crossRegionEffectsCount: visualizationData.crossRegionEffects.length,
+        emergentOpportunitiesCount: visualizationData.emergentOpportunities.length
+      })
+
+      return effectHistory
+    } catch (error) {
+      this.logger('error', 'Failed to persist butterfly effect data', { error })
+      throw error
+    }
+  }
+
+  /**
+   * Retrieve effect history for a specific action or player
+   */
+  async getEffectHistory(
+    actionId?: string,
+    playerId?: string,
+    limit: number = 100,
+    offset: number = 0
+  ): Promise<EffectHistory[]> {
+    this.logger('info', 'Retrieving effect history', {
+      actionId,
+      playerId,
+      limit,
+      offset
+    })
+
+    try {
+      // Load effect storage from Layer 3
+      const effectStorage = await this.getEffectWorldStorage()
+
+      let filteredHistories = effectStorage.effectHistories
+
+      // Filter by action ID if provided
+      if (actionId) {
+        filteredHistories = filteredHistories.filter(history => history.originalActionId === actionId)
+      }
+
+      // Filter by player discovery if provided
+      if (playerId) {
+        filteredHistories = filteredHistories.filter(history =>
+          history.discoveredBy.includes(playerId) || history.originalActionId === playerId
+        )
+      }
+
+      // Sort by timestamp (most recent first)
+      filteredHistories.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+
+      // Apply pagination
+      const paginatedHistories = filteredHistories.slice(offset, offset + limit)
+
+      this.logger('info', 'Effect history retrieved', {
+        totalCount: filteredHistories.length,
+        returnedCount: paginatedHistories.length
+      })
+
+      return paginatedHistories
+    } catch (error) {
+      this.logger('error', 'Failed to retrieve effect history', { error })
+      return []
+    }
+  }
+
+  /**
+   * Process player discovery of butterfly effects
+   */
+  async recordEffectDiscovery(
+    playerId: string,
+    effectId: string,
+    discoveryMethod: EffectDiscoveryRecord['discoveryMethod'] = 'direct'
+  ): Promise<EffectDiscoveryRecord> {
+    this.logger('info', 'Recording effect discovery', {
+      playerId,
+      effectId,
+      discoveryMethod
+    })
+
+    const discoveryRecord: EffectDiscoveryRecord = {
+      effectId,
+      playerId,
+      discoveryTimestamp: new Date().toISOString(),
+      discoveryMethod,
+      rewardClaimed: false
+    }
+
+    try {
+      // Load effect storage
+      const effectStorage = await this.getEffectWorldStorage()
+
+      // Check if already discovered by this player
+      const existingDiscovery = effectStorage.discoveryRecords.find(
+        record => record.effectId === effectId && record.playerId === playerId
+      )
+
+      if (existingDiscovery) {
+        this.logger('info', 'Effect already discovered by player', {
+          playerId,
+          effectId,
+          discoveryTimestamp: existingDiscovery.discoveryTimestamp
+        })
+        return existingDiscovery
+      }
+
+      // Add new discovery record
+      effectStorage.discoveryRecords.push(discoveryRecord)
+
+      // Update effect history discoveredBy array
+      const effectHistory = effectStorage.effectHistories.find(history =>
+        history.id === effectId || history.originalActionId === effectId
+      )
+
+      if (effectHistory && !effectHistory.discoveredBy.includes(playerId)) {
+        effectHistory.discoveredBy.push(playerId)
+
+        // Check for achievements
+        if (effectHistory.discoveredBy.length >= 5 && !effectHistory.achievementUnlocked) {
+          effectHistory.achievementUnlocked = true
+          this.logger('info', 'Butterfly effect achievement unlocked', {
+            effectHistoryId: effectHistory.id,
+            discoveryCount: effectHistory.discoveredBy.length
+          })
+        }
+      }
+
+      // Save updated storage
+      await this.saveEffectWorldStorage(effectStorage)
+
+      this.logger('info', 'Effect discovery recorded successfully', {
+        playerId,
+        effectId,
+        discoveryMethod
+      })
+
+      return discoveryRecord
+    } catch (error) {
+      this.logger('error', 'Failed to record effect discovery', { error })
+      throw error
+    }
+  }
+
+  /**
+   * Get available emergent opportunities for players
+   */
+  async getEmergentOpportunities(
+    playerId?: string,
+    regionFilter?: string[]
+  ): Promise<EffectWorldStorage['emergentOpportunities']> {
+    this.logger('info', 'Retrieving emergent opportunities', {
+      playerId,
+      regionFilter
+    })
+
+    try {
+      const effectStorage = await this.getEffectWorldStorage()
+
+      let opportunities = effectStorage.emergentOpportunities
+
+      // Filter by player if provided (show undiscovered opportunities)
+      if (playerId) {
+        opportunities = opportunities.filter(opp =>
+          !opp.discoveredBy.includes(playerId) && opp.isActive
+        )
+      }
+
+      // Filter by region if provided
+      if (regionFilter && regionFilter.length > 0) {
+        opportunities = opportunities.filter(opp =>
+          this.opportunityMatchesRegions(opp, regionFilter)
+        )
+      }
+
+      return opportunities
+    } catch (error) {
+      this.logger('error', 'Failed to retrieve emergent opportunities', { error })
+      return []
+    }
+  }
+
+  /**
+   * Process cross-region effect propagation with delays
+   */
+  private async processCrossRegionEffects(
+    effectHistoryId: string,
+    crossRegionEffects: CascadeVisualizationData['crossRegionEffects']
+  ): Promise<void> {
+    this.logger('info', 'Processing cross-region effects', {
+      effectHistoryId,
+      crossRegionEffectCount: crossRegionEffects.length
+    })
+
+    const effectStorage = await this.getEffectWorldStorage()
+
+    for (const crossRegionEffect of crossRegionEffects) {
+      const record: CrossRegionEffectRecord = {
+        effectId: crossRegionEffect.nodeId,
+        sourceRegion: crossRegionEffect.sourceRegion,
+        targetRegion: crossRegionEffect.targetRegion,
+        arrivalTimestamp: new Date(Date.now() + crossRegionEffect.travelTime).toISOString(),
+        modifiedImpact: {} as ConsequenceImpact, // Would be calculated based on region modifiers
+        propagationPath: [crossRegionEffect.sourceRegion, crossRegionEffect.targetRegion]
+      }
+
+      effectStorage.crossRegionEffects.push(record)
+
+      // Schedule delayed application (in a real implementation, this would use a job queue)
+      setTimeout(async () => {
+        await this.applyCrossRegionEffect(record)
+      }, crossRegionEffect.travelTime)
+    }
+
+    await this.saveEffectWorldStorage(effectStorage)
+  }
+
+  /**
+   * Apply a cross-region effect when it arrives
+   */
+  private async applyCrossRegionEffect(record: CrossRegionEffectRecord): Promise<void> {
+    this.logger('info', 'Applying cross-region effect', {
+      effectId: record.effectId,
+      sourceRegion: record.sourceRegion,
+      targetRegion: record.targetRegion
+    })
+
+    // In a full implementation, this would modify the world state in the target region
+    // For now, we'll just log the arrival
+    this.logger('info', 'Cross-region effect arrived', {
+      effectId: record.effectId,
+      targetRegion: record.targetRegion,
+      arrivalTime: record.arrivalTimestamp
+    })
+  }
+
+  /**
+   * Helper methods for effect storage
+   */
+  private async storeEffectHistory(effectHistory: EffectHistory): Promise<void> {
+    const effectStorage = await this.getEffectWorldStorage()
+    effectStorage.effectHistories.push(effectHistory)
+    await this.saveEffectWorldStorage(effectStorage)
+  }
+
+  private async storeEmergentOpportunities(
+    effectHistoryId: string,
+    opportunities: CascadeVisualizationData['emergentOpportunities']
+  ): Promise<void> {
+    const effectStorage = await this.getEffectWorldStorage()
+
+    for (const opportunity of opportunities) {
+      effectStorage.emergentOpportunities.push({
+        id: opportunity.id,
+        title: opportunity.title,
+        description: opportunity.description,
+        requiredConditions: opportunity.requiredConditions,
+        potentialOutcomes: opportunity.potentialOutcomes,
+        discoveredBy: [],
+        isActive: true
+      })
+    }
+
+    await this.saveEffectWorldStorage(effectStorage)
+  }
+
+  private async getEffectWorldStorage(): Promise<EffectWorldStorage> {
+    try {
+      // Load current world state to access butterfly effects data
+      const currentStateResult = await this.layer3State.getCurrentState()
+      if (currentStateResult && currentStateResult.butterflyEffects) {
+        return currentStateResult.butterflyEffects as EffectWorldStorage
+      }
+      return {
+        effectHistories: [],
+        discoveryRecords: [],
+        crossRegionEffects: [],
+        persistentEffects: [],
+        emergentOpportunities: []
+      }
+    } catch (error) {
+      this.logger('warn', 'Failed to load effect storage, creating new', { error })
+      return {
+        effectHistories: [],
+        discoveryRecords: [],
+        crossRegionEffects: [],
+        persistentEffects: [],
+        emergentOpportunities: []
+      }
+    }
+  }
+
+  private async saveEffectWorldStorage(storage: EffectWorldStorage): Promise<void> {
+    try {
+      // Get current world state and update butterfly effects
+      const currentState = await this.layer3State.getCurrentState()
+
+      // Update with new butterfly effects data
+      const updatedState = {
+        ...currentState,
+        butterflyEffects: storage
+      }
+
+      const result = await this.layer3State.updateWorldState(updatedState)
+      if (!result.success) {
+        throw new Error(`Failed to save effect storage: ${result.error}`)
+      }
+    } catch (error) {
+      this.logger('error', 'Failed to save effect storage', { error })
+      throw error
+    }
+  }
+
+  private identifyPersistentEffects(visualizationData: CascadeVisualizationData): string[] {
+    return visualizationData.nodes
+      .filter(node => node.metadata.duration === 'permanent' || node.metadata.magnitude >= 8)
+      .map(node => node.id)
+  }
+
+  private opportunityMatchesRegions(
+    opportunity: EffectWorldStorage['emergentOpportunities'][0],
+    regions: string[]
+  ): boolean {
+    // Simple region matching - could be enhanced with more sophisticated logic
+    for (const condition of opportunity.requiredConditions) {
+      if (regions.some(region => condition.toLowerCase().includes(region.toLowerCase()))) {
+        return true
+      }
+    }
+    return false
   }
 
   /**

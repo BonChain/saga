@@ -1,0 +1,25 @@
+{
+  "type": "action",
+  "timestamp": "2025-11-17T17:19:42.761Z",
+  "originalChecksum": "c3d35a49de8a2f88f44d7c947407457389914e71bbea30e74436847f67afad4d",
+  "data": {
+    "id": "65ee5bab-4f22-4c3f-aa92-f2aec97de362",
+    "playerId": "test-player-789",
+    "intent": "I deliver a persuasive speech to the merchant council, proposing trade agreements that will benefit our entire region.",
+    "originalInput": "I deliver a persuasive speech to the merchant council, proposing trade agreements that will benefit our entire region.",
+    "timestamp": "2025-11-17T17:19:42.645Z",
+    "status": "pending",
+    "metadata": {
+      "confidence": 0.8,
+      "parsedIntent": {
+        "actionType": "social",
+        "target": "deliver",
+        "urgency": "medium",
+        "objects": [
+          "merchant"
+        ]
+      },
+      "verificationHash": "c3d35a49de8a2f88f44d7c947407457389914e71bbea30e74436847f67afad4d"
+    }
+  }
+}
