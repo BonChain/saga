@@ -21,6 +21,60 @@ import {
   CascadeVisualizationData,
   EffectHistory
 } from '../types/ai'
+import {
+  MemoryOptimizedCascadeProcessor,
+  MemoryMonitor,
+  LazyVisualizationData,
+  PooledVisualizationNode,
+  CompactWorldSystemInfluence,
+  CompactStringCache,
+  WorldSystemType
+} from '../utils/MemoryOptimizer'
+
+/**
+ * Configuration constants for cascade processing
+ * Extracted magic numbers for better maintainability and configuration
+ */
+const CASCADE_CONFIG = {
+  // Processing limits
+  MAX_CASCADING_LEVELS: 3,
+  MAX_EFFECTS_PER_LEVEL: 4,
+  SIGNIFICANCE_THRESHOLD: 0.3,
+
+  // Timing configurations (in milliseconds)
+  TIMING: {
+    BASE_DELAY: 2000,
+    LEVEL_DELAY: 1000,
+    RANDOM_DELAY_RANGE: 3000,
+    BATCH_PROCESSING_DELAY: 500,
+    INDIRECT_ADDITIONAL_DELAY: 5000,
+    ANIMATION_DURATION: 2000,
+    TIME_STEP_INCREMENT: 2000,
+    TRAVEL_TIME_PER_DISTANCE_UNIT: 1000,
+  },
+
+  // Probability thresholds
+  PROBABILITY: {
+    MIN_PROBABILITY: 0.1,
+    MAX_PROBABILITY: 0.8,
+    SIGNIFICANT_INFLUENCE: 0.3,
+    INDIRECT_EFFECT_STRENGTH_MULTIPLIER: 0.5,
+    INDIRECT_EFFECT_PROBABILITY_MULTIPLIER: 0.4,
+    BASE_PROBABILITY_MULTIPLIER: 0.6,
+  },
+
+  // Performance limits
+  PERFORMANCE: {
+    MAX_CONSEQUENCES_PER_BATCH: 10,
+    MAX_CASCADE_TIME: 30000, // 30 seconds
+  },
+
+  // Effect modification factors
+  EFFECTS: {
+    INDIRECT_MAGNITUDE_REDUCTION: 2,
+    MIN_MAGNITUDE: 1,
+  }
+} as const
 
 export interface CascadeProcessingOptions {
   maxCascadingLevels?: number
@@ -69,11 +123,21 @@ export interface CrossRegionPropagation {
 
 export class CascadeProcessor {
   private worldSystems: Map<string, WorldSystemInfluence>
+  private compactWorldSystems: Map<number, CompactWorldSystemInfluence>
+  private systemNameToId: Map<string, number>
   private logger: (level: 'info' | 'warn' | 'error', message: string, data?: any) => void
+  private memoryOptimizer: MemoryOptimizedCascadeProcessor
 
   constructor() {
     this.worldSystems = this.initializeWorldSystems()
+    this.compactWorldSystems = new Map()
+    this.systemNameToId = new Map()
     this.logger = this.createLogger()
+    this.memoryOptimizer = new MemoryOptimizedCascadeProcessor()
+    MemoryMonitor.setBaseline()
+
+    // Initialize compact world systems for memory efficiency
+    this.initializeCompactWorldSystems()
   }
 
   /**
@@ -90,9 +154,9 @@ export class CascadeProcessor {
     })
 
     const defaultOptions: Required<CascadeProcessingOptions> = {
-      maxCascadingLevels: 3,
-      maxEffectsPerLevel: 4,
-      probabilityThreshold: 0.3,
+      maxCascadingLevels: CASCADE_CONFIG.MAX_CASCADING_LEVELS,
+      maxEffectsPerLevel: CASCADE_CONFIG.MAX_EFFECTS_PER_LEVEL,
+      probabilityThreshold: CASCADE_CONFIG.SIGNIFICANCE_THRESHOLD,
       includeIndirectEffects: true
     }
 
@@ -226,7 +290,7 @@ export class CascadeProcessor {
             parentId,
             childId: effect.id,
             relationshipType: 'indirect',
-            strength: effect.probability * 0.5, // Indirect effects are weaker
+            strength: effect.probability * CASCADE_CONFIG.PROBABILITY.INDIRECT_EFFECT_STRENGTH_MULTIPLIER, // Indirect effects are weaker
             delay: effect.delay
           })
         }
@@ -300,12 +364,12 @@ export class CascadeProcessor {
           id: uuidv4(),
           parentConsequenceId: effect.parentConsequenceId || parentId,
           description: this.generateIndirectEffectDescription(effect, connectedSystem),
-          delay: effect.delay + Math.random() * 5000 + 2000, // Additional delay for indirect
-          probability: effect.probability * 0.4, // Lower probability for indirect
+          delay: effect.delay + Math.random() * CASCADE_CONFIG.TIMING.INDIRECT_ADDITIONAL_DELAY + CASCADE_CONFIG.TIMING.BASE_DELAY, // Additional delay for indirect
+          probability: effect.probability * CASCADE_CONFIG.PROBABILITY.INDIRECT_EFFECT_PROBABILITY_MULTIPLIER, // Lower probability for indirect
           impact: {
             level: this.reduceImpactLevel(effect.impact.level),
             affectedSystems: [connectedSystem.id],
-            magnitude: Math.max(1, effect.impact.magnitude - 2),
+            magnitude: Math.max(CASCADE_CONFIG.EFFECTS.MIN_MAGNITUDE, effect.impact.magnitude - CASCADE_CONFIG.EFFECTS.INDIRECT_MAGNITUDE_REDUCTION),
             duration: this.reduceDuration(effect.impact.duration)
           }
         }
@@ -331,7 +395,7 @@ export class CascadeProcessor {
 
     // Generate effects based on system influence factors
     for (const [connectedSystemId, influenceFactor] of Object.entries(system.influenceFactors)) {
-      if (influenceFactor > 0.3) { // Only significant influences
+      if (influenceFactor > CASCADE_CONFIG.PROBABILITY.SIGNIFICANT_INFLUENCE) { // Only significant influences
         const effect = await this.createCascadingEffect(
           system.id,
           connectedSystemId,
@@ -364,14 +428,14 @@ export class CascadeProcessor {
     parentId: string
   ): Promise<CascadingEffect | null> {
     // Generate appropriate delay and probability
-    const baseDelay = 2000 + (level * 1000) // 2s base + 1s per level
-    const delay = baseDelay + Math.random() * 3000 // Add randomness
+    const baseDelay = CASCADE_CONFIG.TIMING.BASE_DELAY + (level * CASCADE_CONFIG.TIMING.LEVEL_DELAY) // Base delay + level multiplier
+    const delay = baseDelay + Math.random() * CASCADE_CONFIG.TIMING.RANDOM_DELAY_RANGE // Add randomness
 
-    const baseProbability = Math.min(0.8, influenceFactor * 0.6)
+    const baseProbability = Math.min(CASCADE_CONFIG.PROBABILITY.MAX_PROBABILITY, influenceFactor * CASCADE_CONFIG.PROBABILITY.BASE_PROBABILITY_MULTIPLIER)
     const probability = baseProbability * (1 / level) // Decrease probability with level
 
     // Skip if probability is too low
-    if (probability < 0.1) {
+    if (probability < CASCADE_CONFIG.PROBABILITY.MIN_PROBABILITY) {
       return null
     }
 
@@ -634,6 +698,26 @@ export class CascadeProcessor {
   }
 
   /**
+   * Initialize compact world systems for memory efficiency
+   */
+  private initializeCompactWorldSystems(): void {
+    const worldSystemsArray = Array.from(this.worldSystems.values())
+    this.memoryOptimizer.processWorldSystemInfluence(worldSystemsArray)
+
+    // Update local mappings for quick access
+    this.systemNameToId = new Map()
+    this.compactWorldSystems = new Map()
+
+    for (const [systemName, system] of this.worldSystems) {
+      const compactSystem = this.memoryOptimizer.getCompactWorldSystem(systemName)
+      if (compactSystem) {
+        this.systemNameToId.set(systemName, compactSystem.id)
+        this.compactWorldSystems.set(compactSystem.id, compactSystem)
+      }
+    }
+  }
+
+  /**
    * Initialize world systems with their connections and influences
    */
   private initializeWorldSystems(): Map<string, WorldSystemInfluence> {
@@ -766,11 +850,12 @@ export class CascadeProcessor {
     })
 
     const startTime = Date.now()
+    MemoryMonitor.recordMeasurement() // Record baseline memory usage
 
     // Process cascading effects if not provided
     const cascadeNetwork = network || await this.processCascadingEffects(consequences)
 
-    // Generate visualization nodes
+    // Generate visualization nodes with memory optimization
     const nodes = await this.generateVisualizationNodes(actionId, actionDescription, cascadeNetwork)
 
     // Generate connections between nodes
@@ -785,6 +870,12 @@ export class CascadeProcessor {
     // Generate emergent opportunities
     const emergentOpportunities = this.generateEmergentOpportunities(nodes, connections)
 
+    // Record final memory usage and generate performance metrics
+    MemoryMonitor.recordMeasurement()
+    const memoryStats = this.memoryOptimizer.getMemoryStats()
+    const compactSystemStats = this.memoryOptimizer.getCompactWorldSystemStats()
+    const finalMemoryUsage = process.memoryUsage()
+
     const visualizationData: CascadeVisualizationData = {
       rootNode: nodes[0], // Action node is always first
       nodes,
@@ -797,14 +888,42 @@ export class CascadeProcessor {
         totalConnections: connections.length,
         maxCascadeDepth: this.calculateMaxCascadeDepth(nodes),
         processingTime: Date.now() - startTime,
-        lastUpdated: new Date().toISOString()
+        lastUpdated: new Date().toISOString(),
+        // Add memory usage and performance metrics
+        performance: {
+          memoryUsage: {
+            initial: MemoryMonitor.getMemoryDelta(),
+            final: {
+              rss: finalMemoryUsage.rss,
+              heapUsed: finalMemoryUsage.heapUsed,
+              heapTotal: finalMemoryUsage.heapTotal,
+              external: finalMemoryUsage.external,
+              arrayBuffers: finalMemoryUsage.arrayBuffers
+            },
+            peak: MemoryMonitor.getAverageMemoryUsage(),
+            optimization: {
+              ...memoryStats,
+              compactWorldSystems: compactSystemStats
+            }
+          },
+          nodePoolStats: memoryStats.nodePool,
+          cacheEfficiency: {
+            hitRate: memoryStats.cache?.hitRate || 0,
+            totalRequests: (memoryStats.cache?.hits || 0) + (memoryStats.cache?.misses || 0)
+          }
+        }
       }
     }
 
-    this.logger('info', 'Butterfly effect visualization generated', {
+    this.logger('info', 'Butterfly effect visualization generated with memory optimization', {
       totalNodes: visualizationData.metadata.totalNodes,
       totalConnections: visualizationData.metadata.totalConnections,
-      processingTime: visualizationData.metadata.processingTime
+      processingTime: visualizationData.metadata.processingTime,
+      memoryOptimization: {
+        nodeReuseRate: memoryStats.nodePool?.reuseRate || 0,
+        cacheHitRate: memoryStats.cache?.hitRate || 0,
+        finalMemoryUsage: finalMemoryUsage.heapUsed
+      }
     })
 
     return visualizationData
@@ -844,22 +963,31 @@ export class CascadeProcessor {
     }
     nodes.push(rootNode)
 
-    // Create nodes for primary consequences
+    // Use memory-optimized node generation
+    this.generateNodesWithOptimization(network, nodes)
+
+    return nodes
+  }
+
+  /**
+   * Enhanced memory-optimized node generation with compact data structures
+   */
+  private generateNodesWithOptimization(network: CascadeNetwork, nodes: ButterflyEffectNode[]): void {
+    // Create nodes for primary consequences using enhanced object pooling
     for (let i = 0; i < network.primaryConsequences.length; i++) {
       const consequence = network.primaryConsequences[i]
       const angle = (2 * Math.PI * i) / network.primaryConsequences.length
       const distance = 150
 
-      const node = this.createConsequenceNode(
-        consequence,
-        distance * Math.cos(angle),
-        distance * Math.sin(angle),
-        1 // Primary level
-      )
+      const node = this.createOptimizedConsequenceNode(consequence, {
+        x: distance * Math.cos(angle),
+        y: distance * Math.sin(angle),
+        layer: 1 // Primary level
+      })
       nodes.push(node)
     }
 
-    // Create nodes for cascading effects
+    // Create nodes for cascading effects with enhanced memory efficiency
     for (let i = 0; i < network.cascadingEffects.length; i++) {
       const effect = network.cascadingEffects[i]
       const parentIndex = nodes.findIndex(n => n.id === effect.parentConsequenceId)
@@ -869,17 +997,23 @@ export class CascadeProcessor {
         const angle = (2 * Math.PI * i) / Math.max(1, network.cascadingEffects.length - 1)
         const distance = 100
 
-        const node = this.createCascadingEffectNode(
-          effect,
-          parentNode.position.x + distance * Math.cos(angle),
-          parentNode.position.y + distance * Math.sin(angle),
-          2 // Secondary level
-        )
+        const node = this.createOptimizedCascadingEffectNode(effect, {
+          x: parentNode.position.x + distance * Math.cos(angle),
+          y: parentNode.position.y + distance * Math.sin(angle),
+          layer: 2 // Secondary level
+        })
         nodes.push(node)
       }
     }
 
-    return nodes
+    // Log memory optimization statistics
+    const memoryStats = this.memoryOptimizer.getMemoryStats()
+    this.logger('info', 'Generated optimized nodes with memory efficiency', {
+      totalNodes: nodes.length,
+      nodePoolReuseRate: memoryStats.nodePool.reuseRate,
+      compactWorldSystems: this.compactWorldSystems.size,
+      memoryDelta: MemoryMonitor.getMemoryDelta()
+    })
   }
 
   /**
@@ -908,8 +1042,8 @@ export class CascadeProcessor {
         },
         temporalData: {
           startTime: relationship.delay,
-          endTime: relationship.delay + 2000, // 2 second animation
-          animationDuration: 2000
+          endTime: relationship.delay + CASCADE_CONFIG.TIMING.ANIMATION_DURATION, // 2 second animation
+          animationDuration: CASCADE_CONFIG.TIMING.ANIMATION_DURATION
         }
       }
       connections.push(connection)
@@ -933,7 +1067,7 @@ export class CascadeProcessor {
     const keyFrames: CascadeVisualizationData['temporalProgression']['keyFrames'] = []
 
     // Generate keyframes at 2-second intervals
-    for (let time = 0; time <= totalDuration; time += 2000) {
+    for (let time = 0; time <= totalDuration; time += CASCADE_CONFIG.TIMING.TIME_STEP_INCREMENT) {
       const activeNodes = nodes.filter(n => {
         // Nodes are active immediately (no delay for nodes)
         return true
@@ -969,7 +1103,7 @@ export class CascadeProcessor {
         for (let i = 1; i < node.metadata.affectedRegions.length; i++) {
           const targetRegion = node.metadata.affectedRegions[i]
           const distance = this.calculateRegionalDistance(primaryRegion, targetRegion)
-          const travelTime = distance * 1000 // 1 second per distance unit
+          const travelTime = distance * CASCADE_CONFIG.TIMING.TRAVEL_TIME_PER_DISTANCE_UNIT // 1 second per distance unit
 
           crossRegionEffects.push({
             nodeId: node.id,
@@ -1205,6 +1339,114 @@ export class CascadeProcessor {
     }
 
     return null
+  }
+
+  /**
+   * Memory-optimized consequence node creation
+   */
+  private createOptimizedConsequenceNode(
+    consequence: AIConsequence | CascadingEffect,
+    position: { x: number; y: number; layer?: number }
+  ): ButterflyEffectNode {
+    // Use memory-optimized node pool for basic structure
+    const nodeType = 'type' in consequence ? consequence.type : this.inferTypeFromDescription(consequence.description)
+    const pooledNode = this.memoryOptimizer.createOptimizedNode({
+      id: consequence.id,
+      type: nodeType,
+      title: consequence.description.substring(0, 50), // Limit title length
+      description: consequence.description,
+      level: position.layer || 0,
+      region: 'unknown'
+    })
+
+    // Set impact data separately to keep node small
+    pooledNode.impact = {
+      magnitude: consequence.impact.magnitude,
+      significance: consequence.impact.magnitude / 10, // Use magnitude as significance proxy
+      affectedSystems: consequence.impact.affectedSystems
+    }
+
+    // Set position data
+    pooledNode.position = {
+      x: Math.round(position.x * 100) / 100,
+      y: Math.round(position.y * 100) / 100
+    }
+
+    // Add metadata
+    const confidence = 'confidence' in consequence ? consequence.confidence : 0.5
+    pooledNode.metadata = {
+      title: consequence.description.substring(0, 50),
+      description: consequence.description,
+      severity: consequence.impact.level,
+      confidence,
+      affectedSystems: [nodeType],
+      affectedRegions: consequence.impact.affectedLocations || [],
+      duration: consequence.impact.duration,
+      magnitude: consequence.impact.magnitude
+    }
+
+    // Add visual properties to complete ButterflyEffectNode interface
+    pooledNode.visualProperties = {
+      color: this.getConsequenceColor(nodeType, consequence.impact.level),
+      size: Math.max(10, consequence.impact.magnitude * 3),
+      opacity: Math.max(0.3, confidence),
+      pulseSpeed: consequence.impact.magnitude > 7 ? 3.0 : 1.5
+    }
+
+    return pooledNode as ButterflyEffectNode
+  }
+
+  /**
+   * Memory-optimized cascading effect node creation
+   */
+  private createOptimizedCascadingEffectNode(
+    effect: CascadingEffect,
+    position: { x: number; y: number; layer?: number }
+  ): ButterflyEffectNode {
+    const pooledNode = this.memoryOptimizer.createOptimizedNode({
+      id: effect.id,
+      type: 'cascading_effect',
+      title: effect.description.substring(0, 30), // Shorter title for cascading effects
+      description: effect.description,
+      level: position.layer || 2,
+      region: 'unknown'
+    })
+
+    // Compact impact data
+    pooledNode.impact = {
+      magnitude: effect.impact.magnitude,
+      significance: effect.impact.magnitude / 10, // Use magnitude as significance proxy
+      affectedSystems: effect.impact.affectedSystems
+    }
+
+    // Compact position data
+    pooledNode.position = {
+      x: Math.round(position.x * 100) / 100,
+      y: Math.round(position.y * 100) / 100
+    }
+
+    // Add metadata
+    pooledNode.metadata = {
+      title: effect.description.substring(0, 30),
+      description: effect.description,
+      severity: effect.impact.level,
+      confidence: effect.probability,
+      affectedSystems: effect.impact.affectedSystems as ConsequenceType[],
+      affectedRegions: [],
+      duration: effect.impact.duration,
+      magnitude: effect.impact.magnitude
+    }
+
+    // Add visual properties to complete ButterflyEffectNode interface
+    const effectType = effect.impact.affectedSystems[0] as ConsequenceType
+    pooledNode.visualProperties = {
+      color: this.getConsequenceColor(effectType, effect.impact.level),
+      size: Math.max(8, effect.impact.magnitude * 2),
+      opacity: Math.max(0.2, effect.probability),
+      pulseSpeed: 1.0
+    }
+
+    return pooledNode as ButterflyEffectNode
   }
 
   /**

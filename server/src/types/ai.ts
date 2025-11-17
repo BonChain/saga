@@ -483,6 +483,19 @@ export interface CascadeVisualizationData {
     maxCascadeDepth: number
     processingTime: number
     lastUpdated: string
+    performance?: {
+      memoryUsage: {
+        initial: Partial<NodeJS.MemoryUsage>
+        final: NodeJS.MemoryUsage
+        peak: Partial<NodeJS.MemoryUsage>
+        optimization: any
+      }
+      nodePoolStats?: any
+      cacheEfficiency?: {
+        hitRate: number
+        totalRequests: number
+      }
+    }
   }
 }
 

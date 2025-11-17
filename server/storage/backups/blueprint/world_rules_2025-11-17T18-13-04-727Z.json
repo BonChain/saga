@@ -1,10 +1,10 @@
 {
   "type": "world_rules",
-  "timestamp": "2025-11-16T19:42:01.902Z",
+  "timestamp": "2025-11-17T18:13:04.727Z",
   "originalChecksum": "87aa00ad791e87d5cb5f4226a5bb6fac7886199f8b44c95985df07a969d809bf",
   "data": {
     "version": "1.0.0",
-    "lastModified": "2025-11-16T19:42:01.788Z",
+    "lastModified": "2025-11-17T18:13:04.618Z",
     "rules": {
       "physics": {
         "gravity": 9.81,
