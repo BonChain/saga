@@ -394,3 +394,11 @@ export interface TemplateExample {
   context: Partial<PromptContext>
   expectedOutput: string
 }
+
+// Validation Types
+export interface ValidationResult {
+  isValid: boolean
+  errors: string[]
+  warnings: string[]
+  details?: any
+}

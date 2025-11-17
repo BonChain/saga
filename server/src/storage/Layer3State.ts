@@ -1,6 +1,6 @@
 import { promises as fs } from 'fs'
-import path from 'path'
-import crypto from 'crypto'
+import * as path from 'path'
+import * as crypto from 'crypto'
 import { WorldState, StorageLayer, StorageResult, ListOptions, WalrusConfig, StorageLog } from '../types/storage'
 
 export class Layer3State implements StorageLayer<WorldState> {
@@ -774,6 +774,52 @@ export class Layer3State implements StorageLayer<WorldState> {
         checksum: '',
         actionCount: 0,
         description: 'Initial world state for SuiSaga Living World'
+      }
+    }
+  }
+
+  /**
+   * Get current world state (highest version)
+   */
+  async getCurrentState(): Promise<any> {
+    const result = await this.list()
+    if (result.success && result.data.length > 0) {
+      // Sort by version and return the highest
+      const sorted = result.data.sort((a, b) => (b.version || 0) - (a.version || 0))
+      return sorted[0]
+    }
+
+    // Return default world state if no state exists
+    return this.createDefaultWorldState()
+  }
+
+  /**
+   * Update world state with new data
+   */
+  async updateWorldState(updates: any): Promise<StorageResult<WorldState>> {
+    try {
+      // Get current state
+      const currentState = await this.getCurrentState()
+
+      // Apply updates
+      const updatedState = {
+        ...currentState,
+        ...updates,
+        version: (currentState.version || 0) + 1,
+        timestamp: new Date().toISOString(),
+        metadata: {
+          ...currentState.metadata,
+          ...updates.metadata,
+          lastUpdate: new Date().toISOString()
+        }
+      }
+
+      // Write updated state
+      return await this.write(updatedState)
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
       }
     }
   }

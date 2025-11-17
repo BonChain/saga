@@ -411,11 +411,19 @@ Be specific and reference the current world state.`
     try {
       console.log(`[DEBUG] Parsing AI response content: ${content.substring(0, 200)}...`)
 
+      // Use enhanced ConsequenceGenerator for better parsing
+      // Note: In a full implementation, this would use the ConsequenceGenerator service
+      // For now, we'll use the improved parsing logic inline
+
       // Try to parse as JSON first
       const jsonMatch = content.match(/```json\s*([\s\S]*?)\s*```/)
       if (jsonMatch) {
-        const parsed = JSON.parse(jsonMatch[1])
-        return Array.isArray(parsed) ? parsed.map(this.formatConsequence.bind(this)) : []
+        try {
+          const parsed = JSON.parse(jsonMatch[1])
+          return Array.isArray(parsed) ? parsed.map(this.formatConsequence.bind(this)) : []
+        } catch (jsonError) {
+          console.warn(`[WARN] JSON parsing failed, trying text parsing:`, jsonError)
+        }
       }
 
       // Try to find numbered lists or bullet points
@@ -423,8 +431,8 @@ Be specific and reference the current world state.`
       const consequences: AIConsequence[] = []
 
       for (const line of lines) {
-        if (line.match(/^\d+\./) || line.match(/^[-*]/)) {
-          const description = line.replace(/^[\d\.\-\*\s]+/, '').trim()
+        if (line.match(/^\d+\./) || line.match(/^[-*•]/) || line.match(/^[A-Z]\./)) {
+          const description = line.replace(/^[\d\.\-\*\•A-Za-z\.]+/, '').trim()
           if (description.length > 10) {
             consequences.push(this.createConsequenceFromDescription(request, description))
           }
@@ -433,15 +441,32 @@ Be specific and reference the current world state.`
 
       // If we found consequences from the text, return them
       if (consequences.length > 0) {
+        console.log(`[DEBUG] Parsed ${consequences.length} consequences from structured text`)
         return consequences
+      }
+
+      // Try to parse from narrative text
+      const sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 15)
+      for (const sentence of sentences) {
+        const trimmed = sentence.trim()
+        if (this.looksLikeConsequence(trimmed)) {
+          consequences.push(this.createConsequenceFromDescription(request, trimmed))
+        }
+      }
+
+      if (consequences.length > 0) {
+        console.log(`[DEBUG] Parsed ${consequences.length} consequences from narrative text`)
+        return consequences.slice(0, 4) // Limit narrative parsing
       }
 
       // If content is substantial but no clear structure, create consequence from content
       if (content.trim().length > 20) {
+        console.log(`[DEBUG] Creating consequence from full content`)
         return [this.createConsequenceFromDescription(request, content.trim())]
       }
 
       // Fallback: Return a basic consequence
+      console.log(`[DEBUG] Using fallback consequence`)
       return [this.createBasicConsequence(request)]
     } catch (error) {
       console.error(`[ERROR] Failed to parse consequences:`, error)
@@ -449,22 +474,160 @@ Be specific and reference the current world state.`
     }
   }
 
+  /**
+   * Check if text looks like a consequence
+   */
+  private looksLikeConsequence(text: string): boolean {
+    const consequenceIndicators = [
+      'result', 'effect', 'impact', 'cause', 'lead', 'change', 'alter',
+      'affect', 'influence', 'trigger', 'create', 'destroy', 'improve',
+      'worsen', 'increase', 'decrease', 'become', 'transform',
+      'make', 'force', 'allow', 'prevent', 'enable', 'disable'
+    ]
+
+    const textLower = text.toLowerCase()
+    return consequenceIndicators.some(indicator => textLower.includes(indicator))
+  }
+
   private createConsequenceFromDescription(request: AIRequest, description: string): AIConsequence {
+    const type = this.inferConsequenceType(description)
+    const impact = this.inferImpact(description, type)
+
     return {
       id: uuidv4(),
       actionId: request.actionId,
-      type: 'world_state' as any,
+      type,
       description: description.substring(0, 200), // Limit length
-      impact: {
-        level: 'moderate' as any,
-        affectedSystems: ['world_state', 'environment'],
-        magnitude: 5,
-        duration: 'short_term' as any
-      },
-      cascadingEffects: [],
+      impact,
+      cascadingEffects: this.generateCascadingEffects(description, type),
       timestamp: new Date().toISOString(),
       confidence: 0.8
     }
+  }
+
+  /**
+   * Infer consequence type from description
+   */
+  private inferConsequenceType(description: string): any {
+    const descLower = description.toLowerCase()
+
+    if (descLower.includes('relationship') || descLower.includes('friend') || descLower.includes('enemy') || descLower.includes('alliance')) {
+      return 'relationship'
+    }
+    if (descLower.includes('environment') || descLower.includes('weather') || descLower.includes('forest') || descLower.includes('village')) {
+      return 'environment'
+    }
+    if (descLower.includes('character') || descLower.includes('person') || descLower.includes('npc')) {
+      return 'character'
+    }
+    if (descLower.includes('economy') || descLower.includes('trade') || descLower.includes('market') || descLower.includes('price')) {
+      return 'economic'
+    }
+    if (descLower.includes('combat') || descLower.includes('fight') || descLower.includes('battle') || descLower.includes('attack')) {
+      return 'combat'
+    }
+    if (descLower.includes('discover') || descLower.includes('explore') || descLower.includes('find') || descLower.includes('new')) {
+      return 'exploration'
+    }
+
+    return 'world_state'
+  }
+
+  /**
+   * Infer impact from description
+   */
+  private inferImpact(description: string, type: any): any {
+    const descLower = description.toLowerCase()
+
+    let level = 'moderate'
+    let magnitude = 5
+
+    // Determine impact level from keywords
+    if (descLower.includes('destroy') || descLower.includes('massive') || descLower.includes('catastrophic')) {
+      level = 'critical'
+      magnitude = 9
+    } else if (descLower.includes('major') || descLower.includes('significant') || descLower.includes('dramatic')) {
+      level = 'significant'
+      magnitude = 7
+    } else if (descLower.includes('small') || descLower.includes('minor') || descLower.includes('slight')) {
+      level = 'minor'
+      magnitude = 2
+    }
+
+    // Determine affected systems
+    const affectedSystems = [type]
+    if (descLower.includes('village') || descLower.includes('town')) affectedSystems.push('economic')
+    if (descLower.includes('forest') || descLower.includes('environment')) affectedSystems.push('nature')
+    if (descLower.includes('character') || descLower.includes('people')) affectedSystems.push('social')
+
+    return {
+      level,
+      affectedSystems,
+      magnitude,
+      duration: 'short_term'
+    }
+  }
+
+  /**
+   * Generate cascading effects for a consequence
+   */
+  private generateCascadingEffects(description: string, type: any): any[] {
+    // Simple cascading effect generation based on type
+    const effects = []
+
+    if (Math.random() > 0.5 && (type === 'relationship' || type === 'combat')) {
+      effects.push({
+        id: uuidv4(),
+        parentConsequenceId: '', // Will be set later
+        description: this.generateCascadingDescription(description, type),
+        delay: Math.random() * 10000 + 2000, // 2-12 seconds
+        probability: Math.random() * 0.5 + 0.3, // 0.3-0.8
+        impact: {
+          level: 'minor',
+          affectedSystems: [type],
+          magnitude: 3,
+          duration: 'temporary'
+        }
+      })
+    }
+
+    return effects
+  }
+
+  /**
+   * Generate cascading effect description
+   */
+  private generateCascadingDescription(parentDescription: string, type: any): string {
+    const templates = {
+      relationship: [
+        'Nearby characters notice the change in relationships',
+        'Local community reacts to the relationship shift',
+        'Other characters adjust their behavior based on this'
+      ],
+      environment: [
+        'Wildlife responds to the environmental change',
+        'Nearby areas experience related effects',
+        'Local resources are affected by this change'
+      ],
+      character: [
+        'Other characters learn about this development',
+        'Local rumors spread about the character',
+        'Character\'s reputation is affected'
+      ],
+      combat: [
+        'Nearby characters react to the combat outcome',
+        'Local area security is impacted',
+        'Combatants\' allies take notice'
+      ],
+      world_state: [
+        'Connected systems experience related changes',
+        'Local equilibrium is affected',
+        'Future actions are influenced by this change'
+      ]
+    }
+
+    const typeTemplates = templates[type] || templates.world_state
+    return typeTemplates[Math.floor(Math.random() * typeTemplates.length)]
   }
 
   private formatConsequence(data: any): AIConsequence {
