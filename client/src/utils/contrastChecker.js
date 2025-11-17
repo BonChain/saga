@@ -82,4 +82,61 @@ tests.forEach(test => {
   console.log('');
 });
 
+export function runAutomatedContrastTests() {
+  const results = [];
+  const testColors = [
+    { name: 'neon-green', value: '#00ff41' },
+    { name: 'neon-cyan', value: '#00ffff' },
+    { name: 'neon-pink', value: '#ff99ff' },
+    { name: 'neon-yellow', value: '#ffaa00' },
+    { name: 'neon-red', value: '#ff4141' },
+    { name: 'white', value: '#ffffff' }
+  ];
+
+  const backgroundColors = [
+    { name: 'terminal-black', value: '#0a0a0a' },
+    { name: 'terminal-dark', value: '#1a1a1a' },
+    { name: 'terminal-medium', value: '#2d2d2d' },
+    { name: 'terminal-light', value: '#404040' }
+  ];
+
+  testColors.forEach(foreground => {
+    backgroundColors.forEach(background => {
+      const ratio = getContrastRatio(foreground.value, background.value);
+
+      results.push({
+        foreground: foreground.name,
+        background: background.name,
+        foregroundHex: foreground.value,
+        backgroundHex: background.value,
+        ratio: parseFloat(ratio.toFixed(2)),
+        passesAAA: ratio >= 7,
+        passesAA: ratio >= 4.5,
+        passesAALarge: ratio >= 3
+      });
+    });
+  });
+
+  return results;
+}
+
+export function validateAllColorCombinations() {
+  const testResults = runAutomatedContrastTests();
+
+  const summary = {
+    totalTests: testResults.length,
+    passingAAA: testResults.filter(r => r.passesAAA).length,
+    passingAA: testResults.filter(r => r.passesAA).length,
+    failingAAA: testResults.filter(r => !r.passesAAA).length,
+    failingAA: testResults.filter(r => !r.passesAA).length,
+    averageRatio: (testResults.reduce((sum, r) => sum + r.ratio, 0) / testResults.length).toFixed(2)
+  };
+
+  return {
+    summary,
+    details: testResults,
+    hasFailures: summary.failingAAA > 0
+  };
+}
+
 export { validateContrast, getContrastRatio };

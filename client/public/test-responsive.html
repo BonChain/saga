@@ -100,28 +100,6 @@
         </div>
     </div>
 
-    <script>
-        function updateScreenSize() {
-            const width = window.innerWidth;
-            const height = window.innerHeight;
-            const screenSizeElement = document.getElementById('screenSize');
-            const breakpointElement = document.getElementById('breakpoint');
-
-            screenSizeElement.textContent = `${width}x${height}`;
-
-            if (width <= 480) {
-                breakpointElement.textContent = 'Mobile (≤480px)';
-            } else if (width <= 768) {
-                breakpointElement.textContent = 'Tablet (481-768px)';
-            } else if (width <= 1024) {
-                breakpointElement.textContent = 'Small Desktop (769-1024px)';
-            } else {
-                breakpointElement.textContent = 'Large Desktop (≥1025px)';
-            }
-        }
-
-        window.addEventListener('resize', updateScreenSize);
-        updateScreenSize();
-    </script>
+    <script src="test-responsive.js" defer></script>
 </body>
 </html>

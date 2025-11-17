@@ -5,16 +5,24 @@ import './ActionInput.css';
 interface ActionInputProps {
   onSubmit?: (action: string) => void;
   disabled?: boolean;
+  maxLength?: number;           // Maximum characters allowed
+  enforceLimit?: boolean;       // Whether to enforce hard limit
+  showCharacterCount?: boolean; // Whether to show character counter
 }
 
-const ActionInput: React.FC<ActionInputProps> = ({ onSubmit, disabled = false }) => {
+const ActionInput: React.FC<ActionInputProps> = ({
+  onSubmit,
+  disabled = false,
+  maxLength = 500,
+  enforceLimit = true,
+  showCharacterCount = true
+}) => {
   const [action, setAction] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [characterCount, setCharacterCount] = useState(0);
+  const [error, setError] = useState<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-  const maxCharacters = 500;
   const serverUrl = import.meta.env.VITE_SERVER_URL || 'http://localhost:3005';
 
   const exampleActions = [
@@ -35,8 +43,15 @@ const ActionInput: React.FC<ActionInputProps> = ({ onSubmit, disabled = false })
       return;
     }
 
+    // Character limit validation
+    if (enforceLimit && maxLength && action.length > maxLength) {
+      setError(`Action exceeds maximum length of ${maxLength} characters`);
+      return;
+    }
+
     setIsSubmitting(true);
     setFeedback(null);
+    setError(null);
 
     try {
       const response = await axios.post(`${serverUrl}/api/actions/submit`, {
@@ -75,15 +90,43 @@ const ActionInput: React.FC<ActionInputProps> = ({ onSubmit, disabled = false })
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
-    if (value.length <= maxCharacters) {
-      setAction(value);
-      setCharacterCount(value.length);
+
+    // Clear any previous errors when user starts typing
+    if (error) {
+      setError(null);
     }
+
+    if (enforceLimit && maxLength && value.length > maxLength) {
+      // Truncate to max length
+      const truncatedValue = value.substring(0, maxLength);
+      setAction(truncatedValue);
+      setCharacterCount(truncatedValue.length);
+      return;
+    }
+
+    setAction(value);
+    setCharacterCount(value.length);
+  };
+
+  // Helper function to determine character count color
+  const getCharacterCountColor = () => {
+    if (!characterCount) return 'var(--terminal-light)';
+    if (maxLength && characterCount >= maxLength) return 'var(--neon-red)';
+    if (maxLength && characterCount >= maxLength * 0.8) return 'var(--neon-yellow)';
+    return 'var(--neon-green)';
   };
 
   const selectExampleAction = (example: string) => {
-    setAction(example);
-    setCharacterCount(example.length);
+    // Check if example exceeds the limit
+    if (enforceLimit && maxLength && example.length > maxLength) {
+      const truncatedExample = example.substring(0, maxLength);
+      setAction(truncatedExample);
+      setCharacterCount(truncatedExample.length);
+      setError(`Example action truncated to ${maxLength} characters`);
+    } else {
+      setAction(example);
+      setCharacterCount(example.length);
+    }
     setFeedback(null);
   };
 
@@ -117,26 +160,43 @@ const ActionInput: React.FC<ActionInputProps> = ({ onSubmit, disabled = false })
             className="action-textarea"
             disabled={disabled || isSubmitting}
             rows={4}
+            maxLength={enforceLimit ? maxLength : undefined}
           />
         </div>
 
         <div className="input-footer">
-          <div className={`character-counter ${
-            characterCount > maxCharacters * 0.9 ? 'warning' :
-            characterCount >= maxCharacters ? 'error' : ''
-          }`}>
-            {characterCount}/{maxCharacters}
-          </div>
+          {showCharacterCount && (
+            <div
+              className={`character-counter ${
+                characterCount > maxLength * 0.9 ? 'warning' :
+                characterCount >= maxLength ? 'error' : ''
+              }`}
+              style={{ color: getCharacterCountColor() }}
+            >
+              {characterCount}/{maxLength}
+            </div>
+          )}
 
           <button
             type="submit"
             className="submit-button"
-            disabled={disabled || isSubmitting || !action.trim() || characterCount > maxCharacters}
+            disabled={
+              disabled ||
+              isSubmitting ||
+              !action.trim() ||
+              (enforceLimit && characterCount > maxLength)
+            }
           >
             {isSubmitting ? 'PROCESSING...' : 'EXECUTE ACTION'}
           </button>
         </div>
       </form>
+
+      {error && (
+        <div className="feedback-message error">
+          {error}
+        </div>
+      )}
 
       {feedback && (
         <div className={`feedback-message ${
@@ -167,3 +227,10 @@ const ActionInput: React.FC<ActionInputProps> = ({ onSubmit, disabled = false })
 };
 
 export default ActionInput;
+
+// Configuration constants for different action types
+export const ACTION_CONFIG = {
+  SHORT_ACTION: 100,    // Quick commands
+  NORMAL_ACTION: 500,   // Standard actions
+  LONG_ACTION: 1000,    // Detailed actions
+};

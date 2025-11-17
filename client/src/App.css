@@ -378,3 +378,5 @@
 ::-webkit-scrollbar-thumb:hover {
   background: var(--terminal-bright);
 }
+
+/* Performance optimization is now fully automatic and invisible to users */
