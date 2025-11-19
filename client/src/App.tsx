@@ -1,10 +1,14 @@
 import { useState, useEffect } from 'react'
 import ActionInput from './components/ActionInput'
+import CascadeVisualization from './components/cascade/CascadeVisualization'
 import performanceMonitor from './utils/performanceMonitor'
+import type { CascadeNode } from './components/cascade/types/cascade'
 import './App.css'
 
 function App() {
   const [submittedActions, setSubmittedActions] = useState<string[]>([])
+  // const [currentCascadeAction, setCurrentCascadeAction] = useState<string | null>(null)
+  const [showCascade, setShowCascade] = useState(false)
 
   // Initialize performance monitoring (always automatic, user-friendly)
   useEffect(() => {
@@ -22,6 +26,19 @@ function App() {
 
   const handleActionSubmit = (action: string) => {
     setSubmittedActions(prev => [...prev, action])
+    // Show cascade visualization for the latest action
+    // setCurrentCascadeAction(`action-${Date.now()}`)
+    setShowCascade(true)
+  }
+
+  const handleNodeClick = (node: CascadeNode) => {
+    console.log('Node clicked:', node)
+    // Could expand to show more details or navigate to related views
+  }
+
+  const handleNodeHover = (node: CascadeNode | null) => {
+    // Update UI state for hover feedback
+    console.log('Node hovered:', node?.label)
   }
 
   return (
@@ -34,6 +51,29 @@ function App() {
 
       <div className="main-content" id="main-content">
         <ActionInput onSubmit={handleActionSubmit} />
+
+        {/* Cascade Visualization Section */}
+        {showCascade && (
+          <div className="cascade-section">
+            <div className="cascade-header">
+              <h3>ACTION CASCADE VISUALIZATION</h3>
+              <button
+                className="cascade-close-button"
+                onClick={() => setShowCascade(false)}
+                aria-label="Close cascade visualization"
+              >
+                ✕
+              </button>
+            </div>
+            <CascadeVisualization
+              data={null} // Will use default demo data for now
+              width={Math.min(800, window.innerWidth - 40)}
+              height={400}
+              onNodeClick={handleNodeClick}
+              onNodeHover={handleNodeHover}
+            />
+          </div>
+        )}
 
         {submittedActions.length > 0 && (
           <div className="recent-actions">
@@ -51,6 +91,9 @@ function App() {
           <p>Server: <span className="status-online">● Online</span></p>
           <p>Connected to Living World API</p>
           <p>Ready to process unlimited actions</p>
+          {!showCascade && (
+            <p className="cascade-hint">Submit an action to see cascade visualization</p>
+          )}
         </div>
       </div>
     </div>

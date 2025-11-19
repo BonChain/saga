@@ -235,7 +235,7 @@ epic-3:
     story-3-3-butterfly-effect-calculation:
       title: "Butterfly Effect Calculation"
       description: "As a player, I want to see how my actions ripple through the world, so that I understand the impact of my choices."
-      status: "review"
+      status: "done"
       prerequisites: ["story-3-2-consequence-generation-world-changes"]
       estimated_hours: 4
       acceptance_criteria:
@@ -534,7 +534,7 @@ epic-8:
     story-8-2-cascade-visualization-engine:
       title: "Cascade Visualization Engine"
       description: "As a player, I want to see visual diagrams showing how my actions create ripple effects through the world, so that I understand the living world mechanics."
-      status: "backlog"
+      status: "done"
       prerequisites: ["story-3-3-butterfly-effect-calculation"]
       estimated_hours: 5
       acceptance_criteria:

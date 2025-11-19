@@ -1,0 +1,139 @@
+<story-context id="story-8-2-cascade-visualization-engine.context" v="1.0">
+  <metadata>
+    <epicId>8</epicId>
+    <storyId>2</storyId>
+    <title>Cascade Visualization Engine</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-19</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>stories/story-8-2-cascade-visualization-engine.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>As a player</asA>
+    <iWant>I want to see visual diagrams showing how my actions create ripple effects through the world</iWant>
+    <soThat>so that I understand the living world mechanics</soThat>
+    <tasks>8 tasks with 32 subtasks focused on D3.js integration, real-time visualization, retro styling, and interactive features</tasks>
+  </story>
+
+  <acceptanceCriteria>1. See animated diagram showing cause-and-effect relationships
+2. Visualization connects action to direct consequences and butterfly effects
+3. Related world systems are color-coded and clearly labeled
+4. Can interact with diagram to explore detailed consequences
+5. Visualization updates in real-time as new effects emerge
+6. Retro styling makes it visually appealing for demo presentation</acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc path="docs/epics.md" title="Epic Breakdown" section="Epic 8 - Story 8.2" snippet="Story focuses on implementing cascade visualization component with D3.js, animated connection lines, interactive hover states, real-time update system, and retro styling with neon effects."/>
+      <doc path="docs/PRD.md" title="Product Requirements Document" section="Functional Requirements" snippet="FR4: Players can see visual cascade diagrams showing how their actions trigger world changes. FR23: Players understand world impact through clear visual feedback and cascade diagrams."/>
+      <doc path="docs/ux-design-specification.md" title="UX Design Specification" section="Design System Foundation" snippet="shadcn/ui chosen for modern clean aesthetic highlighting blockchain innovation. Custom components needed: specialized blockchain verification displays, cascade effect diagrams, real-time activity indicators, world state visualization widgets."/>
+      <doc path="stories/story-8-1-retro-gaming-ui-design.md" title="Previous Story - Retro Gaming UI" section="Dev Notes" snippet="Retro Design System: VT323 and Roboto Mono fonts, neon color palette (#00ff41, #00ffff, #ff99ff), dark backgrounds (#0a0a0a, #1a1a1a, #2d2d2d), CSS custom properties, responsive design, WCAG 2.1 AAA compliance."/>
+    </docs>
+    <code>
+      <artifact path="client/src/App.tsx" kind="React Component" symbol="App" lines="1-61" reason="Main application component showing current structure with ActionInput integration and performance monitoring">
+        <signature>function App(): JSX.Element</signature>
+      </artifact>
+      <artifact path="client/src/components/ActionInput.tsx" kind="React Component" symbol="ActionInput" lines="1-236" reason="Existing action submission component that will need integration with cascade visualization">
+        <signature>const ActionInput: React.FC&lt;ActionInputProps&gt;</signature>
+      </artifact>
+      <artifact path="client/src/components/ActionInput.tsx" kind="Interface" symbol="ActionInputProps" lines="5-11" reason="Props interface pattern for component design">
+        <signature>interface ActionInputProps { onSubmit?: (action: string) => void; disabled?: boolean; maxLength?: number; enforceLimit?: boolean; showCharacterCount?: boolean; }</signature>
+      </artifact>
+      <artifact path="client/src/utils/performanceMonitor.js" kind="Utility" symbol="performanceMonitor" reason="Performance monitoring system that cascade visualization should integrate with">
+        <signature>performanceMonitor: PerformanceMonitor</signature>
+      </artifact>
+      <artifact path="client/src/utils/contrastChecker.js" kind="Utility" symbol="contrastChecker" reason="Accessibility utility for ensuring WCAG compliance in cascade visualization colors">
+        <signature>contrastChecker: ContrastChecker</signature>
+      </artifact>
+      <artifact path="client/package.json" kind="Configuration" symbol="Dependencies" reason="Current frontend dependencies showing React, TypeScript, Vite setup - D3.js needs to be added">
+        <signature>dependencies: { "@types/axios": "^0.9.36", "axios": "^1.13.2", "react": "^19.2.0", "react-dom": "^19.2.0" }</signature>
+      </artifact>
+      <artifact path="client/src/components/__tests__/ActionInput.accessibility.test.tsx" kind="Test" symbol="Accessibility Test" reason="Existing accessibility testing pattern that cascade visualization should follow">
+        <signature>Accessibility test using @axe-core/react and jest-axe</signature>
+      </artifact>
+    </code>
+    <dependencies>
+      <frontend>
+        <package name="react" version="^19.2.0"/>
+        <package name="react-dom" version="^19.2.0"/>
+        <package name="typescript" version="~5.9.3"/>
+        <package name="vite" version="^7.2.2"/>
+        <package name="@testing-library/react" version="^16.3.0"/>
+        <package name="@testing-library/jest-dom" version="^6.9.1"/>
+        <package name="axios" version="^1.13.2"/>
+      </frontend>
+      <required-additions>
+        <package name="d3" version="^7.8.5" reason="Data visualization library for force-directed graphs and animations"/>
+        <package name="@types/d3" version="^7.4.3" reason="TypeScript definitions for D3.js"/>
+        <package name="d3-selection" version="^3.0.0" reason="D3 selection module for DOM manipulation"/>
+        <package name="d3-force" version="^3.0.0" reason="Force simulation for graph layout algorithms"/>
+        <package name="d3-zoom" version="^3.0.0" reason="Zoom and pan functionality for large cascades"/>
+        <package name="d3-transition" version="^3.0.0" reason="Smooth animations between states"/>
+      </required-additions>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <architectural>
+      <constraint>Frontend work only - focus on client/ directory React application</constraint>
+      <constraint>Integrate with existing retro UI design system from Story 8.1</constraint>
+      <constraint>Use existing performance monitoring system for smooth animations</constraint>
+      <constraint>Follow existing TypeScript patterns and interfaces</constraint>
+      <constraint>Maintain WCAG 2.1 AAA accessibility compliance</constraint>
+      <constraint>Responsive design for desktop (1024px+) and mobile (320px+)</constraint>
+    </architectural>
+    <styling>
+      <constraint>Use established retro color palette: neon green (#00ff41), cyan (#00ffff), pink (#ff99ff)</constraint>
+      <constraint>Apply VT323 font for terminal aesthetics</constraint>
+      <constraint>Use CSS custom properties from Story 8.1 for consistency</constraint>
+      <constraint>Add scanline effects and neon glow styling</constraint>
+      <constraint>Ensure all text meets WCAG contrast requirements</constraint>
+    </styling>
+    <performance>
+      <constraint>Maintain 60fps animations during demo presentation</constraint>
+      <constraint>Process cascade data within 15 seconds for demo reliability</constraint>
+      <constraint>Implement virtual rendering for large cascade graphs</constraint>
+      <constraint>Use React performance patterns for real-time updates</constraint>
+    </performance>
+  </constraints>
+
+  <interfaces>
+    <api name="Cascade Data API" kind="REST endpoint" signature="GET /api/cascades/:actionId" path="backend API endpoints">
+      <description>Fetches cascade data for a specific action including consequences and butterfly effects</description>
+    </api>
+    <api name="Real-time Updates" kind="WebSocket" signature="ws://localhost:3005/cascade-updates" path="backend WebSocket">
+      <description>Real-time cascade updates as new effects emerge and are processed</description>
+    </api>
+    <interface name="CascadeData" kind="TypeScript interface" signature="interface CascadeData { actionId: string; nodes: CascadeNode[]; connections: CascadeConnection[]; metadata: CascadeMetadata; }" path="to be defined">
+      <description>TypeScript interface for cascade visualization data structure</description>
+    </interface>
+    <interface name="CascadeNode" kind="TypeScript interface" signature="interface CascadeNode { id: string; type: 'action' | 'consequence' | 'butterfly-effect'; label: string; system: string; x?: number; y?: number; }" path="to be defined">
+      <description>Individual node in cascade visualization graph</description>
+    </interface>
+    <interface name="CascadeConnection" kind="TypeScript interface" signature="interface CascadeConnection { source: string; target: string; type: 'direct' | 'cascading'; strength: number; delay?: number; }" path="to be defined">
+      <description>Connection between nodes showing cause-and-effect relationships</description>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>Frontend testing uses Jest with React Testing Library. Accessibility testing with @axe-core/react and jest-axe for WCAG 2.1 AAA compliance. Performance testing ensures 60fps animations and &lt;15 second processing time. Mobile responsiveness tested on 320px+ viewports. Component integration tests verify D3.js rendering and real-time updates.</standards>
+    <locations>
+      <directory>client/src/components/__tests__/</directory>
+      <directory>client/src/utils/__tests__/</directory>
+      <pattern>**/*.accessibility.test.tsx</pattern>
+      <pattern>**/*.test.tsx</pattern>
+      <pattern>**/*.test.ts</pattern>
+    </locations>
+    <ideas>
+      <test ac="1" idea="Unit test for D3.js force simulation layout algorithm with test data"/>
+      <test ac="2" idea="Integration test connecting action nodes to consequence nodes with proper connections"/>
+      <test ac="3" idea="Visual regression test for color-coded world system styling"/>
+      <test ac="4" idea="Interaction test for hover states showing detailed consequence information"/>
+      <test ac="5" idea="Real-time update test using WebSocket mock for live effect additions"/>
+      <test ac="6" idea="Accessibility test for keyboard navigation and screen reader support"/>
+      <test ac="6" idea="Performance test measuring animation frame rates with large cascade datasets"/>
+      <test ac="6" idea="Mobile responsive test ensuring cascade visualization works on 320px+ screens"/>
+    </ideas>
+  </tests>
+</story-context>
