@@ -1,11 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from 'react'
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import { axe } from 'jest-axe'
 import CascadeVisualization from '../CascadeVisualization'
 import { DEFAULT_CASCADE_DATA, mockCascadeData } from '../../types/cascade'
-import { server } from '../../../mocks/server'
-import { rest } from 'msw'
 
 // Enhanced D3.js mocking with better simulation
 jest.mock('d3', () => {
@@ -147,7 +146,7 @@ describe('CascadeVisualization Component Unit Tests', () => {
 
   test('displays tooltip on hover', async () => {
     const onNodeHover = jest.fn()
-    const user = userEvent.setup()
+    userEvent.setup()
 
     render(<CascadeVisualization {...defaultProps} onNodeHover={onNodeHover} />)
 

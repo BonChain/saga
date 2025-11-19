@@ -1,6 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from 'react'
 import { render, screen } from '@testing-library/react'
 import '@testing-library/jest-dom'
+
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { DEFAULT_CASCADE_DATA } from '../types/cascade'
 
 // Mock the CSS file to prevent parsing issues
@@ -154,7 +157,7 @@ describe('🧪 REAL TEST RESULTS - CascadeVisualization', () => {
 
     const startTime = performance.now()
 
-    const { container } = render(
+    const { container: _container } = render(
       React.createElement(CascadeVisualization, {
         data: null,
         isLoading: true,

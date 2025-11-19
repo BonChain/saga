@@ -115,7 +115,7 @@ const mockErrorResponse = {
 // MSW handlers for REST API endpoints
 export const handlers = [
   // Get cascade data for specific action
-  http.get('/api/cascades/:actionId', ({ params }: any) => {
+  http.get('/api/cascades/:actionId', ({ params }: { params: { actionId: string } }) => {
     const { actionId } = params;
 
     // Simulate different scenarios based on actionId

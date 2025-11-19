@@ -17,7 +17,7 @@ export interface CascadeData {
 
 export interface CascadeNode {
   id: string;
-  type: 'action' | 'consequence' | 'butterfly-effect';
+  type: 'action' | 'consequence' | 'butterfly-effect' | 'cluster';
   label: string;
   system: string;
   description?: string;
@@ -28,6 +28,8 @@ export interface CascadeNode {
   color?: string;
   delay?: number; // seconds from action start
   duration?: number; // animation duration
+  nodeIds?: string[]; // For cluster nodes - IDs of contained nodes
+  nodeCount?: number; // For cluster nodes - Number of contained nodes
 }
 
 export interface CascadeConnection {
