@@ -74,14 +74,15 @@ const ActionInput: React.FC<ActionInputProps> = ({
       } else {
         setFeedback(`❌ Error: ${response.data.error}`);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Action submission error:', error);
-      if (error.response?.status === 404) {
+      const axiosError = error as { response?: { status?: number; data?: { error?: string } } };
+      if (axiosError.response?.status === 404) {
         setFeedback('❌ Action endpoint not found - server needs update');
-      } else if (error.response?.status >= 500) {
+      } else if (axiosError.response?.status && axiosError.response.status >= 500) {
         setFeedback('❌ Server error - please try again');
       } else {
-        setFeedback(`❌ ${error.response?.data?.error || 'Network error'}`);
+        setFeedback(`❌ ${axiosError.response?.data?.error || 'Network error'}`);
       }
     } finally {
       setIsSubmitting(false);
@@ -227,10 +228,3 @@ const ActionInput: React.FC<ActionInputProps> = ({
 };
 
 export default ActionInput;
-
-// Configuration constants for different action types
-export const ACTION_CONFIG = {
-  SHORT_ACTION: 100,    // Quick commands
-  NORMAL_ACTION: 500,   // Standard actions
-  LONG_ACTION: 1000,    // Detailed actions
-};

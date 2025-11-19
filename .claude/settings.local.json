@@ -71,7 +71,10 @@
       "Bash(git reset:*)",
       "Bash(npx jest --version)",
       "Bash(npm run test:accessibility:*)",
-      "Bash(npm run test:contrast:*)"
+      "Bash(npm run test:contrast:*)",
+      "Bash(gh issue close:*)",
+      "Bash(npx jest:*)",
+      "Bash(npm run lint)"
     ],
     "deny": [],
     "ask": []

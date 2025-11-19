@@ -5,6 +5,16 @@
 
 import '@testing-library/jest-dom';
 import 'jest-axe/extend-expect';
+import { server } from './mocks/server';
+
+// Setup MSW server for API mocking
+beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
+
+// Reset request handlers after each test
+afterEach(() => server.resetHandlers());
+
+// Clean up after all tests are complete
+afterAll(() => server.close());
 
 // Mock ResizeObserver for tests that measure elements
 global.ResizeObserver = jest.fn().mockImplementation(() => ({
