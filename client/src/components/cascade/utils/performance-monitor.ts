@@ -3,6 +3,7 @@
  * Monitors metrics and provides warnings when approaching performance limits
  */
 
+import { getCascadeConfig } from '../config/cascade-config';
 
 export interface PerformanceBudget {
   maxNodes: number;
@@ -68,10 +69,21 @@ const PERFORMANCE_BUDGETS: Record<string, PerformanceBudget> = {
   }
 };
 
+// Cache device detection results
+let cachedDeviceCategory: 'low-end' | 'mid-range' | 'high-end' | null = null;
+let deviceDetectionTimestamp = 0;
+const DEVICE_DETECTION_CACHE_TTL = 300000; // 5 minutes
+
 /**
- * Detect device capabilities
+ * Detect device capabilities with caching
  */
 function detectDeviceCategory(): 'low-end' | 'mid-range' | 'high-end' {
+  const now = Date.now();
+
+  // Return cached result if still valid
+  if (cachedDeviceCategory && (now - deviceDetectionTimestamp) < DEVICE_DETECTION_CACHE_TTL) {
+    return cachedDeviceCategory;
+  }
   // Check for hardware concurrency (CPU cores)
   const cpuCores = navigator.hardwareConcurrency || 4;
 
@@ -98,9 +110,10 @@ function detectDeviceCategory(): 'low-end' | 'mid-range' | 'high-end' {
   if (totalPixels >= 1920 * 1080) score += 2;
   else if (totalPixels >= 1366 * 768) score += 1;
 
-  if (score >= 7) return 'high-end';
-  if (score >= 4) return 'mid-range';
-  return 'low-end';
+  // Cache and return result
+  cachedDeviceCategory = score >= 7 ? 'high-end' : score >= 4 ? 'mid-range' : 'low-end';
+  deviceDetectionTimestamp = now;
+  return cachedDeviceCategory;
 }
 
 /**
@@ -115,7 +128,17 @@ export class PerformanceMonitor {
 
   constructor() {
     this.deviceCategory = detectDeviceCategory();
-    this.budget = PERFORMANCE_BUDGETS[this.deviceCategory];
+
+    // Get configuration override if available
+    const config = getCascadeConfig();
+    const defaultBudget = PERFORMANCE_BUDGETS[this.deviceCategory];
+
+    // Apply custom performance budget if configured
+    this.budget = {
+      ...defaultBudget,
+      ...(config.performance || {})
+    };
+
     this.initializeFPSMonitoring();
   }
 

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import type { CascadeData } from '../types/cascade';
 import { createWebSocketUrl, sanitizeErrorMessage } from '../utils/websocket-utils';
+import { getCascadeConfig } from '../config/cascade-config';
 
 interface UseRealTimeUpdatesOptions {
   actionId?: string;
@@ -16,8 +17,7 @@ interface UseRealTimeUpdatesOptions {
  */
 export const useRealTimeUpdates = ({
   actionId,
-  // @ts-ignore - import.meta.env causes issues in Jest test environment
-    serverUrl = import.meta.env.VITE_SERVER_URL || 'http://localhost:3005',
+  serverUrl = (import.meta.env?.VITE_SERVER_URL as string) || 'http://localhost:3005',
   onNewData,
   onError,
   onConnectionChange
@@ -30,10 +30,12 @@ export const useRealTimeUpdates = ({
   const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const heartbeatIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const MAX_RECONNECT_ATTEMPTS = 5;
-  const RECONNECT_DELAY = 2000; // 2 seconds
-  const HEARTBEAT_INTERVAL = 30000; // 30 seconds
-  const BUFFER_SIZE = 50; // Maximum buffered updates
+  // Get configuration values
+  const config = getCascadeConfig().websocket;
+  const MAX_RECONNECT_ATTEMPTS = config.maxReconnectAttempts;
+  const RECONNECT_DELAY = config.reconnectDelay;
+  const HEARTBEAT_INTERVAL = config.heartbeatInterval;
+  const BUFFER_SIZE = config.bufferSize;
 
   const connectWebSocket = useCallback(() => {
     if (!actionId) {

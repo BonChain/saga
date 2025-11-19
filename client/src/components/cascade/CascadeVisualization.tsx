@@ -27,6 +27,7 @@ import {
 } from './utils/memoization'
 import { performanceMonitor } from './utils/performance-monitor'
 import PerformanceWarnings from './PerformanceWarnings'
+import { applyEnvironmentConfig } from './config/cascade-config'
 import './styles/cascade.css'
 
 /**
@@ -49,6 +50,11 @@ const CascadeVisualization: React.FC<CascadeVisualizationProps> = ({
   const animationFrameRef = useRef<number | null>(null)
   const [dimensions, setDimensions] = useState({ width, height })
   const [hoveredNode, setHoveredNode] = useState<CascadeNode | null>(null)
+
+  // Initialize environment-specific configuration once
+  useEffect(() => {
+    applyEnvironmentConfig()
+  }, [])
 
   // Handle responsive dimensions
   useEffect(() => {
@@ -91,8 +97,7 @@ const CascadeVisualization: React.FC<CascadeVisualizationProps> = ({
   }, [cascadeData.nodes])
 
   // Performance monitoring in development
-  // @ts-ignore - import.meta.env causes issues in Jest test environment
-  if (import.meta.env.DEV) {
+  if (import.meta.env?.DEV as boolean) {
     console.log('🚀 Memo Cache Stats:', getMemoCacheStats())
   }
 

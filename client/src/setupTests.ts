@@ -9,16 +9,19 @@ import '@testing-library/jest-dom';
 import 'jest-axe/extend-expect';
 
 // Mock import.meta.env for Vite compatibility
-global.import = {
-  meta: {
-    env: {
-      DEV: false,
-      MODE: 'test',
-      VITE_SERVER_URL: 'http://localhost:3005',
-      VITE_API_URL: 'http://localhost:3005',
+Object.defineProperty(global, 'import', {
+  value: {
+    meta: {
+      env: {
+        DEV: false,
+        MODE: 'test',
+        VITE_SERVER_URL: 'http://localhost:3005',
+        VITE_API_URL: 'http://localhost:3005',
+      },
     },
   },
-};
+  writable: true,
+});
 
 // Mock MSW server to avoid import issues during basic testing
 const mockServer = {

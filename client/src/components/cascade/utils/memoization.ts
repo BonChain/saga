@@ -4,10 +4,10 @@
  */
 
 import type { CascadeNode, CascadeConnection } from '../types/cascade';
+import { getCascadeConfig } from '../config/cascade-config';
 
 // Cache for computed values
 const memoCache = new Map<string, { value: unknown; timestamp: number }>();
-const CACHE_EXPIRY = 60000; // 1 minute cache expiry
 
 /**
  * Generic memoization function with TTL
@@ -15,12 +15,17 @@ const CACHE_EXPIRY = 60000; // 1 minute cache expiry
 function memoize<T>(
   key: string,
   compute: () => T,
-  ttl: number = CACHE_EXPIRY
+  ttl?: number
 ): T {
+  const config = getCascadeConfig();
+  const cacheTtl = ttl || config.memoization.cacheExpiry;
+  const maxCacheSize = config.memoization.maxCacheSize;
+  const cleanupThreshold = config.memoization.cleanupThreshold;
+
   const cached = memoCache.get(key);
   const now = Date.now();
 
-  if (cached && (now - cached.timestamp) < ttl) {
+  if (cached && (now - cached.timestamp) < cacheTtl) {
     return cached.value as T;
   }
 
@@ -28,12 +33,21 @@ function memoize<T>(
   memoCache.set(key, { value, timestamp: now });
 
   // Clean up expired cache entries periodically
-  if (memoCache.size > 1000) {
+  if (memoCache.size > cleanupThreshold) {
     for (const [cacheKey, entry] of memoCache.entries()) {
-      if (now - entry.timestamp > ttl) {
+      if (now - entry.timestamp > cacheTtl) {
         memoCache.delete(cacheKey);
       }
     }
+  }
+
+  // Prevent cache from growing too large
+  if (memoCache.size > maxCacheSize) {
+    const entries = Array.from(memoCache.entries());
+    // Remove oldest entries
+    entries.slice(0, memoCache.size - maxCacheSize).forEach(([cacheKey]) => {
+      memoCache.delete(cacheKey);
+    });
   }
 
   return value;
@@ -202,12 +216,13 @@ export const clearMemoCache = () => {
  * Get cache statistics for debugging
  */
 export const getMemoCacheStats = () => {
+  const config = getCascadeConfig();
   const now = Date.now();
   let expiredCount = 0;
   let validCount = 0;
 
   for (const [, entry] of memoCache.entries()) {
-    if (now - entry.timestamp > CACHE_EXPIRY) {
+    if (now - entry.timestamp > config.memoization.cacheExpiry) {
       expiredCount++;
     } else {
       validCount++;
@@ -218,6 +233,8 @@ export const getMemoCacheStats = () => {
     total: memoCache.size,
     valid: validCount,
     expired: expiredCount,
+    maxCacheSize: config.memoization.maxCacheSize,
+    cacheExpiry: config.memoization.cacheExpiry,
     memoryUsage: JSON.stringify([...memoCache.entries()]).length // Approximate
   };
 };

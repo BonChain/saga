@@ -4,6 +4,7 @@
  */
 
 import type { CascadeNode, CascadeConnection } from '../types/cascade';
+import { getCascadeConfig } from '../config/cascade-config';
 
 export interface VirtualizationConfig {
   maxNodes: number;
@@ -20,6 +21,12 @@ export interface Viewport {
   width: number;
   height: number;
   zoom: number;
+}
+
+export interface LODThreshold {
+  zoom: number;
+  nodeLimit: number;
+  detailLevel: 'low' | 'medium' | 'high' | 'very-high';
 }
 
 export interface VirtualizationResult {
@@ -47,15 +54,11 @@ const DEFAULT_CONFIG: VirtualizationConfig = {
 };
 
 /**
- * Level of Detail thresholds
+ * Get Level of Detail thresholds from configuration
  */
-const LOD_THRESHOLDS = [
-  { zoom: 0.25, nodeLimit: 50, detailLevel: 'very-low' },
-  { zoom: 0.5, nodeLimit: 150, detailLevel: 'low' },
-  { zoom: 0.75, nodeLimit: 300, detailLevel: 'medium' },
-  { zoom: 1.0, nodeLimit: 500, detailLevel: 'high' },
-  { zoom: 2.0, nodeLimit: 1000, detailLevel: 'very-high' }
-];
+const getLODThresholds = () => {
+  return getCascadeConfig().virtualization.detailLevels;
+};
 
 /**
  * Cascade Virtualization Manager
@@ -66,7 +69,12 @@ export class CascadeVirtualization {
   private lastViewport: Viewport | null = null;
 
   constructor(config: Partial<VirtualizationConfig> = {}) {
-    this.config = { ...DEFAULT_CONFIG, ...config };
+    const cascadeConfig = getCascadeConfig();
+    this.config = {
+      ...DEFAULT_CONFIG,
+      maxNodes: cascadeConfig.virtualization.nodeLimit,
+      ...config
+    };
   }
 
   /**
@@ -86,7 +94,8 @@ export class CascadeVirtualization {
 
     // Determine Level of Detail
     const lodLevel = this.determineLOD(viewport.zoom);
-    const lodThreshold = LOD_THRESHOLDS[lodLevel];
+    const lodThresholds = getLODThresholds();
+    const lodThreshold = lodThresholds[lodLevel] || lodThresholds[lodThresholds.length - 1];
 
     // Start performance monitoring
     const startTime = performance.now();
@@ -150,8 +159,9 @@ export class CascadeVirtualization {
    * Determine Level of Detail based on zoom level
    */
   private determineLOD(zoom: number): number {
-    for (let i = LOD_THRESHOLDS.length - 1; i >= 0; i--) {
-      if (zoom >= LOD_THRESHOLDS[i].zoom) {
+    const lodThresholds = getLODThresholds();
+    for (let i = lodThresholds.length - 1; i >= 0; i--) {
+      if (zoom >= lodThresholds[i].zoom) {
         return i;
       }
     }
@@ -381,7 +391,7 @@ export class CascadeVirtualization {
    */
   private applyLevelOfDetail(
     nodes: CascadeNode[],
-    lodThreshold: typeof LOD_THRESHOLDS[0]
+    lodThreshold: LODThreshold
   ): { nodes: CascadeNode[]; connections: CascadeConnection[] } {
     if (nodes.length <= lodThreshold.nodeLimit) {
       return { nodes, connections: [] };
