@@ -12,6 +12,8 @@ import { Logger } from 'winston'
 import { CharacterService } from '../../services/character-service'
 import {
   Character,
+  MemoryEntry,
+  Relationship,
   MemoryCreateParams,
   RelationshipUpdateParams,
   CharacterQueryOptions,
@@ -24,11 +26,12 @@ interface AuthenticatedRequest extends Request {
   user?: {
     id: string
     role: string
+    sessionToken?: string
   }
 }
 
 // Response interfaces
-interface ApiResponse<T = any> {
+interface ApiResponse<T> {
   success: boolean
   data?: T
   error?: string
@@ -50,7 +53,7 @@ interface CharacterListResponse {
 }
 
 interface MemoryListResponse {
-  memories: any[]
+  memories: MemoryEntry[]
   count: number
   total: number
   page: number
@@ -61,7 +64,14 @@ interface RelationshipSummaryResponse {
   characterId: string
   relationships: {
     [targetId: string]: {
-      scores: any
+      scores: {
+        trust: number
+        respect: number
+        friendship: number
+        hostility: number
+        loyalty: number
+        fear: number
+      }
       lastInteraction: number
       totalInteractions: number
       relationshipType: string
@@ -74,6 +84,7 @@ export class CharacterRoutes {
   private router: Router
   private characterService: CharacterService
   private logger: Logger
+  private rateLimitStore: Map<string, { count: number; resetTime: number }> = new Map()
 
   constructor(characterService: CharacterService, logger: Logger) {
     this.router = Router()
@@ -179,7 +190,7 @@ export class CharacterRoutes {
       const character = await this.characterService.getCharacter(characterId)
 
       if (!character) {
-        const response: ApiResponse = {
+        const response = {
           success: false,
           error: 'Character not found',
           metadata: {
@@ -359,7 +370,7 @@ export class CharacterRoutes {
 
       const memory = await this.characterService.addMemory(memoryData)
 
-      const response: ApiResponse = {
+      const response = {
         success: true,
         data: memory,
         message: 'Memory added successfully',
@@ -442,7 +453,7 @@ export class CharacterRoutes {
       const relationship = await this.characterService.getRelationshipStatus(characterId, targetId)
 
       if (!relationship) {
-        const response: ApiResponse = {
+        const response = {
           success: false,
           error: 'Relationship not found',
           metadata: {
@@ -454,7 +465,7 @@ export class CharacterRoutes {
       return
       }
 
-      const response: ApiResponse = {
+      const response = {
         success: true,
         data: relationship,
         metadata: {
@@ -496,7 +507,7 @@ export class CharacterRoutes {
         updateData.scores || {}
       )
 
-      const response: ApiResponse = {
+      const response = {
         success: true,
         data: relationship,
         message: 'Relationship updated successfully',
@@ -532,7 +543,7 @@ export class CharacterRoutes {
       const character = await this.characterService.getCharacter(characterId)
 
       if (!character) {
-        const response: ApiResponse = {
+        const response = {
           success: false,
           error: 'Character not found',
           metadata: {
@@ -558,7 +569,7 @@ export class CharacterRoutes {
         }
       }
 
-      const response: ApiResponse = {
+      const response = {
         success: true,
         data: profile,
         metadata: {
@@ -680,7 +691,7 @@ export class CharacterRoutes {
       // In a full implementation, this would use the CharacterWorldIntegration
       const validationResults = []
 
-      const response: ApiResponse = {
+      const response = {
         success: true,
         data: validationResults,
         metadata: {
@@ -717,7 +728,7 @@ export class CharacterRoutes {
       // In a full implementation, this would use the CharacterWorldIntegration
       const backupId = 'backup-' + Date.now()
 
-      const response: ApiResponse = {
+      const response = {
         success: true,
         data: { backupId },
         message: 'Backup created successfully',
@@ -754,7 +765,7 @@ export class CharacterRoutes {
       // In a full implementation, this would use the CharacterWorldIntegration
       // await this.characterWorldIntegration.restoreFromBackup(backupId)
 
-      const response: ApiResponse = {
+      const response = {
         success: true,
         message: 'Backup restored successfully',
         metadata: {
@@ -779,24 +790,198 @@ export class CharacterRoutes {
    * Middleware functions
    */
 
-  private authMiddleware(req: AuthenticatedRequest, res: Response, next: NextFunction): void {
-    // Add user authentication logic here
-    // For now, we'll assume the user is authenticated
-    req.user = {
-      id: req.headers['x-user-id'] as string || 'unknown',
-      role: req.headers['x-user-role'] as string || 'user'
+  private authMiddleware(req: AuthenticatedRequest, res: Response, next: NextFunction): void | Response {
+    try {
+      const userIdHeader = req.headers['x-user-id'] as string;
+      const userRoleHeader = req.headers['x-user-role'] as string;
+      const sessionTokenHeader = req.headers['x-session-token'] as string;
+
+      // Validate required headers
+      if (!userIdHeader || !userRoleHeader || !sessionTokenHeader) {
+        return res.status(401).json({
+          error: 'Authentication required',
+          message: 'Missing required authentication headers: x-user-id, x-user-role, x-session-token',
+          status: 'error'
+        });
+      }
+
+      // Validate header formats
+      if (typeof userIdHeader !== 'string' || userIdHeader.length < 1 || userIdHeader.length > 100) {
+        return res.status(401).json({
+          error: 'Invalid user ID format',
+          message: 'User ID must be a string between 1-100 characters',
+          status: 'error'
+        });
+      }
+
+      const validRoles = ['user', 'admin', 'moderator', 'guest'];
+      if (!validRoles.includes(userRoleHeader)) {
+        return res.status(403).json({
+          error: 'Invalid user role',
+          message: `Invalid role. Allowed roles: ${validRoles.join(', ')}`,
+          status: 'error'
+        });
+      }
+
+      if (typeof sessionTokenHeader !== 'string' || sessionTokenHeader.length < 10 || sessionTokenHeader.length > 500) {
+        return res.status(401).json({
+          error: 'Invalid session token',
+          message: 'Session token must be a string between 10-500 characters',
+          status: 'error'
+        });
+      }
+
+      // Basic session token validation (in production, use proper JWT verification)
+      const tokenParts = sessionTokenHeader.split('.');
+      if (tokenParts.length !== 3) {
+        return res.status(401).json({
+          error: 'Invalid session token format',
+          message: 'Session token must follow proper format',
+          status: 'error'
+        });
+      }
+
+      // Set authenticated user data
+      req.user = {
+        id: userIdHeader,
+        role: userRoleHeader,
+        sessionToken: sessionTokenHeader
+      };
+
+      next();
+    } catch (error) {
+      console.error('Authentication error:', error);
+      res.status(500).json({
+        error: 'Authentication error',
+        message: 'An error occurred during authentication',
+        status: 'error'
+      });
     }
-    next()
   }
 
-  private rateLimitMiddleware(req: Request, res: Response, next: NextFunction): void {
-    // Add rate limiting logic here
-    next()
+  private rateLimitMiddleware(req: Request, res: Response, next: NextFunction): void | Response {
+    const clientIp = Array.isArray(req.headers['x-forwarded-for'])
+      ? req.headers['x-forwarded-for'][0]
+      : (req.ip || req.socket.remoteAddress || req.headers['x-forwarded-for'] || 'unknown') as string;
+    const timestamp = Date.now();
+    const windowMs = 60 * 1000; // 1 minute window
+    const maxRequestsPerMinute = 100;
+
+    // In production, use Redis or a proper in-memory store
+    // For now, use a simple in-memory rate limiter per client
+    if (!this.rateLimitStore) {
+      this.rateLimitStore = new Map<string, { count: number; resetTime: number }>();
+    }
+
+    const clientData = this.rateLimitStore.get(clientIp);
+
+    if (!clientData || timestamp > clientData.resetTime) {
+      // Reset or initialize rate limit window
+      this.rateLimitStore.set(clientIp, {
+        count: 1,
+        resetTime: timestamp + windowMs
+      });
+      return next();
+    }
+
+    // Check if rate limit exceeded
+    if (clientData.count >= maxRequestsPerMinute) {
+      const resetTimeSeconds = Math.ceil((clientData.resetTime - timestamp) / 1000);
+
+      res.set('X-RateLimit-Limit', maxRequestsPerMinute.toString());
+      res.set('X-RateLimit-Remaining', '0');
+      res.set('X-RateLimit-Reset', clientData.resetTime.toString());
+      res.set('Retry-After', resetTimeSeconds.toString());
+
+      return res.status(429).json({
+        error: 'Rate limit exceeded',
+        message: `Too many requests. Try again in ${resetTimeSeconds} seconds.`,
+        limit: maxRequestsPerMinute,
+        windowMs: windowMs,
+        retryAfter: resetTimeSeconds,
+        status: 'error'
+      });
+    }
+
+    // Increment request count
+    clientData.count += 1;
+    this.rateLimitStore.set(clientIp, clientData);
+
+    // Set rate limit headers
+    res.set('X-RateLimit-Limit', maxRequestsPerMinute.toString());
+    res.set('X-RateLimit-Remaining', (maxRequestsPerMinute - clientData.count).toString());
+    res.set('X-RateLimit-Reset', clientData.resetTime.toString());
+
+    next();
   }
 
-  private requestValidationMiddleware(req: Request, res: Response, next: NextFunction): void {
-    // Add request validation logic here
-    next()
+  private requestValidationMiddleware(req: Request, res: Response, next: NextFunction): void | Response {
+    try {
+      // Validate request method
+      const validMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
+      if (!validMethods.includes(req.method)) {
+        return res.status(405).json({
+          error: 'Method not allowed',
+          message: `Method ${req.method} is not allowed`,
+          allowedMethods: validMethods,
+          status: 'error'
+        });
+      }
+
+      // Validate content type for POST/PUT/PATCH
+      if (['POST', 'PUT', 'PATCH'].includes(req.method)) {
+        const contentType = req.headers['content-type'];
+        if (!contentType || !contentType.includes('application/json')) {
+          return res.status(400).json({
+            error: 'Invalid content type',
+            message: 'Content-Type must be application/json',
+            status: 'error'
+          });
+        }
+
+        // Validate JSON payload size (max 1MB)
+        const contentLength = req.headers['content-length'];
+        if (contentLength && parseInt(contentLength) > 1048576) {
+          return res.status(413).json({
+            error: 'Payload too large',
+            message: 'Request body cannot exceed 1MB',
+            maxSize: '1MB',
+            status: 'error'
+          });
+        }
+      }
+
+      // Validate query parameters for GET requests
+      if (req.method === 'GET') {
+        const page = parseInt(req.query.page as string) || 1;
+        const pageSize = parseInt(req.query.pageSize as string) || 10;
+
+        if (page < 1 || page > 1000) {
+          return res.status(400).json({
+            error: 'Invalid page parameter',
+            message: 'Page must be between 1 and 1000',
+            status: 'error'
+          });
+        }
+
+        if (pageSize < 1 || pageSize > 100) {
+          return res.status(400).json({
+            error: 'Invalid pageSize parameter',
+            message: 'Page size must be between 1 and 100',
+            status: 'error'
+          });
+        }
+      }
+
+      next();
+    } catch (error) {
+      console.error('Request validation error:', error);
+      res.status(500).json({
+        error: 'Request validation error',
+        message: 'An error occurred during request validation',
+        status: 'error'
+      });
+    }
   }
 
   /**
@@ -885,7 +1070,7 @@ export class CharacterRoutes {
       stack: error.stack
     })
 
-    const response: ApiResponse = {
+    const response = {
       success: false,
       error: error.message || 'Internal server error',
       metadata: {
