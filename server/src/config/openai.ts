@@ -14,21 +14,7 @@ export class OpenAIConfigManager {
     'OPENAI_API_KEY'
   ]
 
-  private readonly optionalEnvVars = {
-    'OPENAI_MODEL': 'gpt-3.5-turbo',
-    'MAX_API_CALLS_PER_DAY': '1000',
-    'AI_RATE_LIMIT_PER_USER': '10',
-    'AI_REQUEST_TIMEOUT': '15000',
-    'MAX_RETRY_ATTEMPTS': '3',
-    'RETRY_BASE_DELAY': '1000',
-    'RETRY_MAX_DELAY': '10000',
-    'OPENAI_DEBUG_MODE': 'false',
-    'OPENAI_LOG_LEVEL': 'info',
-    'CIRCUIT_BREAKER_FAILURE_THRESHOLD': '5',
-    'CIRCUIT_BREAKER_RECOVERY_TIMEOUT': '30000',
-    'TOKEN_USAGE_WARNING_THRESHOLD': '8000',
-    'COST_ESTIMATE_ENABLED': 'true'
-  }
+
 
   constructor() {
     this.config = this.loadAndValidateConfig()

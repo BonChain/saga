@@ -16,7 +16,7 @@ export enum Personality {
   AGGRESSIVE = 'aggressive',
   FRIENDLY = 'friendly',
   CAUTIOUS = 'cautious',
-  CURIOS = 'curious',
+  CURIOUS = 'curious',
   LOYAL = 'loyal',
   MISCHIEVOUS = 'mischievous',
   WISE = 'wise',
