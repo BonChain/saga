@@ -14,8 +14,8 @@ const PerformanceControls: React.FC = () => {
 
   useEffect(() => {
     // Listen for performance changes
-    const handlePerformanceChange = (newStats: any) => {
-      setStats(newStats);
+    const handlePerformanceChange = (newStats: { fps: number; profile: string; batteryLevel: number | null; memory: string }) => {
+      setStats(newStats as typeof stats);
     };
 
     performanceMonitor.onPerformanceChange(handlePerformanceChange);

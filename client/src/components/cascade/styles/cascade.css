@@ -68,7 +68,95 @@
   animation: cascade-pulse 2s infinite linear;
 }
 
-/* Scanline effect */
+/* CSS-only Scanline effect - Performance optimized */
+.cascade-visualization::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 255, 65, 0.03) 2px,
+    rgba(0, 255, 65, 0.03) 4px
+  );
+  pointer-events: none;
+  z-index: 1;
+  animation: scanline 8s linear infinite;
+}
+
+/* Alternative scanline pattern with cyan color */
+.cascade-visualization::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 1px,
+    rgba(0, 255, 255, 0.02) 1px,
+    rgba(0, 255, 255, 0.02) 2px
+  );
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0.7;
+}
+
+/* Scanline animation */
+@keyframes scanline {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(10px);
+  }
+}
+
+/* Respect user's motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .cascade-visualization::before {
+    animation: none;
+  }
+}
+
+/* Adaptive scanline intensity for different screen sizes */
+@media (max-width: 768px) {
+  .cascade-visualization::before {
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 3px,
+      rgba(0, 255, 65, 0.02) 3px,
+      rgba(0, 255, 65, 0.02) 6px
+    );
+  }
+
+  .cascade-visualization::after {
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 255, 255, 0.01) 2px,
+      rgba(0, 255, 255, 0.01) 4px
+    );
+  }
+}
+
+/* Performance mode - disable scanlines on low-end devices */
+@media (max-width: 480px) {
+  .cascade-visualization::before,
+  .cascade-visualization::after {
+    display: none;
+  }
+}
+
+/* Legacy scanline class for backward compatibility */
 .scanlines {
   position: absolute;
   top: 0;
@@ -76,7 +164,8 @@
   width: 100%;
   height: 100%;
   pointer-events: none;
-  opacity: 0.5;
+  opacity: 0;
+  /* Hidden by default - CSS scanlines are used instead */
 }
 
 /* Loading state */

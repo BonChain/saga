@@ -1,4 +1,4 @@
-import { setupServer } from 'msw/node';
+import { setupServer } from 'msw/mockServiceWorker';
 import { handlers } from './handlers';
 
 // Setup MSW server for Node environment (Jest)

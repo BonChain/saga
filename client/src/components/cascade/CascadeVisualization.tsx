@@ -1,7 +1,32 @@
-import React, { useRef, useEffect, useCallback, useState } from 'react'
+import React, { useRef, useEffect, useCallback, useState, useMemo } from 'react'
 import * as d3 from 'd3'
 import type { CascadeNode, CascadeConnection, CascadeVisualizationProps } from './types/cascade'
+
+// D3 simulation types - these represent the transformed data during simulation
+type SimulatedNode = CascadeNode & {
+  x?: number;
+  y?: number;
+  vx?: number;
+  vy?: number;
+  fx?: number | null;
+  fy?: number | null;
+};
+
+type SimulatedLink = {
+  source: SimulatedNode | string;
+  target: SimulatedNode | string;
+  index?: number;
+  x?: number;
+  y?: number;
+} & CascadeConnection;
 import { DEFAULT_CASCADE_DATA, DEFAULT_WORLD_SYSTEM_COLORS } from './types/cascade'
+import {
+  memoizeForceConfig,
+  memoizeCollisionDetection,
+  getMemoCacheStats
+} from './utils/memoization'
+import { performanceMonitor } from './utils/performance-monitor'
+import PerformanceWarnings from './PerformanceWarnings'
 import './styles/cascade.css'
 
 /**
@@ -54,9 +79,29 @@ const CascadeVisualization: React.FC<CascadeVisualizationProps> = ({
     return baseRadius + node.impact * 2
   }, [])
 
+  // Memoized calculations for performance optimization
+  const cascadeData = useMemo(() => data || DEFAULT_CASCADE_DATA, [data])
+
+  const memoizedForceConfig = useMemo(() => {
+    return memoizeForceConfig(dimensions, cascadeData.nodes.length)
+  }, [dimensions, cascadeData.nodes.length])
+
+  const memoizedCollisionConfig = useMemo(() => {
+    return memoizeCollisionDetection(cascadeData.nodes)
+  }, [cascadeData.nodes])
+
+  // Performance monitoring in development
+  // @ts-ignore - import.meta.env causes issues in Jest test environment
+  if (import.meta.env.DEV) {
+    console.log('🚀 Memo Cache Stats:', getMemoCacheStats())
+  }
+
   // Initialize and update D3.js visualization with memory optimization
   useEffect(() => {
     if (!svgRef.current || isLoading || error) return
+
+    // Start performance monitoring
+    performanceMonitor.startRender()
 
     const svg = d3.select(svgRef.current)
     svg.selectAll('*').remove() // Clear previous visualization
@@ -81,25 +126,28 @@ const CascadeVisualization: React.FC<CascadeVisualizationProps> = ({
 
     svg.call(zoom)
 
-    // Use provided data or default demo data
-    const cascadeData = data || DEFAULT_CASCADE_DATA
-
-    // Create force simulation
+    // Create force simulation with memoized configuration
     const simulation = d3
-      .forceSimulation(cascadeData.nodes)
+      .forceSimulation<SimulatedNode>(cascadeData.nodes as SimulatedNode[])
       .force(
         'link',
         d3
-          .forceLink<CascadeNode, CascadeConnection>(cascadeData.connections)
-          .id((d: any) => d.id)
-          .strength((d: any) => d.strength)
+          .forceLink<SimulatedNode, SimulatedLink>(cascadeData.connections as SimulatedLink[])
+          .id((d) => d.id)
+          .strength((d) => d.strength)
+          .distance(memoizedForceConfig.linkDistance)
       )
-      .force('charge', d3.forceManyBody<CascadeNode>().strength(-300))
-      .force('center', d3.forceCenter<CascadeNode>(dimensions.width / 2, dimensions.height / 2))
+      .force('charge', d3.forceManyBody<SimulatedNode>().strength(memoizedForceConfig.chargeStrength))
+      .force('center', d3.forceCenter<SimulatedNode>(memoizedForceConfig.center.x, memoizedForceConfig.center.y))
       .force(
         'collision',
-        d3.forceCollide<CascadeNode>().radius((d: any) => getNodeRadius(d) + 10)
+        d3.forceCollide<SimulatedNode>()
+          .radius((d) => getNodeRadius(d) + 10)
+          .strength(memoizedCollisionConfig.strength)
       )
+      .velocityDecay(memoizedForceConfig.velocityDecay)
+      .alphaDecay(memoizedForceConfig.alphaDecay)
+      .alphaMin(memoizedForceConfig.alphaMin)
 
     simulationRef.current = simulation
 
@@ -113,9 +161,9 @@ const CascadeVisualization: React.FC<CascadeVisualizationProps> = ({
       .append('line')
       .attr('class', 'cascade-connection')
       .attr('stroke', '#00ffff')
-      .attr('stroke-width', (d: any) => Math.max(1, d.strength * 3))
+      .attr('stroke-width', (d) => Math.max(1, d.strength * 3))
       .attr('stroke-opacity', 0.8)
-      .attr('data-connection-type', (d: any) => d.type)
+      .attr('data-connection-type', (d) => d.type)
 
     // Create node groups
     const nodeGroups = container
@@ -126,8 +174,8 @@ const CascadeVisualization: React.FC<CascadeVisualizationProps> = ({
       .enter()
       .append('g')
       .attr('class', 'cascade-node')
-      .attr('data-node-type', (d: any) => d.type)
-      .attr('data-node-system', (d: any) => d.system)
+      .attr('data-node-type', (d) => d.type)
+      .attr('data-node-system', (d) => d.system)
       .style('cursor', 'pointer')
 
     // Add node circles with retro glow effect
@@ -135,7 +183,7 @@ const CascadeVisualization: React.FC<CascadeVisualizationProps> = ({
       .append('circle')
       .attr('class', 'node-circle')
       .attr('r', 0)
-      .attr('fill', (d: any) => getNodeColor(d))
+      .attr('fill', (d) => getNodeColor(d))
       .attr('stroke', '#ffffff')
       .attr('stroke-width', 2)
       .attr('filter', 'url(#neonGlow)')
@@ -152,7 +200,7 @@ const CascadeVisualization: React.FC<CascadeVisualizationProps> = ({
       .attr('stroke', '#000000')
       .attr('stroke-width', 3)
       .attr('paint-order', 'stroke fill')
-      .text((d: any) => {
+      .text((d) => {
         return d.label.length > 20 ? d.label.substring(0, 17) + '...' : d.label
       })
 
@@ -168,7 +216,7 @@ const CascadeVisualization: React.FC<CascadeVisualizationProps> = ({
       .attr('stroke', '#000000')
       .attr('stroke-width', 2)
       .attr('paint-order', 'stroke fill')
-      .text((d: any) => d.system.toUpperCase())
+      .text((d) => d.system.toUpperCase())
 
     // Add retro definitions (filters, gradients)
     const defs = svg.append('defs')
@@ -187,36 +235,25 @@ const CascadeVisualization: React.FC<CascadeVisualizationProps> = ({
         <feComposite in="softGlow" in2="SourceGraphic" operator="over"/>
       `)
 
-    // Add scanline overlay effect
-    const scanlines = svg.append('g').attr('class', 'scanlines').style('pointer-events', 'none')
-
-    for (let lineIndex = 0; lineIndex < dimensions.height; lineIndex += 2) {
-      scanlines
-        .append('line')
-        .attr('x1', 0)
-        .attr('y1', lineIndex)
-        .attr('x2', dimensions.width)
-        .attr('y2', lineIndex)
-        .attr('stroke', 'rgba(0, 255, 255, 0.03)')
-        .attr('stroke-width', 1)
-    }
+    // CSS-only scanlines are now applied via cascade.css ::before and ::after pseudo-elements
+    // This provides significant performance improvement by eliminating DOM manipulation
 
     // Animation for node appearance
     nodeGroups
       .selectAll('circle')
       .transition()
       .duration(1000)
-      .delay((d: any) => (d.delay ? d.delay * 500 : 0))
-      .attr('r', (d: any) => getNodeRadius(d))
+      .delay((d) => ((d as CascadeNode).delay) ? (d as CascadeNode).delay! * 500 : 0)
+      .attr('r', (d) => getNodeRadius(d as CascadeNode))
       .ease(d3.easeBackOut)
 
     // Animation for connection appearance
     links
       .transition()
       .duration(800)
-      .delay((d: any) => (d.delay || 0) * 500 + 200)
+      .delay((d) => ((d as CascadeConnection).delay || 0) * 500 + 200)
       .attr('stroke-opacity', 0.8)
-      .attr('stroke-dasharray', function (this: SVGLineElement) {
+      .attr('stroke-dasharray', function(this: SVGLineElement) {
         const length = this.getTotalLength()
         return `${length} ${length}`
       })
@@ -229,39 +266,42 @@ const CascadeVisualization: React.FC<CascadeVisualizationProps> = ({
 
     // Handle node interactions
     nodeGroups
-      .on('mouseenter', function (_event, d: any) {
+      .on('mouseenter', function (_event, d) {
         d3.select(this)
           .select('circle')
           .transition()
           .duration(200)
-          .attr('r', getNodeRadius(d) * 1.2)
+          .attr('r', getNodeRadius(d as CascadeNode) * 1.2)
 
-        setHoveredNode(d)
-        onNodeHover?.(d)
+        setHoveredNode(d as CascadeNode)
+        onNodeHover?.(d as CascadeNode)
       })
-      .on('mouseleave', function (_event, d: any) {
-        d3.select(this).select('circle').transition().duration(200).attr('r', getNodeRadius(d))
+      .on('mouseleave', function (_event, d) {
+        d3.select(this).select('circle').transition().duration(200).attr('r', getNodeRadius(d as CascadeNode))
 
         setHoveredNode(null)
         onNodeHover?.(null)
       })
-      .on('click', (_event, d: any) => {
-        onNodeClick?.(d)
+      .on('click', (_event, d) => {
+        onNodeClick?.(d as CascadeNode)
       })
 
     // Update positions on simulation tick
     simulation.on('tick', () => {
       links
-        .attr('x1', (d: any) => (d.source?.x || 0))
-        .attr('y1', (d: any) => (d.source?.y || 0))
-        .attr('x2', (d: any) => (d.target?.x || 0))
-        .attr('y2', (d: any) => (d.target?.y || 0))
+        .attr('x1', (d) => ((d as SimulatedLink).source as SimulatedNode).x || 0)
+        .attr('y1', (d) => ((d as SimulatedLink).source as SimulatedNode).y || 0)
+        .attr('x2', (d) => ((d as SimulatedLink).target as SimulatedNode).x || 0)
+        .attr('y2', (d) => ((d as SimulatedLink).target as SimulatedNode).y || 0)
 
-      nodeGroups.attr('transform', (d: any) => `translate(${d.x || 0}, ${d.y || 0})`)
+      nodeGroups.attr('transform', (d: CascadeNode) => `translate(${d.x || 0}, ${d.y || 0})`)
     })
 
     // Enhanced cleanup
     return () => {
+      // End performance monitoring
+      performanceMonitor.endRender();
+
       if (simulation) {
         simulation.stop();
         simulationRef.current = null;
@@ -275,7 +315,7 @@ const CascadeVisualization: React.FC<CascadeVisualizationProps> = ({
       // Clear D3 selections
       svg.selectAll('*').remove();
     };
-  }, [data, isLoading, error, dimensions, onNodeClick, onNodeHover, getNodeColor, getNodeRadius])
+  }, [data, isLoading, error, dimensions, onNodeClick, onNodeHover, getNodeColor, getNodeRadius, cascadeData, memoizedForceConfig, memoizedCollisionConfig])
 
   // Loading state
   if (isLoading) {
@@ -322,6 +362,10 @@ const CascadeVisualization: React.FC<CascadeVisualizationProps> = ({
           )}
         </div>
       )}
+      <PerformanceWarnings
+        nodeCount={cascadeData.nodes.length}
+        connectionCount={cascadeData.connections.length}
+      />
     </div>
   )
 }

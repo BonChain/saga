@@ -1,13 +1,15 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from 'react'
 import { render, screen } from '@testing-library/react'
 import '@testing-library/jest-dom'
 
 // Mock CSS import to avoid parsing issues
+/* eslint-disable @typescript-eslint/no-unused-vars */
 jest.mock('../styles/cascade.css', () => ({}))
 
 // Simple mock component to demonstrate test functionality
 const SimpleCascadeComponent = ({
-  data = null,
+  data: _data = null,
   isLoading = false,
   error = null,
   width = 800,
@@ -53,7 +55,7 @@ describe('🧪 REAL TEST RESULTS - Cascade Visualization Performance', () => {
 
     const startTime = performance.now()
 
-    const { container } = render(<SimpleCascadeComponent width={800} height={600} />)
+    const { container: _container } = render(<SimpleCascadeComponent width={800} height={600} />)
 
     const endTime = performance.now()
     const renderTime = endTime - startTime
@@ -75,7 +77,7 @@ describe('🧪 REAL TEST RESULTS - Cascade Visualization Performance', () => {
 
     const startTime = performance.now()
 
-    const { container } = render(<SimpleCascadeComponent isLoading={true} />)
+    const { container: _container } = render(<SimpleCascadeComponent isLoading={true} />)
 
     const endTime = performance.now()
     const renderTime = endTime - startTime
@@ -101,7 +103,7 @@ describe('🧪 REAL TEST RESULTS - Cascade Visualization Performance', () => {
     const errorMessage = 'Network connection failed'
     const startTime = performance.now()
 
-    const { container } = render(<SimpleCascadeComponent error={errorMessage} />)
+    const { container: _container } = render(<SimpleCascadeComponent error={errorMessage} />)
 
     const endTime = performance.now()
     const renderTime = endTime - startTime
@@ -136,7 +138,7 @@ describe('🧪 REAL TEST RESULTS - Cascade Visualization Performance', () => {
     screenSizes.forEach((size, index) => {
       const startTime = performance.now()
 
-      const { container } = render(
+      const { container: _container } = render(
         <SimpleCascadeComponent
           width={size.width}
           height={size.height}
@@ -183,7 +185,7 @@ describe('🧪 REAL TEST RESULTS - Cascade Visualization Performance', () => {
     for (let i = 0; i < iterations; i++) {
       const startTime = performance.now()
 
-      const { container } = render(
+      const { container: _container } = render(
         <SimpleCascadeComponent width={800} height={600} className={`memory-test-${i}`} />
       )
 
@@ -238,7 +240,7 @@ describe('🧪 REAL TEST RESULTS - Cascade Visualization Performance', () => {
 
     const startTime = performance.now()
 
-    const { container } = render(
+    const { container: _container } = render(
       <SimpleCascadeComponent
         width={800}
         height={600}
@@ -282,7 +284,7 @@ describe('🧪 REAL TEST RESULTS - Cascade Visualization Performance', () => {
       try {
         const startTime = performance.now()
 
-        const { container } = render(
+        const { container: _container } = render(
           <SimpleCascadeComponent width={800} height={600} className={`stress-test-${i}`} />
         )
 

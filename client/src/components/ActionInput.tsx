@@ -23,7 +23,8 @@ const ActionInput: React.FC<ActionInputProps> = ({
   const [characterCount, setCharacterCount] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const serverUrl = import.meta.env.VITE_SERVER_URL || 'http://localhost:3005';
+  // @ts-ignore - import.meta.env causes issues in Jest test environment
+const serverUrl = import.meta.env.VITE_SERVER_URL || 'http://localhost:3005';
 
   const exampleActions = [
     'befriend the goblin king',
@@ -64,15 +65,16 @@ const ActionInput: React.FC<ActionInputProps> = ({
         }
       });
 
-      if (response.data.success) {
-        setFeedback(`✅ Action received: ID ${response.data.data.id}`);
+      const responseData = response.data as { success: boolean; data?: { id: string }; error?: string };
+      if (responseData.success) {
+        setFeedback(`✅ Action received: ID ${responseData.data?.id}`);
         setAction('');
         onSubmit?.(action.trim());
 
         // Clear feedback after 3 seconds
         setTimeout(() => setFeedback(null), 3000);
       } else {
-        setFeedback(`❌ Error: ${response.data.error}`);
+        setFeedback(`❌ Error: ${responseData.error}`);
       }
     } catch (error: unknown) {
       console.error('Action submission error:', error);
