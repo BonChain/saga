@@ -9,11 +9,11 @@ import path from 'path';
 dotenv.config();
 
 // Import storage components
-import { StorageManager, StorageManagerConfig } from './storage/StorageManager';
+import { StorageManager, StorageManagerConfig } from './storage/storage-manager';
 import { WalrusConfig, BackupConfig, ValidationConfig, LoggerConfig } from './types/storage';
 
 // Import Story 2.2 Intent Parser
-import { intentParser } from './services/IntentParser';
+import { intentParser } from './services/intent-parser';
 
 const app = express();
 const PORT = process.env.PORT || 3005;

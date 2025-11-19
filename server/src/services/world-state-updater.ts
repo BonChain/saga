@@ -23,8 +23,8 @@ import {
   CascadeVisualizationData,
   EffectHistory
 } from '../types/ai'
-import { Layer3State } from '../storage/Layer3State'
-import { Layer1Blueprint } from '../storage/Layer1Blueprint'
+import { Layer3State } from '../storage/layer3-state'
+import { Layer1Blueprint } from '../storage/layer1-blueprint'
 
 export interface WorldStateUpdateResult {
   success: boolean

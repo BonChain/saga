@@ -7,10 +7,10 @@
  * Note: Requires valid OPENAI_API_KEY environment variable
  */
 
-import { CascadeProcessor } from '../../../src/services/CascadeProcessor'
-import { WorldStateUpdater } from '../../../src/services/WorldStateUpdater'
-import { ConsequenceGenerator } from '../../../src/services/ConsequenceGenerator'
-import { OpenAIIntegration } from '../../../src/services/OpenAIIntegration'
+import { CascadeProcessor } from '../../../src/services/cascade-processor'
+import { WorldStateUpdater } from '../../../src/services/world-state-updater'
+import { ConsequenceGenerator } from '../../../src/services/consequence-generator'
+import { OpenAIIntegration } from '../../../src/services/openai-integration'
 import {
   AIRequest,
   AIConsequence,
@@ -20,8 +20,8 @@ import {
   ImpactLevel,
   DurationType
 } from '../../../src/types/ai'
-import { Layer1Blueprint } from '../../../src/storage/Layer1Blueprint'
-import { Layer3State } from '../../../src/storage/Layer3State'
+import { Layer1Blueprint } from '../../../src/storage/layer1-blueprint'
+import { Layer3State } from '../../../src/storage/layer3-state'
 import { v4 as uuidv4 } from 'uuid'
 
 // Skip tests if no OpenAI API key is configured

@@ -19,7 +19,7 @@ import {
   UsageMetrics,
   PromptType
 } from '../types/ai'
-import { AIServiceAdapter, aiServiceAdapter } from './ai/AIServiceAdapter'
+import { AIServiceAdapter, aiServiceAdapter } from './ai/ai-service-adapter'
 
 export class OpenAIIntegration {
   private auditLogger: AuditLogger

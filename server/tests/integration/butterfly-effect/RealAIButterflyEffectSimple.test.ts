@@ -5,10 +5,10 @@
  * Simplified to focus on the core AI → Consequence → Butterfly Effect flow.
  */
 
-import { ConsequenceGenerator } from '../../../src/services/ConsequenceGenerator'
-import { CascadeProcessor } from '../../../src/services/CascadeProcessor'
+import { ConsequenceGenerator } from '../../../src/services/consequence-generator'
+import { CascadeProcessor } from '../../../src/services/cascade-processor'
 import { AIRequest, ConsequenceType } from '../../../src/types/ai'
-import { Layer1Blueprint } from '../../../src/storage/Layer1Blueprint'
+import { Layer1Blueprint } from '../../../src/storage/layer1-blueprint'
 import { v4 as uuidv4 } from 'uuid'
 
 // Check for OpenAI API key

@@ -8,8 +8,8 @@
  */
 
 import { describe, it, expect } from '@jest/globals'
-import { StorageManager } from '../../src/storage/StorageManager'
-import { DataValidation } from '../../src/storage/DataValidation'
+import { StorageManager } from '../../src/storage/storage-manager'
+import { DataValidation } from '../../src/storage/data-validation'
 import { Action } from '../../src/types/storage'
 
 describe('Story 2.3: Enhanced Action Confirmation', () => {
@@ -21,13 +21,22 @@ describe('Story 2.3: Enhanced Action Confirmation', () => {
     storageManager = new StorageManager({
       storageBasePath: './test-storage',
       walrus: {
-        enableWalrus: false,
-        developerKeyId: 'test',
-        network: 'testnet'
+        endpoint: 'https://testnet.sui.app',
+        network: 'testnet',
+        maxRetries: 3,
+        timeout: 5000,
+        useBackup: false,
+        backupPath: './test-backups',
+        sponsoredTransactions: false,
+        developerPrivateKey: 'test-key',
+        storageEpochs: 1
       },
       backup: {
-        enableBackup: true,
-        backupPath: './test-backups'
+        enabled: true,
+        basePath: './test-backups',
+        maxBackups: 5,
+        compressionEnabled: false,
+        encryptionEnabled: false
       },
       validation: {
         strictMode: false,
@@ -39,9 +48,15 @@ describe('Story 2.3: Enhanced Action Confirmation', () => {
         enableCrossLayerValidation: false
       },
       logger: {
-        enableLogging: false,
+        enabled: false,
         logLevel: 'info',
-        logPath: './test-logs'
+        logToFile: false,
+        logToConsole: false,
+        logDirectory: './test-logs',
+        maxLogFileSize: 1048576,
+        maxLogFiles: 10,
+        structuredLogging: false,
+        includeMetadata: false
       }
     })
 
@@ -103,7 +118,8 @@ describe('Story 2.3: Enhanced Action Confirmation', () => {
         metadata: {
           confidence: 0.8,
           parsedIntent: {
-            actionType: 'other'
+            actionType: 'other',
+            urgency: 'low'
           }
         }
       }
@@ -173,7 +189,8 @@ describe('Story 2.3: Enhanced Action Confirmation', () => {
           parsedIntent: {
             actionType: 'combat',
             target: 'dragon',
-            method: 'sword'
+            method: 'sword',
+            urgency: 'high'
           }
         }
       }

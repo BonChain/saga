@@ -13,17 +13,14 @@ import {
   AIRequest,
   AIResponse,
   AIConsequence,
-  PromptContext,
   TokenUsage,
-  AIError,
   ErrorType,
-  LogLevel,
   UsageMetrics,
   PromptType
 } from '../../types/ai'
 import { AuditLogger } from '../AuditLogger'
-import { perModelCircuitBreaker } from './PerModelCircuitBreaker'
-import { APIKeyValidator } from '../../utils/APIKeyValidator'
+import { perModelCircuitBreaker } from './per-model-circuit-breaker'
+import { APIKeyValidator } from '../../utils/api-key-validator'
 
 // Simple Circuit Breaker Implementation
 interface CircuitBreakerState {

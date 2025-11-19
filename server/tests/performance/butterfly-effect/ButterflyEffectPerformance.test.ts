@@ -6,9 +6,9 @@
  * as required by the acceptance criteria and constraints.
  */
 
-import { CascadeProcessor } from '../../../src/services/CascadeProcessor'
-import { WorldStateUpdater } from '../../../src/services/WorldStateUpdater'
-import { ConsequenceGenerator } from '../../../src/services/ConsequenceGenerator'
+import { CascadeProcessor } from '../../../src/services/cascade-processor'
+import { WorldStateUpdater } from '../../../src/services/world-state-updater'
+import { ConsequenceGenerator } from '../../../src/services/consequence-generator'
 import {
   AIConsequence,
   ConsequenceType,
@@ -19,8 +19,8 @@ import {
   ButterflyEffectNode,
   CascadeVisualizationData
 } from '../../../src/types/ai'
-import { Layer1Blueprint } from '../../../src/storage/Layer1Blueprint'
-import { Layer3State } from '../../../src/storage/Layer3State'
+import { Layer1Blueprint } from '../../../src/storage/layer1-blueprint'
+import { Layer3State } from '../../../src/storage/layer3-state'
 import { v4 as uuidv4 } from 'uuid'
 
 // Mock implementations for storage layers

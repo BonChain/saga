@@ -6,7 +6,7 @@
  */
 
 import { OpenAIConfig, LogLevel } from '../types/ai'
-import { APIKeyValidator } from '../utils/APIKeyValidator'
+import { APIKeyValidator } from '../utils/api-key-validator'
 
 export class OpenAIConfigManager {
   private config: OpenAIConfig

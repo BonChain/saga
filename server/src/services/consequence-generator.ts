@@ -21,7 +21,7 @@ import {
   WorldRule,
   ValidationResult
 } from '../types/ai'
-import { Layer1Blueprint } from '../storage/Layer1Blueprint'
+import { Layer1Blueprint } from '../storage/layer1-blueprint'
 
 export interface ConsequenceParsingOptions {
   maxConsequences?: number

@@ -1,14 +1,14 @@
 import path from 'path'
 import { v4 as uuidv4 } from 'uuid'
-import { Layer1Blueprint } from './Layer1Blueprint'
-import { Layer2Queue } from './Layer2Queue'
-import { Layer3State } from './Layer3State'
-import { WalrusClient } from './WalrusClient'
-import { BackupStorage } from './BackupStorage'
-import { DataValidation } from './DataValidation'
-import { StorageLogger } from './StorageLogger'
+import { Layer1Blueprint } from './layer1-blueprint'
+import { Layer2Queue } from './layer2-queue'
+import { Layer3State } from './layer3-state'
+import { WalrusClient } from './walrus-client'
+import { BackupStorage } from './backup-storage'
+import { DataValidation } from './data-validation'
+import { StorageLogger } from './storage-logger'
 import { WorldRules, Action, WorldState, WalrusConfig, BackupConfig, ValidationConfig, LoggerConfig } from '../types/storage'
-import { aiServiceAdapter } from '../services/ai/AIServiceAdapter'
+import { aiServiceAdapter } from '../services/ai/ai-service-adapter'
 
 export interface StorageManagerConfig {
   storageBasePath: string

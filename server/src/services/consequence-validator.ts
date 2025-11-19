@@ -15,8 +15,8 @@ import {
   ValidationResult,
   ImpactLevel
 } from '../types/ai'
-import { Layer1Blueprint } from '../storage/Layer1Blueprint'
-import { Layer3State } from '../storage/Layer3State'
+import { Layer1Blueprint } from '../storage/layer1-blueprint'
+import { Layer3State } from '../storage/layer3-state'
 
 export interface ValidationRule {
   id: string

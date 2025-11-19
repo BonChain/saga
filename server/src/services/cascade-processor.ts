@@ -29,7 +29,7 @@ import {
   CompactWorldSystemInfluence,
   CompactStringCache,
   WorldSystemType
-} from '../utils/MemoryOptimizer'
+} from '../utils/memory-optimizer'
 
 /**
  * Configuration constants for cascade processing
