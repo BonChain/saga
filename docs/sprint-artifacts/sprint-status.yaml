@@ -564,23 +564,26 @@ epic-8:
 
     story-8-2-cascade-visualization-engine:
       title: "Cascade Visualization Engine"
-      description: "As a player, I want to see visual diagrams showing how my actions create ripple effects through the world, so that I understand the living world mechanics."
-      status: "done"
+      description: "As a player, I want to see scrollable consequence cards showing how my actions create ripple effects through the world, so that I understand the living world mechanics and discover surprising AI-generated consequences."
+      status: "in-progress"
       prerequisites: ["story-3-3-butterfly-effect-calculation"]
-      estimated_hours: 5
+      estimated_hours: 8
+      implementation_notes: "Updated for mobile-first responsive design with simple Known/Unknown filtering based on Sprint Change Proposal approval"
+      story_file: "stories/story-8-2-cascade-visualization-engine.md"
       acceptance_criteria:
-        - "See animated diagram showing cause-and-effect relationships"
-        - "Visualization connects action to direct consequences and butterfly effects"
-        - "Related world systems are color-coded and clearly labeled"
-        - "Can interact with diagram to explore detailed consequences"
-        - "Visualization updates in real-time as new effects emerge"
-        - "Retro styling makes it visually appealing for demo presentation"
+        - "See scrollable timeline of consequences organized by familiarity (known/unknown)"
+        - "Each consequence card shows world system, severity level, personal relevance score, and narrative description"
+        - "Can tap cards to reveal detailed impact information"
+        - "Simple Known/Unknown toggle optimized for mobile with 44px tap targets"
+        - "Retro styling with neon effects maintains consistency with Story 8.1"
+        - "Layout works perfectly on mobile (320px+) and desktop (1024px+)"
       technical_notes:
-        - "Implement cascade visualization component with D3.js or similar"
-        - "Create animated connection lines and node positioning"
-        - "Add interactive hover states and detail views"
-        - "Design real-time update system for live effects"
-        - "Include retro styling with neon effects and animations"
+        - "Remove D3.js dependency and complex drag/zoom interactions"
+        - "Implement mobile-first CascadeResults component with CSS Grid layout"
+        - "Create ConsequenceCard component with tap-to-reveal functionality"
+        - "Implement familiarity scoring algorithm based on user context (quests, items, dialogue)"
+        - "Add responsive filter toggle with neon green (Known) and purple (Unknown) effects"
+        - "Ensure WCAG 2.1 AAA contrast compliance and 60fps animation performance"
 
     story-8-3-demo-flow-presentation-mode:
       title: "Demo Flow & Presentation Mode"

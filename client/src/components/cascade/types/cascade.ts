@@ -28,6 +28,12 @@ export interface CascadeNode {
   color?: string;
   delay?: number; // seconds from action start
   duration?: number; // animation duration
+  // Mobile-first consequence properties
+  familiarity?: 'known' | 'unknown'; // based on user context
+  severity?: 'minor' | 'major' | 'critical'; // severity level
+  personalRelevance?: number; // 0-100 score based on user's history
+  narrative?: string; // detailed consequence description
+  isExpanded?: boolean; // UI state for card expansion
   nodeIds?: string[]; // For cluster nodes - IDs of contained nodes
   nodeCount?: number; // For cluster nodes - Number of contained nodes
 }
@@ -60,6 +66,45 @@ export interface CascadeVisualizationProps {
   onNodeClick?: (node: CascadeNode) => void;
   onNodeHover?: (node: CascadeNode | null) => void;
   className?: string;
+}
+
+export interface ActionInputProps {
+  onSubmit?: (action: string) => void;
+  disabled?: boolean;
+  maxLength?: number;           // Maximum characters allowed
+  minLength?: number;           // Minimum characters required
+  enforceLimit?: boolean;       // Whether to enforce hard limit
+  showCharacterCount?: boolean; // Whether to show character counter
+}
+
+// Mobile-first cascade results props
+export interface CascadeResultsProps {
+  data: CascadeData | null;
+  isLoading?: boolean;
+  error?: string | null;
+  className?: string;
+}
+
+// Consequence card component props
+export interface ConsequenceCardProps {
+  consequence: CascadeNode;
+  isExpanded?: boolean;
+  onToggle?: () => void;
+  worldSystemColors: WorldSystemColors;
+}
+
+// Filter state interface
+export interface CascadeFilter {
+  showKnown: boolean;
+  showUnknown: boolean;
+}
+
+// User context for familiarity scoring
+export interface UserContext {
+  completedQuests: string[];
+  discoveredLocations: string[];
+  items: string[];
+  dialogHistory: string[];
 }
 
 export interface WorldSystemColors {
@@ -186,3 +231,4 @@ export const DEFAULT_CASCADE_DATA: CascadeData = {
   timestamp: new Date().toISOString(),
   playerId: 'player-001'
 };
+

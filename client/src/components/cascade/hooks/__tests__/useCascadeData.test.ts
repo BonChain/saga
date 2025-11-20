@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useCascadeData } from '../useCascadeData';
-import { server } from '../../../../mocks/server';
+import { server } from '../../../mocks/server';
 import { http } from 'msw';
-import { mockCascadeData, mockLargeCascade, mockErrorResponse } from '../../../../mocks/handlers';
+import { mockCascadeData, mockLargeCascade, mockErrorResponse } from '../../../mocks/handlers';
 
 describe('useCascadeData Hook Integration Tests', () => {
   const defaultProps = {
