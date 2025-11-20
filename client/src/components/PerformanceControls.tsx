@@ -5,16 +5,17 @@
 
 import React, { useState, useEffect } from 'react';
 import performanceMonitor from '../utils/performanceMonitor';
+import type { PerformanceStats } from '../utils/performanceMonitor';
 import './PerformanceControls.css';
 
 const PerformanceControls: React.FC = () => {
   const [showOverlay, setShowOverlay] = useState(false);
-  const [profile, setProfile] = useState('auto');
-  const [stats, setStats] = useState(performanceMonitor.getStats());
+  const [profile, setProfile] = useState<'auto' | 'high' | 'medium' | 'low'>('auto');
+  const [stats, setStats] = useState<PerformanceStats>(performanceMonitor.getStats());
 
   useEffect(() => {
     // Listen for performance changes
-    const handlePerformanceChange = (newStats: any) => {
+    const handlePerformanceChange = (newStats: PerformanceStats) => {
       setStats(newStats);
     };
 

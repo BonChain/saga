@@ -1,7 +1,7 @@
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useCascadeData } from '../useCascadeData';
 import { server } from '../../../mocks/server';
-import { rest } from 'msw';
+import { http } from 'msw';
 import { mockCascadeData, mockLargeCascade, mockErrorResponse } from '../../../mocks/handlers';
 
 describe('useCascadeData Hook Integration Tests', () => {
@@ -44,7 +44,7 @@ describe('useCascadeData Hook Integration Tests', () => {
   test('handles fetch errors gracefully', async () => {
     // Override server to return error
     server.use(
-      rest.get('/api/cascades/:actionId', (req, res, ctx) => {
+      http.get('/api/cascades/:actionId', (req, res, ctx) => {
         return res(
           ctx.status(500),
           ctx.json({ success: false, error: 'Internal server error' })
@@ -64,7 +64,7 @@ describe('useCascadeData Hook Integration Tests', () => {
 
   test('handles 404 errors', async () => {
     server.use(
-      rest.get('/api/cascades/:actionId', (req, res, ctx) => {
+      http.get('/api/cascades/:actionId', (req, res, ctx) => {
         return res(
           ctx.status(404),
           ctx.json({ success: false, error: 'Action not found' })
@@ -84,7 +84,7 @@ describe('useCascadeData Hook Integration Tests', () => {
 
   test('handles network timeout', async () => {
     server.use(
-      rest.get('/api/cascades/:actionId', (req, res, ctx) => {
+      http.get('/api/cascades/:actionId', (req, res, ctx) => {
         return res(
           ctx.delay(10000), // 10 second delay
           ctx.json({ success: true, data: mockCascadeData })
@@ -182,7 +182,7 @@ describe('useCascadeData Hook Integration Tests', () => {
 
   test('handles server errors with fallback to default data', async () => {
     server.use(
-      rest.get('/api/cascades/:actionId', (req, res, ctx) => {
+      http.get('/api/cascades/:actionId', (req, res, ctx) => {
         return res(
           ctx.status(500),
           ctx.json(mockErrorResponse)
@@ -201,7 +201,7 @@ describe('useCascadeData Hook Integration Tests', () => {
 
   test('validates cascade data structure', async () => {
     server.use(
-      rest.get('/api/cascades/:actionId', (req, res, ctx) => {
+      http.get('/api/cascades/:actionId', (req, res, ctx) => {
         return res(
           ctx.json({
             success: true,
@@ -229,7 +229,7 @@ describe('useCascadeData Hook Integration Tests', () => {
 
   test('handles large cascade data efficiently', async () => {
     server.use(
-      rest.get('/api/cascades/:actionId', (req, res, ctx) => {
+      http.get('/api/cascades/:actionId', (req, res, ctx) => {
         return res(ctx.json({ success: true, data: mockLargeCascade }));
       })
     );
@@ -290,7 +290,7 @@ describe('useCascadeData Hook Integration Tests', () => {
   test('error recovery with retry', async () => {
     let callCount = 0;
     server.use(
-      rest.get('/api/cascades/:actionId', (req, res, ctx) => {
+      http.get('/api/cascades/:actionId', (req, res, ctx) => {
         callCount++;
         if (callCount === 1) {
           return res(

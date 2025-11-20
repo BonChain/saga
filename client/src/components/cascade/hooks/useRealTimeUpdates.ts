@@ -33,17 +33,17 @@ export const useRealTimeUpdates = ({
   const HEARTBEAT_INTERVAL = 30000; // 30 seconds
   const BUFFER_SIZE = 50; // Maximum buffered updates
 
-  const connectWebSocket = useCallback(() => {
+  const connectWebSocket = useCallback((): WebSocket | null => {
     if (!actionId) {
       console.warn('No actionId provided for WebSocket connection');
-      return;
+      return null;
     }
 
     try {
       // Construct WebSocket URL for cascade updates
       const wsUrl = serverUrl.replace(/^http/, 'ws') + `/cascade-updates/${actionId}`;
 
-      wsRef.current = new WebSocket(wsUrl);
+      wsRef.current = new WebSocket(wsUrl) as WebSocket;
 
       wsRef.current.onopen = () => {
         console.log('Cascade WebSocket connected');
@@ -136,7 +136,9 @@ export const useRealTimeUpdates = ({
       setLastError(error as Error);
       onError?.(error as Error);
     }
-  }, [actionId, serverUrl, onNewData, onError, onConnectionChange]);
+
+    return wsRef.current;
+  }, [actionId, serverUrl, onError, onConnectionChange]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const scheduleReconnect = useCallback(() => {
     let attempts = 0;
@@ -147,18 +149,46 @@ export const useRealTimeUpdates = ({
         return;
       }
 
+      try {
+        if (wsRef.current) {
+          wsRef.current.close();
+        }
+
+        // Create new WebSocket connection directly
+        const wsUrl = serverUrl.replace(/^http/, 'ws') + `/cascade-updates/${actionId}`;
+        wsRef.current = new WebSocket(wsUrl) as WebSocket;
+
+        wsRef.current.onopen = () => {
+          console.log('Cascade WebSocket reconnected');
+          setIsConnected(true);
+          onConnectionChange?.(true);
+        };
+
+        wsRef.current.onclose = () => {
+          console.log('Cascade WebSocket disconnected');
+          setIsConnected(false);
+          onConnectionChange?.(false);
+        };
+
+        wsRef.current.onerror = (error) => {
+          console.error('Cascade WebSocket error:', error);
+          const errorMessage = error instanceof Event ? 'WebSocket connection error' : 'Unknown WebSocket error';
+          setLastError(new Error(errorMessage));
+          onError?.(new Error(errorMessage));
+        };
+      } catch (error) {
+        console.error('Failed to reconnect:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Reconnection failed';
+        setLastError(new Error(errorMessage));
+        onError?.(new Error(errorMessage));
+      }
+
       attempts++;
       console.log(`Attempting reconnection ${attempts}/${MAX_RECONNECT_ATTEMPTS}...`);
-
-      setTimeout(() => {
-        if (!wsRef.current || wsRef.current.readyState === WebSocket.CLOSED) {
-          connectWebSocket();
-        }
-      }, RECONNECT_DELAY * attempts); // Exponential backoff
     };
 
     reconnectTimeoutRef.current = setTimeout(reconnect, RECONNECT_DELAY);
-  }, [connectWebSocket]);
+  }, [actionId, serverUrl, onError, onConnectionChange]);
 
   const disconnect = useCallback(() => {
     console.log('Disconnecting WebSocket');

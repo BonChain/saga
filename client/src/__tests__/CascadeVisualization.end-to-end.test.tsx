@@ -3,7 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { axe } from 'jest-axe';
 import { server } from '../mocks/server';
-import { rest } from 'msw';
+import { http } from 'msw';
 import App from '../App';
 import { mockCascadeData, mockSmallCascade, mockLargeCascade } from '../mocks/handlers';
 
@@ -54,7 +54,7 @@ describe('Cascade Visualization End-to-End Tests', () => {
 
     // Mock cascade data
     server.use(
-      rest.get('/api/cascades/:actionId', (req, res, ctx) => {
+      http.get('/api/cascades/:actionId', (req, res, ctx) => {
         return res(ctx.json({ success: true, data: mockCascadeData }));
       })
     );
@@ -142,7 +142,7 @@ describe('Cascade Visualization End-to-End Tests', () => {
     );
 
     server.use(
-      rest.get('/api/cascades/:actionId', (req, res, ctx) => {
+      http.get('/api/cascades/:actionId', (req, res, ctx) => {
         return res(
           ctx.status(500),
           ctx.json({ success: false, error: 'Cascade generation failed' })
@@ -231,7 +231,7 @@ describe('Cascade Visualization End-to-End Tests', () => {
     );
 
     server.use(
-      rest.get('/api/cascades/:actionId', (req, res, ctx) => {
+      http.get('/api/cascades/:actionId', (req, res, ctx) => {
         return res(ctx.json({ success: true, data: mockSmallCascade }));
       })
     );
@@ -287,7 +287,7 @@ describe('Cascade Visualization End-to-End Tests', () => {
     );
 
     server.use(
-      rest.get('/api/cascades/:actionId', (req, res, ctx) => {
+      http.get('/api/cascades/:actionId', (req, res, ctx) => {
         return res(ctx.json({ success: true, data: mockLargeCascade }));
       })
     );
@@ -335,7 +335,7 @@ describe('Cascade Visualization End-to-End Tests', () => {
     );
 
     server.use(
-      rest.get('/api/cascades/:actionId', (req, res, ctx) => {
+      http.get('/api/cascades/:actionId', (req, res, ctx) => {
         return res(ctx.json({ success: true, data: mockSmallCascade }));
       })
     );
@@ -384,7 +384,7 @@ describe('Cascade Visualization End-to-End Tests', () => {
     );
 
     server.use(
-      rest.get('/api/cascades/:actionId', (req, res, ctx) => {
+      http.get('/api/cascades/:actionId', (req, res, ctx) => {
         return res(ctx.json({ success: true, data: mockSmallCascade }));
       })
     );
@@ -395,7 +395,7 @@ describe('Cascade Visualization End-to-End Tests', () => {
     const actionInput = screen.getByPlaceholderText('Enter any action you can imagine...');
     await userEvent.type(actionInput, 'keyboard test action');
     await userEvent.tab(); // Move to submit button
-    await userEvent.keyboard.press('Enter');
+    await userEvent.keyboard('{Enter}');
 
     // Cascade should appear
     await waitFor(() => {
@@ -405,7 +405,7 @@ describe('Cascade Visualization End-to-End Tests', () => {
     // Close cascade using keyboard (Escape or close button)
     const closeButton = screen.getByLabelText('Close cascade visualization');
     closeButton.focus();
-    await userEvent.keyboard.press('Enter');
+    await userEvent.keyboard('{Enter}');
 
     await waitFor(() => {
       expect(screen.queryByText('ACTION CASCADE VISUALIZATION')).not.toBeInTheDocument();
@@ -429,7 +429,7 @@ describe('Cascade Visualization End-to-End Tests', () => {
     );
 
     server.use(
-      rest.get('/api/cascades/:actionId', (req, res, ctx) => {
+      http.get('/api/cascades/:actionId', (req, res, ctx) => {
         return res(ctx.json({ success: true, data: mockCascadeData }));
       })
     );
@@ -512,7 +512,7 @@ describe('Cascade Visualization End-to-End Tests', () => {
     );
 
     server.use(
-      rest.get('/api/cascades/:actionId', (req, res, ctx) => {
+      http.get('/api/cascades/:actionId', (req, res, ctx) => {
         return res(ctx.json({ success: true, data: mockSmallCascade }));
       })
     );

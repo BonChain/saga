@@ -12,6 +12,7 @@ module.exports = {
     '^(\\.{1,2}/.*)\\.js$': '$1',
     '^react$': '<rootDir>/node_modules/react/index.js',
     '^react-dom$': '<rootDir>/node_modules/react-dom/index.js',
+    '^.+\\.(css|less|scss|sass)$': 'identity-obj-proxy',
   },
   transform: {
     '^.+\\.(ts|tsx)$': ['ts-jest', {
@@ -23,6 +24,8 @@ module.exports = {
       }
     }]
   },
+  setupFiles: ['<rootDir>/src/setupTests.js'],
+  setupFilesAfterEnv: ['<rootDir>/src/setupTests.ts'],
   transformIgnorePatterns: [
     'node_modules/(?!(d3|@types/d3|msw)/)'
   ],

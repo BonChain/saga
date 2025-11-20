@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react'
 import ActionInput from './components/ActionInput'
-import CascadeVisualization from './components/cascade/CascadeVisualization'
+import CascadeResults from './components/cascade/CascadeResults'
 import performanceMonitor from './utils/performanceMonitor'
-import type { CascadeNode } from './components/cascade/types/cascade'
 import './App.css'
 
 function App() {
@@ -31,16 +30,7 @@ function App() {
     setShowCascade(true)
   }
 
-  const handleNodeClick = (node: CascadeNode) => {
-    console.log('Node clicked:', node)
-    // Could expand to show more details or navigate to related views
-  }
-
-  const handleNodeHover = (node: CascadeNode | null) => {
-    // Update UI state for hover feedback
-    console.log('Node hovered:', node?.label)
-  }
-
+  
   return (
     <div className="app">
       <a href="#main-content" className="skip-link">Skip to main content</a>
@@ -65,12 +55,8 @@ function App() {
                 ✕
               </button>
             </div>
-            <CascadeVisualization
+            <CascadeResults
               data={null} // Will use default demo data for now
-              width={Math.min(800, window.innerWidth - 40)}
-              height={400}
-              onNodeClick={handleNodeClick}
-              onNodeHover={handleNodeHover}
             />
           </div>
         )}

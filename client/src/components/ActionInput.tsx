@@ -1,19 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
+import type { ActionInputProps } from './cascade/types/cascade';
 import './ActionInput.css';
-
-interface ActionInputProps {
-  onSubmit?: (action: string) => void;
-  disabled?: boolean;
-  maxLength?: number;           // Maximum characters allowed
-  enforceLimit?: boolean;       // Whether to enforce hard limit
-  showCharacterCount?: boolean; // Whether to show character counter
-}
 
 const ActionInput: React.FC<ActionInputProps> = ({
   onSubmit,
   disabled = false,
   maxLength = 500,
+  minLength = 3, // Minimum 3 characters required
   enforceLimit = true,
   showCharacterCount = true
 }) => {
@@ -40,6 +34,13 @@ const ActionInput: React.FC<ActionInputProps> = ({
     e.preventDefault();
 
     if (!action.trim() || isSubmitting || disabled) {
+      setError('⚠️ Please enter an action before submitting');
+      return;
+    }
+
+    // Minimum character validation
+    if (action.trim().length < (minLength || 3)) {
+      setError(`⚠️ Action must be at least ${minLength || 3} characters long`);
       return;
     }
 
@@ -189,6 +190,56 @@ const ActionInput: React.FC<ActionInputProps> = ({
             }
           >
             {isSubmitting ? 'PROCESSING...' : 'EXECUTE ACTION'}
+          </button>
+
+          <button
+            type="button"
+            className="demo-button"
+            onClick={() => {
+              const demoActions = [
+                { text: 'Cast fireball at goblin', system: 'magic' },
+                { text: 'Negotiate peace treaty', system: 'social' },
+                { text: 'Plant enchanted forest', system: 'environment' },
+                { text: 'Raid dragon\'s lair', system: 'combat' },
+                { text: 'Build magical portal', system: 'magic' }
+              ];
+
+              const demo = demoActions[Math.floor(Math.random() * demoActions.length)];
+              setAction(demo.text);
+
+              // Create mock cascade data for immediate display
+              const mockCascadeData = {
+                actionId: `demo-${Date.now()}`,
+                nodes: [
+                  { id: 'action-demo', type: 'action' as const, label: demo.text, system: demo.system, impact: 8, delay: 0, duration: 1 },
+                  { id: 'consequence-demo', type: 'consequence' as const, label: 'Immediate effect', system: 'combat', impact: 6, delay: 1, duration: 2 },
+                  { id: 'butterfly-1', type: 'butterfly-effect' as const, label: 'Social reaction', system: 'social', impact: 5, delay: 2.5, duration: 3 },
+                  { id: 'butterfly-2', type: 'butterfly-effect' as const, label: 'Environmental impact', system: 'environment', impact: 7, delay: 3, duration: 4 }
+                ],
+                connections: [
+                  { source: 'action-demo', target: 'consequence-demo', type: 'direct' as const, strength: 0.9, delay: 1, duration: 2 },
+                  { source: 'action-demo', target: 'butterfly-1', type: 'cascading' as const, strength: 0.7, delay: 2, duration: 3 },
+                  { source: 'consequence-demo', target: 'butterfly-2', type: 'cascading' as const, strength: 0.8, delay: 2.5, duration: 4 }
+                ],
+                metadata: { totalNodes: 4, totalConnections: 3, processingTime: 6.5, worldSystemsAffected: [demo.system, 'combat', 'social', 'environment'], maxDepth: 2, severity: 'high' as const },
+                timestamp: new Date().toISOString(),
+                playerId: 'demo-player'
+              };
+
+              setFeedback(`🎮 Demo: ${demo.text}`);
+              onSubmit?.(demo.text);
+
+              // Show demo cascade immediately without backend
+              setTimeout(() => {
+                // This will trigger the cascade visualization if it exists
+                const event = new CustomEvent('showDemoCascade', { detail: mockCascadeData });
+                window.dispatchEvent(event);
+              }, 500);
+
+              setTimeout(() => setFeedback(null), 3000);
+            }}
+          >
+            🎮 DEMO MODE
           </button>
         </div>
       </form>
