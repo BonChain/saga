@@ -1,9 +1,18 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+// @ts-nocheck - This test file uses mocks that don't match real WebSocket types
 import { renderHook, act } from '@testing-library/react';
 import { useRealTimeUpdates } from '../useRealTimeUpdates';
-import { createMockWebSocket } from '../../../mocks/handlers';
+import { createMockWebSocket } from '../../../../mocks/handlers';
 
-// Mock WebSocket constructor
-global.WebSocket = jest.fn().mockImplementation(() => createMockWebSocket());
+// Mock WebSocket constructor with proper typing
+const mockWebSocketClass = jest.fn(() => createMockWebSocket()) as any;
+mockWebSocketClass.CONNECTING = 0;
+mockWebSocketClass.OPEN = 1;
+mockWebSocketClass.CLOSING = 2;
+mockWebSocketClass.CLOSED = 3;
+
+(global as any).WebSocket = mockWebSocketClass;
 
 describe('useRealTimeUpdates Hook Integration Tests', () => {
   const defaultProps = {
@@ -55,8 +64,8 @@ describe('useRealTimeUpdates Hook Integration Tests', () => {
   });
 
   test('connects successfully and calls callbacks', async () => {
-    const mockWebSocket = createMockWebSocket();
-    global.WebSocket = jest.fn(() => mockWebSocket);
+    const mockWebSocket = createMockWebSocket() as any;
+    (global as any).WebSocket = jest.fn(() => mockWebSocket);
 
     const { result } = renderHook(() => useRealTimeUpdates(defaultProps));
 
@@ -72,7 +81,7 @@ describe('useRealTimeUpdates Hook Integration Tests', () => {
 
   test('handles connection errors', () => {
     const mockWebSocket = createMockWebSocket();
-    global.WebSocket = jest.fn(() => mockWebSocket);
+    (global as any).WebSocket = jest.fn(() => mockWebSocket);
 
     renderHook(() => useRealTimeUpdates(defaultProps));
 
@@ -89,7 +98,7 @@ describe('useRealTimeUpdates Hook Integration Tests', () => {
 
   test('receives cascade updates correctly', async () => {
     const mockWebSocket = createMockWebSocket();
-    global.WebSocket = jest.fn(() => mockWebSocket);
+    (global as any).WebSocket = jest.fn(() => mockWebSocket);
 
     const { result } = renderHook(() => useRealTimeUpdates(defaultProps));
 
@@ -120,7 +129,7 @@ describe('useRealTimeUpdates Hook Integration Tests', () => {
 
   test('handles cascade completion message', () => {
     const mockWebSocket = createMockWebSocket();
-    global.WebSocket = jest.fn(() => mockWebSocket);
+    (global as any).WebSocket = jest.fn(() => mockWebSocket);
 
     const { result } = renderHook(() => useRealTimeUpdates(defaultProps));
 
@@ -147,7 +156,7 @@ describe('useRealTimeUpdates Hook Integration Tests', () => {
 
   test('sends heartbeat messages', async () => {
     const mockWebSocket = createMockWebSocket();
-    global.WebSocket = jest.fn(() => mockWebSocket);
+    (global as any).WebSocket = jest.fn(() => mockWebSocket);
 
     renderHook(() => useRealTimeUpdates(defaultProps));
 
@@ -167,7 +176,7 @@ describe('useRealTimeUpdates Hook Integration Tests', () => {
 
   test('handles heartbeat responses', async () => {
     const mockWebSocket = createMockWebSocket();
-    global.WebSocket = jest.fn(() => mockWebSocket);
+    (global as any).WebSocket = jest.fn(() => mockWebSocket);
 
     renderHook(() => useRealTimeUpdates(defaultProps));
 
@@ -193,7 +202,7 @@ describe('useRealTimeUpdates Hook Integration Tests', () => {
 
   test('buffers updates efficiently', () => {
     const mockWebSocket = createMockWebSocket();
-    global.WebSocket = jest.fn(() => mockWebSocket);
+    (global as any).WebSocket = jest.fn(() => mockWebSocket);
 
     const { result } = renderHook(() => useRealTimeUpdates(defaultProps));
 
@@ -220,7 +229,7 @@ describe('useRealTimeUpdates Hook Integration Tests', () => {
 
   test('handles disconnection gracefully', () => {
     const mockWebSocket = createMockWebSocket();
-    global.WebSocket = jest.fn(() => mockWebSocket);
+    (global as any).WebSocket = jest.fn(() => mockWebSocket);
 
     const { result } = renderHook(() => useRealTimeUpdates(defaultProps));
 
@@ -240,7 +249,7 @@ describe('useRealTimeUpdates Hook Integration Tests', () => {
 
   test('manual disconnect works correctly', () => {
     const mockWebSocket = createMockWebSocket();
-    global.WebSocket = jest.fn(() => mockWebSocket);
+    (global as any).WebSocket = jest.fn(() => mockWebSocket);
 
     const { result } = renderHook(() => useRealTimeUpdates(defaultProps));
 
@@ -260,7 +269,7 @@ describe('useRealTimeUpdates Hook Integration Tests', () => {
 
   test('manual reconnect works correctly', () => {
     const mockWebSocket = createMockWebSocket();
-    global.WebSocket = jest.fn(() => mockWebSocket);
+    (global as any).WebSocket = jest.fn(() => mockWebSocket);
 
     const { result } = renderHook(() => useRealTimeUpdates(defaultProps));
 
@@ -281,7 +290,7 @@ describe('useRealTimeUpdates Hook Integration Tests', () => {
 
   test('processes update buffer periodically', async () => {
     const mockWebSocket = createMockWebSocket();
-    global.WebSocket = jest.fn(() => mockWebSocket);
+    (global as any).WebSocket = jest.fn(() => mockWebSocket);
 
     const { result } = renderHook(() => useRealTimeUpdates(defaultProps));
 
@@ -315,7 +324,7 @@ describe('useRealTimeUpdates Hook Integration Tests', () => {
 
   test('limits buffer size to prevent memory leaks', () => {
     const mockWebSocket = createMockWebSocket();
-    global.WebSocket = jest.fn(() => mockWebSocket);
+    (global as any).WebSocket = jest.fn(() => mockWebSocket);
 
     const { result } = renderHook(() => useRealTimeUpdates(defaultProps));
 
@@ -343,7 +352,7 @@ describe('useRealTimeUpdates Hook Integration Tests', () => {
   test('handles unknown message types gracefully', () => {
     const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
     const mockWebSocket = createMockWebSocket();
-    global.WebSocket = jest.fn(() => mockWebSocket);
+    (global as any).WebSocket = jest.fn(() => mockWebSocket);
 
     renderHook(() => useRealTimeUpdates(defaultProps));
 
@@ -367,7 +376,7 @@ describe('useRealTimeUpdates Hook Integration Tests', () => {
   test('handles malformed JSON messages', () => {
     const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
     const mockWebSocket = createMockWebSocket();
-    global.WebSocket = jest.fn(() => mockWebSocket);
+    (global as any).WebSocket = jest.fn(() => mockWebSocket);
 
     renderHook(() => useRealTimeUpdates(defaultProps));
 
@@ -395,7 +404,7 @@ describe('useRealTimeUpdates Hook Integration Tests', () => {
 
   test('cleanup on unmount', () => {
     const mockWebSocket = createMockWebSocket();
-    global.WebSocket = jest.fn(() => mockWebSocket);
+    (global as any).WebSocket = jest.fn(() => mockWebSocket);
 
     const { unmount } = renderHook(() => useRealTimeUpdates(defaultProps));
 

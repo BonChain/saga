@@ -5,9 +5,9 @@
  * and provides expected performance improvements.
  */
 
-import { CascadeProcessor } from '../src/services/CascadeProcessor'
+import { CascadeProcessor } from '../src/services/cascade-processor'
 import { AIConsequence, ConsequenceType, ImpactLevel, DurationType } from '../src/types/ai'
-import { MemoryOptimizedCascadeProcessor, VisualizationNodePool } from '../src/utils/MemoryOptimizer'
+import { MemoryOptimizedCascadeProcessor, VisualizationNodePool } from '../src/utils/memory-optimizer'
 
 // Extend AIConsequence for testing with additional properties
 interface TestAIConsequence extends Omit<AIConsequence, 'actionId' | 'cascadingEffects'> {
@@ -123,7 +123,7 @@ describe('Memory Efficiency Tests', () => {
 
   describe('String Compression and Caching', () => {
     it('should cache frequently used strings', () => {
-      const { CompactStringCache } = require('../src/utils/MemoryOptimizer')
+      const { CompactStringCache } = require('../src/utils/memory-optimizer')
 
       const testString = 'frequently used system name'
 
@@ -143,7 +143,7 @@ describe('Memory Efficiency Tests', () => {
     })
 
     it('should limit string cache size', () => {
-      const { CompactStringCache } = require('../src/utils/MemoryOptimizer')
+      const { CompactStringCache } = require('../src/utils/memory-optimizer')
 
       // Add many strings to exceed cache limit
       for (let i = 0; i < 100; i++) {

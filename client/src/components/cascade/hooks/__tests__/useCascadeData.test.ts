@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useCascadeData } from '../useCascadeData';
 import { server } from '../../../mocks/server';

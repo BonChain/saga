@@ -1,0 +1,70 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>4</epicId>
+    <storyId>1</storyId>
+    <title>Character Memory & Relationship Tracking</title>
+    <status>done</status>
+    <generatedAt>2025-11-19</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>stories/story-4-1-character-memory-relationship-tracking.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>character</asA>
+    <iWant>remember every interaction with players and other characters</iWant>
+    <soThat>I can develop authentic relationships and respond appropriately</soThat>
+    <tasks>Create Character Data Models and Interfaces (server/src/models/character.ts), Implement Character Service (server/src/services/character-service.ts), Build Relationship Management System, Integrate with World State Storage, Create API Endpoints, Integrate with Existing Action Processing, Backend Testing</tasks>
+  </story>
+
+  <acceptanceCriteria>1. Each NPC maintains a complete memory of all player actions affecting them; 2. NPCs track relationship scores (friendship, hostility, loyalty) with each player; 3. NPCs develop relationships with other NPCs based on shared experiences; 4. Character memories influence future dialogue and behavior; 5. Relationship changes are permanent and visible to players; 6. Characters have distinct personalities that affect their responses</acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc path="docs/tech-spec.md" title="Technical Specification" section="Core System Architecture" snippet="3-layer Walrus storage system with Layer 1 (Blueprint), Layer 2 (Queue), Layer 3 (State) architecture for world state persistence"/>
+      <doc path="docs/epics.md" title="Epic Breakdown" section="Epic 4: Living Character System" snippet="NPCs with genuine memories, relationships, and emotional responses to player actions"/>
+    </docs>
+    <code>
+      <artifact path="server/src/services/WorldStateUpdater.ts" kind="service" symbol="WorldStateUpdater" lines="1-50" reason="Existing world state management service with character relationship support"/>
+      <artifact path="server/src/index.ts" kind="routes" symbol="API Routes" lines="644-654" reason="Current API structure for character and relationship endpoints"/>
+      <artifact path="server/src/storage/Layer1Blueprint.ts" kind="storage" symbol="worldRules.characterBehavior" lines="320-330" reason="Existing character behavior rules including memoryCapacity and emotionInfluence"/>
+      <artifact path="server/tests/memory-efficiency.test.ts" kind="test" symbol="memory tests" reason="Existing testing patterns and infrastructure"/>
+    </code>
+    <dependencies>
+      <ecosystem name="nodejs">
+        <package name="express" version="^4.18.2"/>
+        <package name="uuid" version="^9.0.1"/>
+        <package name="winston" version="^3.18.3"/>
+        <package name="typescript" version="^5.3.3"/>
+        <package name="jest" version="^30.2.0"/>
+        <package name="openai" version="^6.9.0"/>
+        <package name="@mysten/walrus" version="^0.8.4"/>
+      </ecosystem>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint type="architecture">Integrate with existing 3-layer Walrus storage system (Layer 1: Blueprint, Layer 2: Queue, Layer 3: State)</constraint>
+    <constraint type="patterns">Follow existing service patterns in server/src/services/ with TypeScript interfaces and Winston logging</constraint>
+    <constraint type="api">RESTful endpoints following existing patterns in server/src/index.ts with Express middleware</constraint>
+    <constraint type="storage">Character data must persist through Layer 3 (State) storage integration</constraint>
+    <constraint type="testing">Use Jest framework with existing test structure in server/tests/</constraint>
+    <constraint type="performance">Memory capacity limits defined in Layer1Blueprint (memoryCapacity field)</constraint>
+  </constraints>
+  <interfaces>
+    <interface name="WorldStateUpdater" kind="service" signature="class WorldStateUpdater with updateWorldState() method" path="server/src/services/WorldStateUpdater.ts"/>
+    <interface name="Character API" kind="REST" signature="GET/POST /api/characters/:id/* endpoints" path="server/src/index.ts"/>
+    <interface name="Layer1Blueprint" kind="storage" signature="worldRules.characterBehavior with memoryCapacity and emotionInfluence" path="server/src/storage/Layer1Blueprint.ts"/>
+  </interfaces>
+  <tests>
+    <standards>Use Jest testing framework with TypeScript support. Follow existing patterns in server/tests/memory-efficiency.test.ts. Include unit tests for service methods, integration tests for API endpoints, and performance tests for memory retrieval.</standards>
+    <locations>server/tests/ directory with .test.ts file naming convention. Tests should mirror service structure in server/src/services/.</locations>
+    <ideas>
+      <test idea="Unit test CharacterService.addMemory() method with various action types" ac="1"/>
+      <test idea="Integration test for relationship score calculation across multiple interactions" ac="2,5"/>
+      <test idea="Test NPC-to-NPC relationship formation based on shared world events" ac="3"/>
+      <test idea="Validate character state persistence through Layer 3 storage system" ac="1,2,3,5"/>
+      <test idea="Performance test for memory retrieval with large datasets (100+ entries)" ac="1"/>
+      <test idea="Test personality-driven response modifiers affect AI dialogue generation" ac="6,4"/>
+    </ideas>
+  </tests>
+</story-context>

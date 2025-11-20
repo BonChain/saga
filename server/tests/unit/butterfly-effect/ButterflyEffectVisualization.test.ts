@@ -3,7 +3,7 @@
  * Story 3.3: Butterfly Effect Calculation
  */
 
-import { CascadeProcessor } from '../../../src/services/CascadeProcessor'
+import { CascadeProcessor } from '../../../src/services/cascade-processor'
 import {
   AIConsequence,
   ConsequenceType,

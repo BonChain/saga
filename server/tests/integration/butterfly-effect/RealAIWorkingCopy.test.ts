@@ -5,8 +5,8 @@
  * using the correct TypeScript interfaces.
  */
 
-import { ConsequenceGenerator } from '../../../src/services/ConsequenceGenerator'
-import { CascadeProcessor } from '../../../src/services/CascadeProcessor'
+import { ConsequenceGenerator } from '../../../src/services/consequence-generator'
+import { CascadeProcessor } from '../../../src/services/cascade-processor'
 import { AIRequest, PromptType, AIConsequence } from '../../../src/types/ai'
 import { v4 as uuidv4 } from 'uuid'
 

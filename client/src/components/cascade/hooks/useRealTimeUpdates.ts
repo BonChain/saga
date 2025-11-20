@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import type { CascadeData } from '../types/cascade';
+import { createWebSocketUrl, sanitizeErrorMessage } from '../utils/websocket-utils';
+import { getCascadeConfig } from '../config/cascade-config';
 
 interface UseRealTimeUpdatesOptions {
   actionId?: string;
@@ -15,7 +17,7 @@ interface UseRealTimeUpdatesOptions {
  */
 export const useRealTimeUpdates = ({
   actionId,
-  serverUrl = import.meta.env.VITE_SERVER_URL || 'http://localhost:3005',
+  serverUrl = (import.meta.env?.VITE_SERVER_URL as string) || 'http://localhost:3005',
   onNewData,
   onError,
   onConnectionChange
@@ -28,10 +30,12 @@ export const useRealTimeUpdates = ({
   const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const heartbeatIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const MAX_RECONNECT_ATTEMPTS = 5;
-  const RECONNECT_DELAY = 2000; // 2 seconds
-  const HEARTBEAT_INTERVAL = 30000; // 30 seconds
-  const BUFFER_SIZE = 50; // Maximum buffered updates
+  // Get configuration values
+  const config = getCascadeConfig().websocket;
+  const MAX_RECONNECT_ATTEMPTS = config.maxReconnectAttempts;
+  const RECONNECT_DELAY = config.reconnectDelay;
+  const HEARTBEAT_INTERVAL = config.heartbeatInterval;
+  const BUFFER_SIZE = config.bufferSize;
 
   const connectWebSocket = useCallback((): WebSocket | null => {
     if (!actionId) {
@@ -40,10 +44,16 @@ export const useRealTimeUpdates = ({
     }
 
     try {
+<<<<<<< HEAD
       // Construct WebSocket URL for cascade updates
       const wsUrl = serverUrl.replace(/^http/, 'ws') + `/cascade-updates/${actionId}`;
 
       wsRef.current = new WebSocket(wsUrl) as WebSocket;
+=======
+      // Construct secure WebSocket URL for cascade updates
+      const wsUrl = createWebSocketUrl(serverUrl, actionId);
+      wsRef.current = new WebSocket(wsUrl);
+>>>>>>> b2f71a199ce6b4dbb6824f9fc0cb2e92f273d2f2
 
       wsRef.current.onopen = () => {
         console.log('Cascade WebSocket connected');
@@ -87,7 +97,7 @@ export const useRealTimeUpdates = ({
               break;
 
             case 'error': {
-              const error = new Error(message.error || 'Unknown WebSocket error');
+              const error = new Error(sanitizeErrorMessage(message.error || 'Unknown WebSocket error'));
               setLastError(error);
               onError?.(error);
               break;
@@ -102,8 +112,9 @@ export const useRealTimeUpdates = ({
           }
         } catch (error) {
           console.error('Error parsing WebSocket message:', error);
-          setLastError(error as Error);
-          onError?.(error as Error);
+          const sanitizedError = new Error(sanitizeErrorMessage(error as Error));
+          setLastError(sanitizedError);
+          onError?.(sanitizedError);
         }
       };
 
@@ -126,15 +137,16 @@ export const useRealTimeUpdates = ({
 
       wsRef.current.onerror = (event) => {
         console.error('Cascade WebSocket error:', event);
-        const error = new Error('WebSocket connection error');
+        const error = new Error(sanitizeErrorMessage('WebSocket connection error'));
         setLastError(error);
         onError?.(error);
       };
 
     } catch (error) {
       console.error('Failed to create WebSocket connection:', error);
-      setLastError(error as Error);
-      onError?.(error as Error);
+      const sanitizedError = new Error(sanitizeErrorMessage(error as Error));
+      setLastError(sanitizedError);
+      onError?.(sanitizedError);
     }
 
     return wsRef.current;
@@ -188,7 +200,11 @@ export const useRealTimeUpdates = ({
     };
 
     reconnectTimeoutRef.current = setTimeout(reconnect, RECONNECT_DELAY);
+<<<<<<< HEAD
   }, [actionId, serverUrl, onError, onConnectionChange]);
+=======
+  }, [connectWebSocket, MAX_RECONNECT_ATTEMPTS, RECONNECT_DELAY]);
+>>>>>>> b2f71a199ce6b4dbb6824f9fc0cb2e92f273d2f2
 
   const disconnect = useCallback(() => {
     console.log('Disconnecting WebSocket');

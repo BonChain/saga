@@ -5,7 +5,7 @@
  * with real AI responses to validate the AI → Consequence flow.
  */
 
-import { ConsequenceGenerator } from '../../../src/services/ConsequenceGenerator'
+import { ConsequenceGenerator } from '../../../src/services/consequence-generator'
 import { AIRequest } from '../../../src/types/ai'
 import { v4 as uuidv4 } from 'uuid'
 

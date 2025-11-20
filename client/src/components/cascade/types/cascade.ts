@@ -17,7 +17,7 @@ export interface CascadeData {
 
 export interface CascadeNode {
   id: string;
-  type: 'action' | 'consequence' | 'butterfly-effect';
+  type: 'action' | 'consequence' | 'butterfly-effect' | 'cluster';
   label: string;
   system: string;
   description?: string;
