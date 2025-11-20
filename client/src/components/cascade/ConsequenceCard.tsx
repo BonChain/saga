@@ -4,7 +4,34 @@ import './styles/cascade.css'
 
 /**
  * ConsequenceCard Component
- * Individual consequence card with retro styling and tap-to-reveal functionality
+ *
+ * Individual consequence card with retro gaming aesthetics and tap-to-reveal functionality.
+ * Displays cascade consequence information with expandable details and accessibility features.
+ *
+ * @param consequence - The cascade consequence data to display including system, severity, familiarity, narrative description, and other metadata
+ * @param isExpanded - Whether the card is currently expanded to show detailed information. Defaults to false
+ * @param onToggle - Callback function when the expand/collapse toggle button is clicked. Handles the toggle interaction
+ * @param style - Optional additional inline styles to apply to the card component. Defaults to empty object
+ *
+ * @example
+ * ```tsx
+ * <ConsequenceCard
+ *   consequence={{
+ *     id: "env-1",
+ *     label: "Temperature Rise",
+ *     system: "environment",
+ *     severity: "major",
+ *     familiarity: "known",
+ *     narrative: "Global temperatures increase by 2°C...",
+ *     impact: 7,
+ *     personalRelevance: 85,
+ *     type: "environmental"
+ *   }}
+ *   isExpanded={false}
+ *   onToggle={() => setExpanded(!expanded)}
+ * />
+ * ```
+ *
  * Story 8.2 - Cascade Visualization Engine
  */
 const ConsequenceCard: React.FC<ConsequenceCardProps & { style?: React.CSSProperties }> = ({
