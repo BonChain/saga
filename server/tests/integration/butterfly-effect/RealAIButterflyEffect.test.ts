@@ -7,10 +7,10 @@
  * Note: Requires valid OPENAI_API_KEY environment variable
  */
 
-import { CascadeProcessor } from '../../../src/services/CascadeProcessor'
-import { WorldStateUpdater } from '../../../src/services/WorldStateUpdater'
-import { ConsequenceGenerator } from '../../../src/services/ConsequenceGenerator'
-import { OpenAIIntegration } from '../../../src/services/OpenAIIntegration'
+import { CascadeProcessor } from '../../../src/services/cascade-processor'
+import { WorldStateUpdater } from '../../../src/services/world-state-updater'
+import { ConsequenceGenerator } from '../../../src/services/consequence-generator'
+import { OpenAIIntegration } from '../../../src/services/openai-integration'
 import {
   AIRequest,
   AIConsequence,
@@ -20,8 +20,8 @@ import {
   ImpactLevel,
   DurationType
 } from '../../../src/types/ai'
-import { Layer1Blueprint } from '../../../src/storage/Layer1Blueprint'
-import { Layer3State } from '../../../src/storage/Layer3State'
+import { Layer1Blueprint } from '../../../src/storage/layer1-blueprint'
+import { Layer3State } from '../../../src/storage/layer3-state'
 import { v4 as uuidv4 } from 'uuid'
 
 // Skip tests if no OpenAI API key is configured
@@ -45,13 +45,21 @@ describe('Real AI Butterfly Effect Integration', () => {
     cascadeProcessor = new CascadeProcessor()
     openAIIntegration = new OpenAIIntegration()
 
-    // Initialize storage services (these might need configuration)
-    layer1Blueprint = new Layer1Blueprint()
-    layer3State = new Layer3State('./test-data', {
-      walrusApiEndpoint: 'https://test.walrus.com',
-      projectId: 'test-project',
-      accessKey: 'test-key'
-    })
+    // Initialize storage services with proper configuration
+    const mockWalrusConfig = {
+      endpoint: 'https://testnet.sui.app',
+      network: 'testnet',
+      maxRetries: 3,
+      timeout: 5000,
+      useBackup: false,
+      backupPath: './test-backups',
+      sponsoredTransactions: false,
+      developerPrivateKey: 'test-key',
+      storageEpochs: 1
+    }
+
+    layer1Blueprint = new Layer1Blueprint('./test-storage', mockWalrusConfig)
+    layer3State = new Layer3State('./test-storage', mockWalrusConfig)
 
     consequenceGenerator = new ConsequenceGenerator(layer1Blueprint)
     worldStateUpdater = new WorldStateUpdater(layer3State, layer1Blueprint)

@@ -1,0 +1,95 @@
+{
+  "type": "world_rules",
+  "timestamp": "2025-11-20T11:36:08.432Z",
+  "originalChecksum": "87aa00ad791e87d5cb5f4226a5bb6fac7886199f8b44c95985df07a969d809bf",
+  "data": {
+    "version": "1.0.0",
+    "lastModified": "2025-11-20T11:36:08.320Z",
+    "rules": {
+      "physics": {
+        "gravity": 9.81,
+        "timeFlow": 1,
+        "weatherPatterns": [
+          "clear",
+          "cloudy",
+          "rain",
+          "storm"
+        ],
+        "magicalEnergy": true
+      },
+      "characterBehavior": {
+        "maxHealth": 100,
+        "baseMovementSpeed": 5,
+        "socialInteractionRange": 10,
+        "memoryCapacity": 1000,
+        "emotionInfluence": 0.8
+      },
+      "actionConstraints": {
+        "maxActionsPerTurn": 1,
+        "actionCooldown": 5000,
+        "rangeLimit": 100,
+        "resourceRequirements": true
+      },
+      "butterflyEffects": [
+        {
+          "id": "dragon_defeat",
+          "trigger": "defeat_dragon",
+          "effects": [
+            {
+              "type": "economic",
+              "target": "village",
+              "change": {
+                "prosperity": 50,
+                "celebration": true
+              },
+              "duration": 7200000,
+              "cascading": true
+            },
+            {
+              "type": "relationship",
+              "target": "dragons",
+              "change": {
+                "hostility": 80
+              },
+              "permanent": true
+            }
+          ],
+          "probability": 1,
+          "description": "Defeating a dragon causes village celebration and increased dragon hostility"
+        },
+        {
+          "id": "tavern_burn",
+          "trigger": "burn_tavern",
+          "effects": [
+            {
+              "type": "economic",
+              "target": "village",
+              "change": {
+                "prosperity": -20,
+                "rebuilding": true
+              },
+              "duration": 86400000,
+              "cascading": true
+            },
+            {
+              "type": "relationship",
+              "target": "villagers",
+              "change": {
+                "hostility": 30,
+                "suspicion": true
+              },
+              "duration": 43200000
+            }
+          ],
+          "probability": 0.9,
+          "description": "Burning the tavern damages village economy and villager relationships"
+        }
+      ]
+    },
+    "metadata": {
+      "description": "SuiSaga Living World Rules - Default Configuration",
+      "author": "SuiSaga System",
+      "checksum": "87aa00ad791e87d5cb5f4226a5bb6fac7886199f8b44c95985df07a969d809bf"
+    }
+  }
+}
