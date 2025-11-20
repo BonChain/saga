@@ -44,16 +44,9 @@ export const useRealTimeUpdates = ({
     }
 
     try {
-<<<<<<< HEAD
-      // Construct WebSocket URL for cascade updates
-      const wsUrl = serverUrl.replace(/^http/, 'ws') + `/cascade-updates/${actionId}`;
-
-      wsRef.current = new WebSocket(wsUrl) as WebSocket;
-=======
       // Construct secure WebSocket URL for cascade updates
       const wsUrl = createWebSocketUrl(serverUrl, actionId);
       wsRef.current = new WebSocket(wsUrl);
->>>>>>> b2f71a199ce6b4dbb6824f9fc0cb2e92f273d2f2
 
       wsRef.current.onopen = () => {
         console.log('Cascade WebSocket connected');
@@ -200,11 +193,7 @@ export const useRealTimeUpdates = ({
     };
 
     reconnectTimeoutRef.current = setTimeout(reconnect, RECONNECT_DELAY);
-<<<<<<< HEAD
-  }, [actionId, serverUrl, onError, onConnectionChange]);
-=======
   }, [connectWebSocket, MAX_RECONNECT_ATTEMPTS, RECONNECT_DELAY]);
->>>>>>> b2f71a199ce6b4dbb6824f9fc0cb2e92f273d2f2
 
   const disconnect = useCallback(() => {
     console.log('Disconnecting WebSocket');

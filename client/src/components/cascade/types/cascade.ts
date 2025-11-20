@@ -34,6 +34,8 @@ export interface CascadeNode {
   personalRelevance?: number; // 0-100 score based on user's history
   narrative?: string; // detailed consequence description
   isExpanded?: boolean; // UI state for card expansion
+  nodeIds?: string[]; // For cluster nodes - IDs of contained nodes
+  nodeCount?: number; // For cluster nodes - Number of contained nodes
 }
 
 export interface CascadeConnection {
