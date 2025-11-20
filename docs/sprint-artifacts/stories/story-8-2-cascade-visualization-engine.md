@@ -1,6 +1,6 @@
 # Story 8.2: Cascade Visualization Engine
 
-Status: in-progress
+Status: done
 
 ## Story
 
