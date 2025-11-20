@@ -4,6 +4,8 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
 import path from 'path';
+import { validateInput, commonSchemas, securityHeaders, rateLimit } from './middleware/input-validation';
+import { requestMonitor, collectMetrics, healthCheck, setupGracefulShutdown } from './middleware/monitoring';
 
 // Load environment variables
 dotenv.config();
@@ -15,8 +17,15 @@ import { WalrusConfig, BackupConfig, ValidationConfig, LoggerConfig } from './ty
 // Import Story 2.2 Intent Parser
 import { intentParser } from './services/intent-parser';
 
+// Import Authentication and Character Services
+import { createAuthService } from './services/auth-service';
+import { createAuthRoutes } from './routes/api/auth';
+import { createCharacterRoutes } from './routes/api/characters';
+import { CharacterService } from './services/character-service';
+import { createLogger, format, transports } from 'winston';
+
 const app = express();
-const PORT = process.env.PORT || 3005;
+const PORT = process.env.PORT || 3001; // Using port 3001
 
 // Initialize storage configuration (SECURE: Using environment variables)
 const storageConfig: StorageManagerConfig = {
@@ -74,15 +83,26 @@ storageManager.initializeWorldState().catch(error => {
   console.error('Failed to initialize world state:', error);
 });
 
-// Middleware
+// Security and monitoring middleware
 app.use(helmet());
 app.use(cors());
+app.use(securityHeaders);
 app.use(morgan('combined'));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Health check endpoint
-app.get('/health', (req, res) => {
+// Apply monitoring and metrics collection
+app.use(requestMonitor);
+app.use(collectMetrics);
+
+// Apply rate limiting to all API routes
+app.use('/api/', rateLimit({ windowMs: 15 * 60 * 1000, max: 100, message: 'Too many requests from this IP' }));
+
+// Enhanced health check endpoint
+app.get('/health', healthCheck);
+
+// Basic health check for backward compatibility
+app.get('/health/basic', (req, res) => {
   res.status(200).json({
     status: 'healthy',
     timestamp: new Date().toISOString(),
@@ -101,8 +121,20 @@ app.get('/api', (req, res) => {
   res.json({
     message: 'SuiSaga Living World API',
     version: '1.0.0',
+    authentication: {
+      type: 'JWT Wallet-based Authentication',
+      endpoints: {
+        challenge: '/api/auth/challenge',
+        authenticate: '/api/auth/authenticate',
+        refresh: '/api/auth/refresh',
+        validate: '/api/auth/validate'
+      },
+      usage: 'Get challenge with wallet address -> Sign message -> Authenticate to get JWT token'
+    },
     endpoints: {
       health: '/health',
+      authentication: '/api/auth',
+      characters: '/api/characters',
       actions: {
         submit: '/api/actions/submit',
         storage: '/api/storage/actions'
@@ -175,16 +207,9 @@ app.get('/api/storage/world-rules/butterfly-effects', async (req, res) => {
 });
 
 // Layer 2: Actions
-app.post('/api/storage/actions', async (req, res) => {
+app.post('/api/storage/actions', validateInput(commonSchemas.submitAction), async (req, res) => {
   try {
     const { playerId, intent, originalInput, parsedIntent } = req.body;
-
-    if (!playerId || !intent || !originalInput) {
-      return res.status(400).json({
-        success: false,
-        error: 'playerId, intent, and originalInput are required'
-      });
-    }
 
     const result = await storageManager.submitAction(playerId, intent, originalInput, parsedIntent);
     if (result.success) {
@@ -207,25 +232,9 @@ app.post('/api/storage/actions', async (req, res) => {
 });
 
 // Natural Language Action Submission (Story 2.1)
-app.post('/api/actions/submit', async (req, res) => {
+app.post('/api/actions/submit', validateInput(commonSchemas.submitAction), async (req, res) => {
   try {
     const { playerId, intent, originalInput, parsedIntent } = req.body;
-
-    // Input validation
-    if (!playerId || !intent || !originalInput) {
-      return res.status(400).json({
-        success: false,
-        error: 'playerId, intent, and originalInput are required'
-      });
-    }
-
-    // Validate action length (max 500 characters from Story 2.1 AC 2)
-    if (originalInput.length > 500) {
-      return res.status(400).json({
-        success: false,
-        error: 'Action text exceeds 500 character limit'
-      });
-    }
 
     // Story 2.2: Parse intent using IntentParser service
     let parsedIntentResult: any;
@@ -322,7 +331,7 @@ app.post('/api/actions/submit', async (req, res) => {
   }
 });
 
-app.get('/api/storage/actions', async (req, res) => {
+app.get('/api/storage/actions', validateInput(commonSchemas.pagination), async (req, res) => {
   try {
     const { playerId, status, limit = 50, offset = 0 } = req.query;
 
@@ -385,17 +394,10 @@ app.get('/api/storage/actions/pending', async (req, res) => {
   }
 });
 
-app.put('/api/storage/actions/:id/status', async (req, res) => {
+app.put('/api/storage/actions/:id/status', validateInput(commonSchemas.statusUpdate), async (req, res) => {
   try {
     const { id } = req.params;
     const { status, consequences } = req.body;
-
-    if (!status) {
-      return res.status(400).json({
-        success: false,
-        error: 'Status is required'
-      });
-    }
 
     const result = await storageManager.updateActionStatus(id, status, consequences);
     if (result.success) {
@@ -493,16 +495,9 @@ app.get('/api/storage/world-state', async (req, res) => {
   }
 });
 
-app.post('/api/storage/world-state', async (req, res) => {
+app.post('/api/storage/world-state', validateInput(commonSchemas.worldStateModification), async (req, res) => {
   try {
     const modifications = req.body;
-
-    if (!modifications || typeof modifications !== 'object') {
-      return res.status(400).json({
-        success: false,
-        error: 'Modifications object is required'
-      });
-    }
 
     const result = await storageManager.createWorldStateVersion(modifications);
     if (result.success) {
@@ -829,7 +824,81 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
   });
 });
 
-// 404 handler
+// Setup Authentication and Character Services
+console.log('🔐 Setting up authentication services...');
+
+// Create logger for auth services
+const authLogger = createLogger({
+  level: 'info',
+  format: format.combine(
+    format.timestamp(),
+    format.json()
+  ),
+  transports: [
+    new transports.Console({
+      format: format.combine(
+        format.colorize(),
+        format.simple()
+      )
+    })
+  ]
+});
+
+// Initialize Auth Service
+const authService = createAuthService(authLogger);
+
+// Initialize Character Service (basic setup for now)
+// TODO: Properly integrate with existing world service
+const MockCharacterService = {
+  async getAllCharacters(options?: any): Promise<any[]> {
+    authLogger.info('CharacterService.getAllCharacters called', { options });
+    return [];
+  },
+  async getCharacter(id: string): Promise<any> {
+    authLogger.info('CharacterService.getCharacter called', { id });
+    return null;
+  },
+  async createCharacter(character: any): Promise<any> {
+    authLogger.info('CharacterService.createCharacter called', { character });
+    return character;
+  },
+  async addMemory(params: any): Promise<any> {
+    authLogger.info('CharacterService.addMemory called', { params });
+    return params;
+  },
+  async getCharacterMemories(characterId: string, options?: any): Promise<any[]> {
+    authLogger.info('CharacterService.getCharacterMemories called', { characterId, options });
+    return [];
+  },
+  async updateRelationshipScore(characterId: string, targetId: string, score: number): Promise<void> {
+    authLogger.info('CharacterService.updateRelationshipScore called', { characterId, targetId, score });
+  },
+  async getRelationshipStatus(characterId: string, targetId: string): Promise<any> {
+    authLogger.info('CharacterService.getRelationshipStatus called', { characterId, targetId });
+    return { characterId, targetId, score: 0 };
+  },
+  async validateCharacter(character: any): Promise<any> {
+    authLogger.info('CharacterService.validateCharacter called', { character });
+    return { valid: true, errors: [] };
+  },
+  async updateCharacter(id: string, updates: any): Promise<any> {
+    authLogger.info('CharacterService.updateCharacter called', { id, updates });
+    return { id, ...updates };
+  }
+  // Add other methods as needed
+};
+
+const characterService = MockCharacterService as any;
+
+// Setup Authentication Routes
+app.use('/api/auth', createAuthRoutes(authService, authLogger));
+
+// Setup Character Routes (with JWT authentication)
+app.use('/api/characters', createCharacterRoutes(characterService, authService, authLogger));
+
+console.log('✅ Authentication and character routes configured');
+
+// 404 handler (must be AFTER all other routes)
 app.use('*', (req, res) => {
   res.status(404).json({
     error: {
@@ -839,11 +908,31 @@ app.use('*', (req, res) => {
   });
 });
 
+console.log('🔍 About to start server...');
+
 // Start server
-app.listen(PORT, () => {
-  console.log(`🚀 SuiSaga server running on port ${PORT}`);
-  console.log(`📊 Health check: http://localhost:${PORT}/health`);
-  console.log(`🔧 Environment: ${process.env.NODE_ENV || 'development'}`);
-});
+try {
+  const server = app.listen(PORT, () => {
+    console.log(`🚀 SuiSaga server running on port ${PORT}`);
+    console.log(`📊 Health check: http://localhost:${PORT}/health`);
+    console.log(`📈 Enhanced monitoring: http://localhost:${PORT}/health (detailed)`);
+    console.log(`🔧 Environment: ${process.env.NODE_ENV || 'development'}`);
+
+    // Setup graceful shutdown
+    setupGracefulShutdown();
+  });
+
+  server.on('error', (error: any) => {
+    console.error('❌ Server error:', error);
+    if (error.code === 'EADDRINUSE') {
+      console.error(`❌ Port ${PORT} is already in use`);
+    }
+    process.exit(1);
+  });
+
+} catch (error) {
+  console.error('❌ Failed to start server:', error);
+  process.exit(1);
+}
 
 export default app;

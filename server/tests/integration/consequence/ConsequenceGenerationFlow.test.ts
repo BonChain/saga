@@ -27,10 +27,23 @@ describe.skip('Consequence Generation Integration Flow (Temporarily Disabled)', 
   let mockLayer3State: jest.Mocked<Layer3State>
 
   beforeEach(() => {
-    // Setup mocks
-    mockLayer1Blueprint = new Layer1Blueprint('') as jest.Mocked<Layer1Blueprint>
-    mockLayer2Queue = new Layer2Queue('') as jest.Mocked<Layer2Queue>
-    mockLayer3State = new Layer3State('') as jest.Mocked<Layer3State>
+    // Mock WalrusConfig for testing
+    const mockWalrusConfig = {
+      endpoint: 'https://testnet.sui.io',
+      network: 'testnet',
+      maxRetries: 3,
+      timeout: 5000,
+      useBackup: false,
+      backupPath: './backup',
+      sponsoredTransactions: false,
+      developerPrivateKey: 'test-key',
+      storageEpochs: 1
+    }
+
+    // Setup mocks with proper constructor parameters
+    mockLayer1Blueprint = new Layer1Blueprint('./test-storage', mockWalrusConfig) as jest.Mocked<Layer1Blueprint>
+    mockLayer2Queue = new Layer2Queue('./test-storage', mockWalrusConfig) as jest.Mocked<Layer2Queue>
+    mockLayer3State = new Layer3State('./test-storage', mockWalrusConfig) as jest.Mocked<Layer3State>
 
     // Mock world rules
     mockLayer1Blueprint.getWorldRules = jest.fn().mockResolvedValue([

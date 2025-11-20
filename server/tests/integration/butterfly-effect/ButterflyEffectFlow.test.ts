@@ -47,8 +47,13 @@ class MockLayer3State implements Partial<Layer3State> {
     this.data.set(key, value)
   }
 
-  async updateWorldState(state: any): Promise<void> {
-    // Mock implementation
+  async updateWorldState(state: any): Promise<any> {
+    // Mock implementation - return proper StorageResult structure
+    return {
+      success: true,
+      data: state,
+      error: null
+    }
   }
 
   async getCurrentState(): Promise<any> {

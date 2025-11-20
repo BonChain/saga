@@ -50,9 +50,14 @@ class MockLayer3State implements Partial<Layer3State> {
     this.data.set(key, value)
   }
 
-  async updateWorldState(state: any): Promise<void> {
+  async updateWorldState(state: any): Promise<any> {
     // Simulate state update delay
     await new Promise(resolve => setTimeout(resolve, 20))
+    return {
+      success: true,
+      data: state,
+      error: null
+    }
   }
 
   async getCurrentState(): Promise<any> {

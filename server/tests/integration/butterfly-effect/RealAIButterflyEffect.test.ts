@@ -45,13 +45,21 @@ describe('Real AI Butterfly Effect Integration', () => {
     cascadeProcessor = new CascadeProcessor()
     openAIIntegration = new OpenAIIntegration()
 
-    // Initialize storage services (these might need configuration)
-    layer1Blueprint = new Layer1Blueprint()
-    layer3State = new Layer3State('./test-data', {
-      walrusApiEndpoint: 'https://test.walrus.com',
-      projectId: 'test-project',
-      accessKey: 'test-key'
-    })
+    // Initialize storage services with proper configuration
+    const mockWalrusConfig = {
+      endpoint: 'https://testnet.sui.app',
+      network: 'testnet',
+      maxRetries: 3,
+      timeout: 5000,
+      useBackup: false,
+      backupPath: './test-backups',
+      sponsoredTransactions: false,
+      developerPrivateKey: 'test-key',
+      storageEpochs: 1
+    }
+
+    layer1Blueprint = new Layer1Blueprint('./test-storage', mockWalrusConfig)
+    layer3State = new Layer3State('./test-storage', mockWalrusConfig)
 
     consequenceGenerator = new ConsequenceGenerator(layer1Blueprint)
     worldStateUpdater = new WorldStateUpdater(layer3State, layer1Blueprint)

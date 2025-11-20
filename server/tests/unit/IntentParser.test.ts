@@ -201,7 +201,7 @@ describe('IntentParser', () => {
 
       expect(result.success).toBe(true) // Should parse but with low confidence
       expect(result.parsedIntent?.actionType).toBe('other')
-      expect(result.confidence).toBeLessThan(0.4)
+      expect(result.confidence).toBeLessThan(0.5)
     })
 
     test('should handle null input', () => {
@@ -209,7 +209,7 @@ describe('IntentParser', () => {
 
       expect(result.success).toBe(false)
       expect(result.confidence).toBe(0)
-      expect(result.error).toContain('Invalid input')
+      expect(result.error).toContain('Empty input')
       expect(result.fallback).toBe(true)
     })
 

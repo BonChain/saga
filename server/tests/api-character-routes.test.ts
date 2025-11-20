@@ -12,6 +12,7 @@ import { CharacterService } from '../src/services/character-service'
 import { RelationshipManager } from '../src/services/relationship-manager'
 import { CharacterWorldIntegration } from '../src/services/character-world-integration'
 import { Layer3State } from '../src/storage/layer3-state'
+import { AuthService } from '../src/services/auth-service'
 import { createCharacterRoutes } from '../src/routes/api/characters'
 import { Personality, Relationship, MemoryEntry } from '../src/models/character'
 
@@ -26,7 +27,13 @@ describe('Character API Routes', () => {
   let mockRelationshipManager: jest.Mocked<RelationshipManager>
   let mockCharacterWorldIntegration: jest.Mocked<CharacterWorldIntegration>
   let mockLayer3State: jest.Mocked<Layer3State>
+  let mockAuthService: jest.Mocked<AuthService>
   let mockLogger: any
+
+  // Helper function to add auth headers to all requests
+  const authHeaders = {
+    'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0LXVzZXItMTIzIiwiaWF0IjoxNjAwMDAwMDAwfQ.signature'
+  }
 
   beforeEach(() => {
     jest.clearAllMocks()
@@ -38,6 +45,36 @@ describe('Character API Routes', () => {
       debug: jest.fn(),
       warn: jest.fn()
     }
+
+    mockAuthService = {
+      authenticateWallet: jest.fn(),
+      generateChallengeMessage: jest.fn(),
+      generateJWT: jest.fn(),
+      validateJWT: jest.fn().mockReturnValue({
+        valid: true,
+        payload: {
+          sub: '0x1234567890abcdef1234567890abcdef12345678',
+          role: 'user',
+          walletAddress: '0x1234567890abcdef1234567890abcdef12345678',
+          iat: Date.now() / 1000,
+          exp: (Date.now() / 1000) + 3600
+        }
+      }),
+      refreshToken: jest.fn(),
+      rateLimitStore: new Map(),
+      JWT_SECRET: 'test-secret',
+      JWT_EXPIRES_IN: '24h',
+      MIN_CONFIDENCE_THRESHOLD: 0.5,
+      HUMAN_REVIEW_THRESHOLD: 0.1,
+      actionKeywords: {
+        combat: ['attack'],
+        social: ['talk'],
+        exploration: ['explore'],
+        economic: ['buy'],
+        creative: ['create'],
+        other: ['wait']
+      }
+    } as any
 
     mockLayer3State = {
       getStoragePath: jest.fn().mockReturnValue('/mock/storage'),
@@ -86,6 +123,7 @@ describe('Character API Routes', () => {
     // Create character routes
     const characterRouter = createCharacterRoutes(
       mockCharacterService,
+      mockAuthService,
       mockLogger as any
     )
     app.use('/api/characters', characterRouter)
@@ -100,7 +138,15 @@ describe('Character API Routes', () => {
       const response = await request(app)
         .get('/api/characters')
         .set('x-request-id', 'test-123')
-        .expect(200)
+        .set(authHeaders)
+
+      // Debug: Log the response to understand the error
+      if (response.status !== 200) {
+        console.log('Error response:', response.status, response.body)
+        console.log('Response headers:', response.headers)
+      }
+
+      expect(response.status).toBe(200)
 
       // Assert
       expect(response.body.success).toBe(true)

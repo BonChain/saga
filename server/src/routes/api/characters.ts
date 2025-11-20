@@ -3,11 +3,12 @@
  *
  * RESTful endpoints for character interaction management.
  * Follows existing API patterns in server/src/index.ts with Express middleware,
- * authentication, rate limiting, and request validation.
+ * JWT authentication, rate limiting, and request validation.
  */
 
 import { Router, Request, Response, NextFunction } from 'express'
 import { Logger } from 'winston'
+import { AuthService } from '../../services/auth-service'
 
 import { CharacterService } from '../../services/character-service'
 import {
@@ -83,12 +84,14 @@ interface RelationshipSummaryResponse {
 export class CharacterRoutes {
   private router: Router
   private characterService: CharacterService
+  private authService: AuthService
   private logger: Logger
   private rateLimitStore: Map<string, { count: number; resetTime: number }> = new Map()
 
-  constructor(characterService: CharacterService, logger: Logger) {
+  constructor(characterService: CharacterService, authService: AuthService, logger: Logger) {
     this.router = Router()
     this.characterService = characterService
+    this.authService = authService
     this.logger = logger
     this.setupRoutes()
   }
@@ -155,7 +158,7 @@ export class CharacterRoutes {
           characters,
           count: characters.length,
           total: characters.length,
-          page: Math.floor(options.offset / (options.limit || 10)) + 1,
+          page: options.offset ? Math.floor(options.offset / (options.limit || 10)) + 1 : 1,
           pageSize: options.limit || 10
         },
         metadata: {
@@ -790,70 +793,59 @@ export class CharacterRoutes {
    * Middleware functions
    */
 
+  /**
+   * JWT Authentication middleware
+   */
   private authMiddleware(req: AuthenticatedRequest, res: Response, next: NextFunction): void | Response {
     try {
-      const userIdHeader = req.headers['x-user-id'] as string;
-      const userRoleHeader = req.headers['x-user-role'] as string;
+      // Extract JWT token from Authorization header or x-session-token header
+      const authHeader = req.headers['authorization'] as string;
       const sessionTokenHeader = req.headers['x-session-token'] as string;
 
-      // Validate required headers
-      if (!userIdHeader || !userRoleHeader || !sessionTokenHeader) {
+      let token: string | undefined;
+
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        token = authHeader.replace('Bearer ', '');
+      } else if (sessionTokenHeader) {
+        token = sessionTokenHeader;
+      }
+
+      if (!token) {
         return res.status(401).json({
           error: 'Authentication required',
-          message: 'Missing required authentication headers: x-user-id, x-user-role, x-session-token',
+          message: 'Missing JWT token. Provide Authorization: Bearer <token> or x-session-token header',
           status: 'error'
         });
       }
 
-      // Validate header formats
-      if (typeof userIdHeader !== 'string' || userIdHeader.length < 1 || userIdHeader.length > 100) {
+      // Validate JWT token
+      const validation = this.authService.validateJWT(token);
+
+      if (!validation.valid || !validation.payload) {
         return res.status(401).json({
-          error: 'Invalid user ID format',
-          message: 'User ID must be a string between 1-100 characters',
+          error: 'Invalid or expired token',
+          message: validation.error || 'Authentication failed',
           status: 'error'
         });
       }
 
-      const validRoles = ['user', 'admin', 'moderator', 'guest'];
-      if (!validRoles.includes(userRoleHeader)) {
-        return res.status(403).json({
-          error: 'Invalid user role',
-          message: `Invalid role. Allowed roles: ${validRoles.join(', ')}`,
-          status: 'error'
-        });
-      }
-
-      if (typeof sessionTokenHeader !== 'string' || sessionTokenHeader.length < 10 || sessionTokenHeader.length > 500) {
-        return res.status(401).json({
-          error: 'Invalid session token',
-          message: 'Session token must be a string between 10-500 characters',
-          status: 'error'
-        });
-      }
-
-      // Basic session token validation (in production, use proper JWT verification)
-      const tokenParts = sessionTokenHeader.split('.');
-      if (tokenParts.length !== 3) {
-        return res.status(401).json({
-          error: 'Invalid session token format',
-          message: 'Session token must follow proper format',
-          status: 'error'
-        });
-      }
-
-      // Set authenticated user data
+      // Set authenticated user data from JWT payload
       req.user = {
-        id: userIdHeader,
-        role: userRoleHeader,
-        sessionToken: sessionTokenHeader
+        id: validation.payload.walletAddress,
+        role: validation.payload.role,
+        sessionToken: token
       };
+
+      // Add wallet address to headers for downstream use
+      req.headers['x-user-id'] = validation.payload.walletAddress;
+      req.headers['x-user-role'] = validation.payload.role || 'user';
 
       next();
     } catch (error) {
-      console.error('Authentication error:', error);
-      res.status(500).json({
-        error: 'Authentication error',
-        message: 'An error occurred during authentication',
+      this.logger.error('JWT Authentication middleware error', { error: (error as Error).message });
+      return res.status(500).json({
+        error: 'An error occurred during authentication',
+        message: 'Authentication process failed',
         status: 'error'
       });
     }
@@ -1096,8 +1088,9 @@ export class CharacterRoutes {
 // Export the router factory function
 export function createCharacterRoutes(
   characterService: CharacterService,
+  authService: AuthService,
   logger: Logger
 ): Router {
-  const characterRoutes = new CharacterRoutes(characterService, logger)
+  const characterRoutes = new CharacterRoutes(characterService, authService, logger)
   return characterRoutes.getRouter()
 }

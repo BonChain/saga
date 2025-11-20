@@ -38,7 +38,8 @@ describe.skip('Consequence Generation Performance Tests (Temporarily Disabled)',
       useBackup: false,
       backupPath: './backups',
       sponsoredTransactions: false,
-      developerPrivateKey: 'mock-key'
+      developerPrivateKey: 'mock-key',
+      storageEpochs: 1
     }
     mockLayer1Blueprint = new Layer1Blueprint('', mockWalrusConfig) as jest.Mocked<Layer1Blueprint>
     mockLayer3State = new Layer3State('', mockWalrusConfig) as jest.Mocked<Layer3State>
@@ -454,21 +455,20 @@ The cumulative effect creates a permanent shift in how the world operates, estab
         .slice(0, 3) // Limit to 2-4 consequences as per AC requirement
         .map((line, index) => ({
           id: `consequence-${index}`,
+          actionId: 'test-action-1',
+          type: 'economic' as const,
           description: line.trim().replace(/^\d+\.\s*/, ''),
-          impact: Math.random() * 10,
-          likelihood: Math.random(),
-          category: 'economic' as const,
-          timeframe: 'short-term' as const,
-          affectedCharacters: ['villagers', 'merchants'],
-          affectedLocations: ['village', 'trade_routes'],
-          prerequisites: [],
-          conflicts: [],
-          synergyEffects: [],
-          isCascade: false,
-          parentConsequenceId: null,
-          childConsequenceIds: [],
-          metadata: {},
-          timestamp: Date.now()
+          impact: {
+            level: 'moderate' as const,
+            affectedSystems: ['economy'],
+            magnitude: 5,
+            duration: 'short_term' as const,
+            affectedCharacters: ['villagers', 'merchants'],
+            affectedLocations: ['village', 'trade_routes']
+          },
+          cascadingEffects: [],
+          timestamp: new Date().toISOString(),
+          confidence: 0.8
         }))
 
       // Step 2: Validate consequences

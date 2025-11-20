@@ -3,6 +3,7 @@ import {
   SuiClient
 } from '@mysten/sui/client'
 import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519'
+import { decodeSuiPrivateKey } from '@mysten/sui/cryptography'
 import { Transaction, coinWithBalance } from '@mysten/sui/transactions'
 import { MIST_PER_SUI, parseStructTag, fromB64 } from '@mysten/sui/utils'
 import { getFaucetHost, requestSuiFromFaucetV2 } from '@mysten/sui/faucet'
@@ -61,8 +62,13 @@ export class SponsoredWalrusClient {
 
     console.log('[SuiSaga] Initializing Sponsored Walrus Client (Official SDK)...')
 
-    // Initialize developer signer asynchronously (we'll store as undefined initially)
-    this.initializeDeveloperSigner()
+    // Only initialize developer signer if sponsored transactions are enabled
+    if (this.config.sponsoredTransactions) {
+      console.log('[SuiSaga] Sponsored transactions enabled - initializing developer signer...')
+      this.initializeDeveloperSigner()
+    } else {
+      console.log('[SuiSaga] Sponsored transactions disabled - skipping developer signer initialization')
+    }
   }
 
   private async initializeDeveloperSigner(): Promise<void> {
@@ -100,14 +106,21 @@ export class SponsoredWalrusClient {
       // SECURITY: Get private key from environment variable, not file
       const privateKey = this.config.developerPrivateKey
 
-      if (!privateKey) {
-        throw new Error('DEVELOPER_PRIVATE_KEY environment variable not set')
+      if (!privateKey || privateKey.trim() === '') {
+        throw new Error('DEVELOPER_PRIVATE_KEY environment variable not set or empty. Please set it in your .env file or environment variables.')
       }
 
       console.log('[SuiSaga] 🔒 Loading developer keypair from secure environment variable...')
 
       // Create keypair from environment variable
-      const keypair = Ed25519Keypair.fromSecretKey(privateKey)
+      // Handle both suiprivkey format and raw hex format
+      let keypair: Ed25519Keypair
+      if (privateKey.startsWith('suiprivkey')) {
+        const parsedKeypair = decodeSuiPrivateKey(privateKey)
+        keypair = Ed25519Keypair.fromSecretKey(parsedKeypair.secretKey)
+      } else {
+        keypair = Ed25519Keypair.fromSecretKey(privateKey)
+      }
       const developerAddress = keypair.getPublicKey().toSuiAddress()
 
       console.log('[SuiSaga] Developer address:', developerAddress)

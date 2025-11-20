@@ -295,7 +295,7 @@ epic-4:
     story-4-1-character-memory-relationship-tracking:
       title: "Character Memory & Relationship Tracking"
       description: "As a character, I want to remember every interaction with players and other characters, so that I can develop authentic relationships and respond appropriately."
-      status: "review"
+      status: "done"
       prerequisites: ["story-3-3-butterfly-effect-calculation"]
       estimated_hours: 4
       story_file: "stories/story-4-1-character-memory-relationship-tracking.md"

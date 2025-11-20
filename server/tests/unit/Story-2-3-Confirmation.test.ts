@@ -42,7 +42,7 @@ describe('Story 2.3: Enhanced Action Confirmation', () => {
         strictMode: false,
         maxActionLength: 500,
         maxWorldStateSize: 1000,
-        allowedActionTypes: ['combat', 'social', 'exploration'],
+        allowedActionTypes: ['combat', 'social', 'exploration', 'other'],
         requiredWorldRules: ['basic_physics'],
         checksumAlgorithm: 'sha256',
         enableCrossLayerValidation: false
@@ -64,7 +64,7 @@ describe('Story 2.3: Enhanced Action Confirmation', () => {
       strictMode: false,
       maxActionLength: 500,
       maxWorldStateSize: 1000,
-      allowedActionTypes: ['combat', 'social', 'exploration'],
+      allowedActionTypes: ['combat', 'social', 'exploration', 'other'],
       requiredWorldRules: ['basic_physics'],
       checksumAlgorithm: 'sha256',
       enableCrossLayerValidation: false

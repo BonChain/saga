@@ -22,10 +22,18 @@ describe('Real AI → Butterfly Effect Integration (Simple)', () => {
   beforeAll(() => {
     // Initialize services with minimal setup
     cascadeProcessor = new CascadeProcessor()
-    layer1Blueprint = new Layer1Blueprint('./test-data', {
-      projectId: 'test-project',
-      accessKey: 'test-key'
-    })
+    const mockWalrusConfig = {
+      endpoint: 'https://testnet.sui.app',
+      network: 'testnet',
+      maxRetries: 3,
+      timeout: 5000,
+      useBackup: false,
+      backupPath: './test-backups',
+      sponsoredTransactions: false,
+      developerPrivateKey: 'test-key',
+      storageEpochs: 1
+    }
+    layer1Blueprint = new Layer1Blueprint('./test-data', mockWalrusConfig)
     consequenceGenerator = new ConsequenceGenerator(layer1Blueprint)
 
     if (!OPENAI_API_KEY) {
