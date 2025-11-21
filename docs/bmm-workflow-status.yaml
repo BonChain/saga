@@ -41,4 +41,5 @@ workflow_status: "
 
   # Phase 3: Implementation
   sprint-planning: docs/sprint-artifacts/sprint-status.yaml  # agent: sm
+  cascade-visualization-engine: stories/story-8-2-cascade-visualization-engine.md  # agent: dev
 "
