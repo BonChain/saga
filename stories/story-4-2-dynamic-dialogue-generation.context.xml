@@ -1,0 +1,141 @@
+<story-context id="story-4-2-dynamic-dialogue-generation.context" v="1.0">
+  <metadata>
+    <epicId>4</epicId>
+    <storyId>2</storyId>
+    <title>Dynamic Dialogue Generation</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-11-21</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>stories/story-4-2-dynamic-dialogue-generation.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>As a player</asA>
+    <iWant>I want NPCs to say things that reflect their unique experiences with me and the world</iWant>
+    <soThat>so that conversations feel authentic and meaningful</soThat>
+    <tasks>8 tasks with 32 subtasks focused on AI-driven dialogue generation, emotional tone analysis, memory-based conversation topics, relationship-state dialogue templates, world context integration, dialogue consistency checking, API endpoints, and performance optimization</tasks>
+  </story>
+
+  <acceptanceCriteria>1. Given I talk to an NPC who remembers my past actions, when the character responds, then their dialogue references specific shared experiences and history
+2. Given I have different relationship status with an NPC, when they speak, then their emotional tone reflects our current relationship status
+3. Given world events have occurred, when NPCs speak, then they mention other characters and world events they've experienced
+4. Given NPCs have established personalities, when they speak, then dialogue stays consistent with their established personality
+5. Given recent world changes have happened, when NPCs speak, then they have unique things to say based on recent world changes
+6. Given I have repeated interactions with an NPC, when they respond, then I can build genuine connections through repeated interactions</acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc path="docs/epics.md" title="Epic Breakdown" section="Epic 4 - Story 4.2" snippet="Story 4.2 focuses on implementing dynamic dialogue generation with AI-driven character context, emotional tone analysis, memory-based conversation topics, and dialogue consistency checking for authentic NPC interactions."/>
+      <doc path="docs/PRD.md" title="Product Requirements Document" section="Success Criteria" snippet="Players rate 15-minute sessions as 'meaningful' or 'impactful'. 60% return within 24 hours to see world evolution. 70% explore actions other players have made."/>
+      <doc path="docs/tech-spec.md" title="Technical Specification" section="Project Stack" snippet="Backend: Node.js with Express server (localhost processing). AI Integration: OpenAI GPT-3.5-turbo with custom prompt templates. 3-day hackathon timeline with rapid prototyping approach."/>
+      <doc path="stories/story-4-1-character-memory-relationship-tracking.md" title="Previous Story - Character System Foundation" section="Dev Notes" snippet="Complete Character interface with memory arrays, personality traits, and relationship scoring. Personality enum (aggressive, friendly, cautious) with score calculation algorithms. CharacterService with addMemory, getCharacterMemories, updateRelationshipScore methods."/>
+    </docs>
+    <code>
+      <artifact path="server/src/models/character.ts" kind="Data Model" symbol="Character" lines="106-150" reason="Main Character interface with memory system, personality, relationships - foundation for dialogue generation">
+        <signature>interface Character { id: string; name: string; type: 'player' | 'npc'; personality: Personality; memories: MemoryEntry[]; relationships: { [targetId: string]: Relationship } }</signature>
+      </artifact>
+      <artifact path="server/src/models/character.ts" kind="Data Model" symbol="MemoryEntry" lines="42-61" reason="Structured memory data for AI dialogue context including emotional impact and conversation history">
+        <signature>interface MemoryEntry { id: string; action: string; description: string; emotionalImpact: EmotionalImpact; context: { otherCharactersPresent?: string[]; environmentalConditions?: string } }</signature>
+      </artifact>
+      <artifact path="server/src/models/character.ts" kind="Data Model" symbol="Personality" lines="15-24" reason="Personality enum affecting character dialogue patterns and responses">
+        <signature>enum Personality { AGGRESSIVE = 'aggressive'; FRIENDLY = 'friendly'; CAUTIOUS = 'cautious'; CURIOUS = 'curious'; LOYAL = 'loyal'; MISCHIEVOUS = 'mischievous'; WISE = 'wise'; GUARDED = 'guarded' }</signature>
+      </artifact>
+      <artifact path="server/src/models/character.ts" kind="Data Model" symbol="RelationshipScores" lines="67-74" reason="Multi-dimensional relationship scores driving emotional tone in dialogue">
+        <signature>interface RelationshipScores { friendship: number; hostility: number; loyalty: number; respect: number; fear: number; trust: number }</signature>
+      </artifact>
+      <artifact path="server/src/services/ai/ai-service-adapter.ts" kind="AI Service" symbol="AIServiceAdapter" lines="1-20" reason="Multi-provider AI integration with OpenAI, Z.ai, and OpenRouter fallback capabilities for dialogue generation">
+        <signature>class AIServiceAdapter - Abstraction over multiple AI providers with automatic fallback and performance monitoring</signature>
+      </artifact>
+      <artifact path="server/src/routes/api/characters.ts" kind="API Route" symbol="CharacterAPI" lines="1-10" reason="Existing character API endpoints that dialogue system should integrate with">
+        <signature>REST endpoints for character management, memories, and relationships - foundation for dialogue context API</signature>
+      </artifact>
+    </code>
+    <dependencies>
+      <frontend>
+        <package name="react" version="^19.2.0"/>
+        <package name="typescript" version="~5.9.3"/>
+        <package name="axios" version="^1.13.2"/>
+      </frontend>
+      <backend>
+        <package name="express" version="^4.18.2"/>
+        <package name="openai" version="^4.24.0"/>
+        <package name="uuid" version="^9.0.1"/>
+        <package name="typescript" version="^5.3.3"/>
+      </backend>
+      <existing_ai_integration>
+        <package name="z.ai" reason="Primary AI provider from Story 3.1 with glm-4.6 model"/>
+        <package name="openai" reason="Fallback AI provider with GPT-3.5-turbo"/>
+        <package name="@types/uuid" reason="TypeScript definitions for character and memory IDs"/>
+      </existing_ai_integration>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <architectural>
+      <constraint>Extend existing CharacterService from Story 4.1 rather than creating new character management</constraint>
+      <constraint>Integrate with existing AIServiceAdapter from Story 3.1 for AI dialogue generation</constraint>
+      <constraint>Leverage existing memory and relationship systems instead of rebuilding character context</constraint>
+      <constraint>Follow established service pattern: create DialogueService in server/src/services/</constraint>
+      <constraint>API endpoints must follow existing pattern: server/src/routes/api/dialogue/</constraint>
+    </architectural>
+    <performance>
+      <constraint>Dialogue generation must complete within 2 seconds for hackathon demo requirements</constraint>
+      <constraint>Memory context loading must be optimized for sub-500ms response times</constraint>
+      <constraint>Implement dialogue caching for frequently repeated conversations to improve performance</constraint>
+      <constraint>Support batch dialogue generation for multiple NPCs in conversation scenarios</constraint>
+    </performance>
+    <ai_integration>
+      <constraint>Extend existing AIServiceAdapter prompt templates with dialogue-specific context</constraint>
+      <constraint>Include character personality, memories, relationship scores, and world context in AI prompts</constraint>
+      <constraint>Implement personality consistency checking to prevent AI from breaking character traits</constraint>
+      <constraint>Support emotional tone mapping based on relationship scores from existing system</constraint>
+    </ai_integration>
+    <character_system>
+      <constraint>Dialogue must reference specific MemoryEntry objects from existing character memory system</constraint>
+      <constraint>Emotional tone must reflect RelationshipScores from existing relationship tracking</constraint>
+      <constraint>Personality consistency must align with Personality enum from character model</constraint>
+      <constraint>World awareness must integrate with existing world state storage system</constraint>
+    </character_system>
+  </constraints>
+
+  <interfaces>
+    <api name="Dialogue Generation API" kind="REST endpoint" signature="POST /api/dialogue/generate" path="server/src/routes/api/dialogue/generate.ts">
+      <description>Generate personality-consistent dialogue for NPCs based on character context, memories, and relationships</description>
+    </api>
+    <api name="Character Context API" kind="REST endpoint" signature="GET /api/characters/:id/dialogue-context" path="server/src/routes/api/characters.ts">
+      <description>Get character memories, relationships, and personality for dialogue generation (extend existing character API)</description>
+    </api>
+    <api name="AI Service Integration" kind="Service Interface" signature="AIServiceAdapter.generateDialogue(prompt, context)" path="server/src/services/ai/ai-service-adapter.ts">
+      <description>Extend existing AI service adapter with dialogue-specific prompt templates and context processing</description>
+    </api>
+    <interface name="DialogueRequest" kind="TypeScript interface" signature="interface DialogueRequest { characterId: string; playerId: string; context: string; conversationTopic?: string }" path="server/src/types/dialogue.ts">
+      <description>Input parameters for dialogue generation with character and player context</description>
+    </interface>
+    <interface name="DialogueResponse" kind="TypeScript interface" signature="interface DialogueResponse { dialogue: string; emotionalTone: 'friendly' | 'hostile' | 'neutral'; referencedMemories: string[]; personalityScore: number }" path="server/src/types/dialogue.ts">
+      <description>Structured dialogue output with metadata for frontend integration</description>
+    </interface>
+    <interface name="DialogueService" kind="Service Class" signature="class DialogueService { generateDialogue(request: DialogueRequest): Promise&lt;DialogueResponse&gt; }" path="server/src/services/DialogueService.ts">
+      <description>Main service for AI-driven dialogue generation with character context and personality consistency</description>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>Backend testing uses Jest with TypeScript. Frontend testing uses React Testing Library and @axe-core/react for accessibility. Integration tests verify dialogue generation with character memory context. Performance tests ensure sub-2 second dialogue generation. AI response testing validates personality consistency and emotional tone accuracy.</standards>
+    <locations>
+      <directory>server/src/services/__tests__/</directory>
+      <directory>server/src/routes/api/__tests__/</directory>
+      <directory>server/src/types/__tests__/</directory>
+      <pattern>**/*.dialogue.test.ts</pattern>
+      <pattern>**/*.integration.test.ts</pattern>
+    </locations>
+    <ideas>
+      <test ac="1" idea="Unit test for dialogue generation referencing specific shared memories from character MemoryEntry array"/>
+      <test ac="2" idea="Integration test connecting dialogue emotional tone to RelationshipScores from existing system"/>
+      <test ac="3" idea="Personality consistency test ensuring dialogue matches Personality enum traits"/>
+      <test ac="4" idea="World context integration test verifying dialogue mentions recent world changes"/>
+      <test ac="5" idea="AI response validation test for personality violations and emotional accuracy"/>
+      <test ac="6" idea="Performance test measuring dialogue generation time under 2 second target"/>
+      <test ac="6" idea="Memory efficiency test for dialogue caching and batch generation optimization"/>
+    </ideas>
+  </tests>
+</story-context>

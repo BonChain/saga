@@ -22,7 +22,85 @@ import { createAuthService } from './services/auth-service';
 import { createAuthRoutes } from './routes/api/auth';
 import { createCharacterRoutes } from './routes/api/characters';
 import { CharacterService } from './services/character-service';
+import { ParsedIntent } from './types/storage';
+import { IntentParseResult } from './services/intent-parser';
+
+// Import Dialogue Service for Story 4.2
+import { DialogueService } from './services/DialogueService';
+import dialogueRoutes from './routes/api/dialogue';
 import { createLogger, format, transports } from 'winston';
+
+// Type definitions for API responses and intent parsing
+interface IntentData extends ParsedIntent {
+  confidence?: number
+  originalInput?: string
+  timestamp?: number
+}
+
+interface CharacterAPIData {
+  id: string
+  name: string
+  type: string
+  personality?: string
+  memories?: Array<{
+    id: string
+    action: string
+    description: string
+    timestamp: number
+    emotionalImpact?: string
+  }>
+  relationships?: Record<string, {
+    scores: {
+      friendship: number
+      hostility: number
+      loyalty: number
+      respect: number
+      fear: number
+      trust: number
+    }
+    lastInteraction: number
+    totalInteractions: number
+  }>
+}
+
+interface AppError extends Error {
+  status?: number
+  statusCode?: number
+  details?: unknown
+}
+
+// Character Service types
+interface CreateCharacterRequest {
+  name: string
+  type: string
+  personality?: string
+  description?: string
+  backstory?: string
+  appearance?: Record<string, unknown>
+}
+
+interface AddMemoryRequest {
+  characterId: string
+  action: string
+  description: string
+  emotionalImpact?: string
+  timestamp?: number
+  location?: string
+}
+
+interface GetCharacterOptions {
+  includeMemories?: boolean
+  includeRelationships?: boolean
+  limit?: number
+}
+
+interface UpdateCharacterRequest {
+  name?: string
+  personality?: string
+  description?: string
+  backstory?: string
+  appearance?: Record<string, unknown>
+}
 
 const app = express();
 const PORT = process.env.PORT || 3001; // Using port 3001
@@ -237,8 +315,8 @@ app.post('/api/actions/submit', validateInput(commonSchemas.submitAction), async
     const { playerId, intent, originalInput, parsedIntent } = req.body;
 
     // Story 2.2: Parse intent using IntentParser service
-    let parsedIntentResult: any;
-    let finalParsedIntent: any;
+    let parsedIntentResult: IntentParseResult;
+    let finalParsedIntent: IntentData;
 
     if (parsedIntent && parsedIntent.actionType) {
       // Use provided parsedIntent
@@ -257,13 +335,10 @@ app.post('/api/actions/submit', validateInput(commonSchemas.submitAction), async
         if (parsedIntentResult.fallback) {
           // Create fallback parsedIntent with confidence below threshold
           finalParsedIntent = {
-            type: 'natural_language',
             actionType: 'other',
             urgency: 'medium',
-            content: intent.trim(),
-            timestamp: new Date().toISOString(),
-            confidence: parsedIntentResult.confidence,
-            parsingError: true
+            timestamp: Date.now(),
+            confidence: parsedIntentResult.confidence
           };
           console.log(`[PARSER] Using fallback intent with confidence: ${parsedIntentResult.confidence}`);
         } else {
@@ -814,12 +889,14 @@ app.get('/api/storage/system/logs/export', async (req, res) => {
 });
 
 // Error handling middleware
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+app.use((err: AppError, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error('Error:', err);
-  res.status(err.status || 500).json({
+  const status = err.status || err.statusCode || 500;
+  res.status(status).json({
     error: {
       message: err.message || 'Internal server error',
-      status: err.status || 500
+      status,
+      details: err.details
     }
   });
 });
@@ -847,26 +924,29 @@ const authLogger = createLogger({
 // Initialize Auth Service
 const authService = createAuthService(authLogger);
 
+// Initialize Dialogue Service for Story 4.2
+const dialogueService = new DialogueService({} as any);
+
 // Initialize Character Service (basic setup for now)
 // TODO: Properly integrate with existing world service
 const MockCharacterService = {
-  async getAllCharacters(options?: any): Promise<any[]> {
+  async getAllCharacters(options?: GetCharacterOptions): Promise<CharacterAPIData[]> {
     authLogger.info('CharacterService.getAllCharacters called', { options });
     return [];
   },
-  async getCharacter(id: string): Promise<any> {
+  async getCharacter(id: string): Promise<CharacterAPIData | null> {
     authLogger.info('CharacterService.getCharacter called', { id });
     return null;
   },
-  async createCharacter(character: any): Promise<any> {
+  async createCharacter(character: CreateCharacterRequest): Promise<CharacterAPIData> {
     authLogger.info('CharacterService.createCharacter called', { character });
-    return character;
+    return { id: 'temp_' + Date.now(), type: 'npc', name: character.name, ...character } as CharacterAPIData;
   },
-  async addMemory(params: any): Promise<any> {
+  async addMemory(params: AddMemoryRequest): Promise<{ id: string; success: boolean }> {
     authLogger.info('CharacterService.addMemory called', { params });
-    return params;
+    return { id: 'mem_' + Date.now(), success: true };
   },
-  async getCharacterMemories(characterId: string, options?: any): Promise<any[]> {
+  async getCharacterMemories(characterId: string, options?: GetCharacterOptions): Promise<CharacterAPIData['memories']> {
     authLogger.info('CharacterService.getCharacterMemories called', { characterId, options });
     return [];
   },
@@ -895,6 +975,9 @@ app.use('/api/auth', createAuthRoutes(authService, authLogger));
 
 // Setup Character Routes (with JWT authentication)
 app.use('/api/characters', createCharacterRoutes(characterService, authService, authLogger));
+
+// Setup Dialogue Routes for Story 4.2
+app.use('/api/dialogue', dialogueRoutes);
 
 console.log('✅ Authentication and character routes configured');
 

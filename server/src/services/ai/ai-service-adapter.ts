@@ -185,7 +185,7 @@ export class AIServiceAdapter {
       this.currentProvider = configuredProvider
     } else {
       // Find first available provider
-      for (const [key, provider] of this.providers.entries()) {
+      for (const [key, provider] of Array.from(this.providers.entries())) {
         if (provider.enabled) {
           this.currentProvider = key
           break
@@ -227,7 +227,8 @@ export class AIServiceAdapter {
 
   private async checkProviderAvailability(): Promise<string[]> {
     const available: string[] = []
-    for (const [key, provider] of this.providers.entries()) {
+      const providerEntries = Array.from(this.providers.entries())
+      for (const [key, provider] of providerEntries) {
       if (provider.enabled) {
         try {
           // Simple availability check - in real implementation, test API connectivity

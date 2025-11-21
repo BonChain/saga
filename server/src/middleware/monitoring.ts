@@ -79,7 +79,7 @@ export interface HealthStatus {
 }
 
 // Simple metrics tracking
-let requestMetrics = {
+const requestMetrics = {
   totalRequests: 0,
   totalResponseTime: 0,
   errorCount: 0,

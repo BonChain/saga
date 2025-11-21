@@ -8,7 +8,6 @@
       "Bash(mkdir:*)",
       "WebSearch",
       "SlashCommand(/bmad:bmm:workflows:tech-spec)",
-      "Bash(\"D:\\work\\hackathon\\walrus haulout 2025\\docs\\epics_temp.md\")",
       "Bash(npm create vite:*)",
       "Bash(npm install:*)",
       "Bash(npm run build:*)",
@@ -17,9 +16,6 @@
       "Bash(curl:*)",
       "Bash(dir:*)",
       "Bash(echo:*)",
-      "Bash(\"D:\\work\\hackathon\\walrus haulout 2025\\client\\.gitignore\")",
-      "Bash(\"D:\\work\\hackathon\\walrus haulout 2025\\server\\.gitignore\")",
-      "Bash(\"D:\\work\\hackathon\\walrus haulout 2025\\contract\\.gitignore\")",
       "Bash(netstat:*)",
       "Bash(findstr:*)",
       "Bash(taskkill:*)",
@@ -75,7 +71,13 @@
       "Bash(gh issue close:*)",
       "Bash(npx jest:*)",
       "Bash(npm run lint)",
-      "Bash(npm run test:*)"
+      "Bash(npm run test:*)",
+      "Bash(yarn tsc:*)",
+      "Bash(yarn build:*)",
+      "Bash(yarn lint:*)",
+      "Bash(yarn test:*)",
+      "Bash(npm run lint:*)",
+      "Bash(npx eslint-formatter-codeframe)"
     ],
     "deny": [],
     "ask": []
