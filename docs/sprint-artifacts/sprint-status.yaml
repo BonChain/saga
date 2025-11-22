@@ -356,7 +356,7 @@ epic-5:
     story-5-1-action-recording-walrus-integration:
       title: "Action Recording & Walrus Integration"
       description: "As a system, I want to record every player action on blockchain storage, so that all world changes are permanently verifiable."
-      status: "backlog"
+      status: "review"
       prerequisites: ["story-1-2-three-layer-walrus-architecture"]
       estimated_hours: 3
       acceptance_criteria:
