@@ -14,14 +14,78 @@ import { Personality } from '../../../models/character'
 
 // Import the AIServiceAdapter interface from DialogueService
 import { AIServiceAdapter, AIServiceRequest, AIServiceResponse } from '../../../services/DialogueService'
+import { aiServiceAdapter } from '../../../services/ai/ai-service-adapter'
 
 const router = Router()
 
-// Initialize dialogue service - would integrate with existing AIServiceAdapter
-const mockAIService: AIServiceAdapter = {
-  generateResponse: async () => ({ content: 'Mock AI response for testing purposes.' })
+// Create adapter to bridge aiServiceAdapter to DialogueService interface
+const aiServiceAdapterForDialogue: AIServiceAdapter = {
+  generateResponse: async (request: AIServiceRequest) => {
+    // For now, use a simpler direct Z.ai approach
+    try {
+      // Call Z.ai directly with the character context
+      const characterContext = request.context?.personality
+        ? `Character personality: ${request.context.personality}. Character emotional tone: ${request.context?.emotionalTone || 'neutral'}.`
+        : 'You are a friendly NPC character.'
+
+      const promptForAI = `${characterContext}\n\nPlayer says: "${request.prompt}"\n\nRespond as the character, keeping in character with your personality and emotional state:`
+
+      // Simple prompt-based request to the AI service
+      const aiRequest = {
+        id: `dialogue_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        actionId: `dialogue_${Date.now()}`,
+        promptType: 'character_response' as any,
+        context: {
+          actionId: `dialogue_${Date.now()}`,
+          playerIntent: 'dialogue',
+          originalInput: request.prompt,
+          worldState: {
+            timestamp: new Date().toISOString(),
+            regions: [],
+            characters: [],
+            economy: { prosperity: 50, stability: 50 },
+            environment: { weather: 'clear', timeOfDay: 'day' },
+            events: []
+          },
+          characterRelationships: [],
+          locationContext: {
+            currentLocation: 'unknown',
+            nearbyCharacters: [],
+            environmentalFactors: []
+          },
+          recentActions: [],
+          worldRules: []
+        },
+        prompt: promptForAI,
+        timestamp: new Date().toISOString(),
+        maxTokens: request.maxTokens || 500,
+        temperature: request.temperature || 0.7
+      }
+
+      // Use real AI service adapter (with type assertion to bypass complex type checking)
+      const response = await aiServiceAdapter.processAction(aiRequest as any)
+
+      return {
+        content: response.consequences?.[0]?.description || response.content || 'No response generated',
+        usage: response.tokenUsage ? {
+          promptTokens: response.tokenUsage.promptTokens,
+          completionTokens: response.tokenUsage.completionTokens,
+          totalTokens: response.tokenUsage.totalTokens
+        } : undefined,
+        model: response.model
+      }
+    } catch (error) {
+      console.error('AI dialogue generation error:', error)
+      return {
+        content: 'I apologize, but I\'m having trouble thinking of a response right now.',
+        usage: undefined,
+        model: 'error'
+      }
+    }
+  }
 }
-const dialogueService = new DialogueService(mockAIService)
+
+const dialogueService = new DialogueService(aiServiceAdapterForDialogue)
 
 /**
  * Generate dialogue for NPC character

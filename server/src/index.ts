@@ -12,7 +12,6 @@ dotenv.config();
 
 // Import storage components
 import { StorageManager, StorageManagerConfig } from './storage/storage-manager';
-import { WalrusConfig, BackupConfig, ValidationConfig, LoggerConfig } from './types/storage';
 
 // Import Story 2.2 Intent Parser
 import { intentParser } from './services/intent-parser';
@@ -20,15 +19,17 @@ import { intentParser } from './services/intent-parser';
 // Import Authentication and Character Services
 import { createAuthService } from './services/auth-service';
 import { createAuthRoutes } from './routes/api/auth';
-import { createCharacterRoutes } from './routes/api/characters';
-import { CharacterService } from './services/character-service';
+import { createCharacterRealRoutes } from './routes/api/characters-real';
+import { RealCharacterService } from './services/RealCharacterService';
 import { ParsedIntent } from './types/storage';
 import { IntentParseResult } from './services/intent-parser';
 
 // Import Dialogue Service for Story 4.2
 import { DialogueService } from './services/DialogueService';
 import dialogueRoutes from './routes/api/dialogue';
-import { createLogger, format, transports } from 'winston';
+
+// Import Demo Reliability Service for Story 5.3
+import demoRoutes from './routes/api/demo';
 
 // Type definitions for API responses and intent parsing
 interface IntentData extends ParsedIntent {
@@ -94,16 +95,33 @@ interface GetCharacterOptions {
   limit?: number
 }
 
-interface UpdateCharacterRequest {
-  name?: string
-  personality?: string
-  description?: string
-  backstory?: string
-  appearance?: Record<string, unknown>
-}
 
 const app = express();
 const PORT = process.env.PORT || 3001; // Using port 3001
+
+// Import logger for production-ready logging
+import { createLogger, format, transports } from 'winston';
+
+// Create application logger
+const appLogger = createLogger({
+  level: process.env.LOG_LEVEL || 'info',
+  format: format.combine(
+    format.timestamp(),
+    format.errors({ stack: true }),
+    format.json()
+  ),
+  defaultMeta: { service: 'suisaga-api' },
+  transports: [
+    new transports.File({ filename: 'logs/error.log', level: 'error' }),
+    new transports.File({ filename: 'logs/combined.log' }),
+    new transports.Console({
+      format: format.combine(
+        format.colorize(),
+        format.simple()
+      )
+    })
+  ]
+});
 
 // Initialize storage configuration (SECURE: Using environment variables)
 const storageConfig: StorageManagerConfig = {
@@ -173,8 +191,16 @@ app.use(express.urlencoded({ extended: true }));
 app.use(requestMonitor);
 app.use(collectMetrics);
 
-// Apply rate limiting to all API routes
-app.use('/api/', rateLimit({ windowMs: 15 * 60 * 1000, max: 100, message: 'Too many requests from this IP' }));
+// Apply rate limiting to all API routes with configurable values
+const rateLimitWindowMs = parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000'); // 15 minutes default
+const rateLimitMax = parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '100');
+const rateLimitMessage = process.env.RATE_LIMIT_MESSAGE || 'Too many requests from this IP';
+
+app.use('/api/', rateLimit({
+  windowMs: rateLimitWindowMs,
+  max: rateLimitMax,
+  message: rateLimitMessage,
+}));
 
 // Enhanced health check endpoint
 app.get('/health', healthCheck);
@@ -889,7 +915,7 @@ app.get('/api/storage/system/logs/export', async (req, res) => {
 });
 
 // Error handling middleware
-app.use((err: AppError, req: express.Request, res: express.Response, next: express.NextFunction) => {
+app.use((err: AppError, req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error('Error:', err);
   const status = err.status || err.statusCode || 500;
   res.status(status).json({
@@ -902,7 +928,7 @@ app.use((err: AppError, req: express.Request, res: express.Response, next: expre
 });
 
 // Setup Authentication and Character Services
-console.log('🔐 Setting up authentication services...');
+appLogger.info('Setting up authentication services...');
 
 // Create logger for auth services
 const authLogger = createLogger({
@@ -925,61 +951,24 @@ const authLogger = createLogger({
 const authService = createAuthService(authLogger);
 
 // Initialize Dialogue Service for Story 4.2
-const dialogueService = new DialogueService({} as any);
 
-// Initialize Character Service (basic setup for now)
-// TODO: Properly integrate with existing world service
-const MockCharacterService = {
-  async getAllCharacters(options?: GetCharacterOptions): Promise<CharacterAPIData[]> {
-    authLogger.info('CharacterService.getAllCharacters called', { options });
-    return [];
-  },
-  async getCharacter(id: string): Promise<CharacterAPIData | null> {
-    authLogger.info('CharacterService.getCharacter called', { id });
-    return null;
-  },
-  async createCharacter(character: CreateCharacterRequest): Promise<CharacterAPIData> {
-    authLogger.info('CharacterService.createCharacter called', { character });
-    return { id: 'temp_' + Date.now(), type: 'npc', name: character.name, ...character } as CharacterAPIData;
-  },
-  async addMemory(params: AddMemoryRequest): Promise<{ id: string; success: boolean }> {
-    authLogger.info('CharacterService.addMemory called', { params });
-    return { id: 'mem_' + Date.now(), success: true };
-  },
-  async getCharacterMemories(characterId: string, options?: GetCharacterOptions): Promise<CharacterAPIData['memories']> {
-    authLogger.info('CharacterService.getCharacterMemories called', { characterId, options });
-    return [];
-  },
-  async updateRelationshipScore(characterId: string, targetId: string, score: number): Promise<void> {
-    authLogger.info('CharacterService.updateRelationshipScore called', { characterId, targetId, score });
-  },
-  async getRelationshipStatus(characterId: string, targetId: string): Promise<any> {
-    authLogger.info('CharacterService.getRelationshipStatus called', { characterId, targetId });
-    return { characterId, targetId, score: 0 };
-  },
-  async validateCharacter(character: any): Promise<any> {
-    authLogger.info('CharacterService.validateCharacter called', { character });
-    return { valid: true, errors: [] };
-  },
-  async updateCharacter(id: string, updates: any): Promise<any> {
-    authLogger.info('CharacterService.updateCharacter called', { id, updates });
-    return { id, ...updates };
-  }
-  // Add other methods as needed
-};
-
-const characterService = MockCharacterService as any;
+// Initialize Real Character Service with persistent storage
+const characterService = new RealCharacterService('./data/characters');
+appLogger.info('Real Character Service initialized with persistent storage');
 
 // Setup Authentication Routes
 app.use('/api/auth', createAuthRoutes(authService, authLogger));
 
 // Setup Character Routes (with JWT authentication)
-app.use('/api/characters', createCharacterRoutes(characterService, authService, authLogger));
+app.use('/api/characters', createCharacterRealRoutes(characterService, authService, authLogger));
 
 // Setup Dialogue Routes for Story 4.2
 app.use('/api/dialogue', dialogueRoutes);
 
-console.log('✅ Authentication and character routes configured');
+// Setup Demo Reliability Routes for Story 5.3
+app.use('/api/demo', demoRoutes);
+
+appLogger.info('Authentication, character, and demo routes configured');
 
 // 404 handler (must be AFTER all other routes)
 app.use('*', (req, res) => {
@@ -991,30 +980,30 @@ app.use('*', (req, res) => {
   });
 });
 
-console.log('🔍 About to start server...');
+appLogger.info('About to start server...');
 
 // Start server
 try {
   const server = app.listen(PORT, () => {
-    console.log(`🚀 SuiSaga server running on port ${PORT}`);
-    console.log(`📊 Health check: http://localhost:${PORT}/health`);
-    console.log(`📈 Enhanced monitoring: http://localhost:${PORT}/health (detailed)`);
-    console.log(`🔧 Environment: ${process.env.NODE_ENV || 'development'}`);
+    appLogger.info(`SuiSaga server running on port ${PORT}`);
+    appLogger.info(`Health check: http://localhost:${PORT}/health`);
+    appLogger.info(`Enhanced monitoring: http://localhost:${PORT}/health (detailed)`);
+    appLogger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
 
     // Setup graceful shutdown
     setupGracefulShutdown();
   });
 
   server.on('error', (error: any) => {
-    console.error('❌ Server error:', error);
+    appLogger.error('Server error:', error);
     if (error.code === 'EADDRINUSE') {
-      console.error(`❌ Port ${PORT} is already in use`);
+      appLogger.error(`Port ${PORT} is already in use`);
     }
     process.exit(1);
   });
 
 } catch (error) {
-  console.error('❌ Failed to start server:', error);
+  appLogger.error('Failed to start server:', error);
   process.exit(1);
 }
 

@@ -1,0 +1,725 @@
+{
+  "info": {
+    "name": "SuiSaga API",
+    "description": "SuiSaga Blockchain Living World Game API - Complete collection for testing all endpoints including authentication, character management, AI dialogue generation, blockchain actions, and demo reliability systems.",
+    "version": "1.0.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "suisaga-api-v1"
+  },
+  "item": [
+    {
+      "name": "🏥 Health & System",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            },
+            "description": "Check system health status including memory, CPU, and service availability"
+          },
+          "response": []
+        }
+      ],
+      "description": "System health monitoring and status endpoints"
+    },
+    {
+      "name": "🔐 Authentication",
+      "item": [
+        {
+          "name": "Get Challenge",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"walletAddress\": \"0x1234567890123456789012345678901234567890\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/challenge",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "challenge"]
+            },
+            "description": "Get authentication challenge for wallet signing"
+          },
+          "response": []
+        },
+        {
+          "name": "Authenticate",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"walletAddress\": \"0x1234567890123456789012345678901234567890\",\n  \"signature\": \"0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890\",\n  \"challenge\": \"Sign this message to authenticate with SuiSaga\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/authenticate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "authenticate"]
+            },
+            "description": "Authenticate using signed challenge to get JWT token"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.success && response.data.token) {",
+                  "        pm.collectionVariables.set('jwtToken', response.data.token);",
+                  "        console.log('JWT Token saved:', response.data.token.substring(0, 20) + '...');",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Validate Token",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwtToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/validate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "validate"]
+            },
+            "description": "Validate JWT token and get user information"
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwtToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/refresh",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "refresh"]
+            },
+            "description": "Refresh JWT token to extend session"
+          },
+          "response": []
+        }
+      ],
+      "description": "JWT-based wallet authentication endpoints"
+    },
+    {
+      "name": "🧑‍🤝‍🧑 Character Management",
+      "item": [
+        {
+          "name": "Get All Characters",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwtToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/characters?includeMemories=true&includeRelationships=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "characters"],
+              "query": [
+                {
+                  "key": "includeMemories",
+                  "value": "true",
+                  "description": "Include character memories in response"
+                },
+                {
+                  "key": "includeRelationships",
+                  "value": "true",
+                  "description": "Include character relationships in response"
+                }
+              ]
+            },
+            "description": "Retrieve all characters with optional memories and relationships"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Character",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwtToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Aria the Wise\",\n  \"type\": \"npc\",\n  \"personality\": \"WISE\",\n  \"description\": \"An elderly sage with centuries of knowledge about the realm's mysteries and prophecies.\",\n  \"backstory\": \"Aria has served as the royal advisor for three generations of rulers, witnessing the rise and fall of empires. She possesses ancient magical artifacts and can read the stars to predict future events.\",\n  \"appearance\": {\n    \"physicalDescription\": \"Elderly woman with long silver hair often braided with magical runes. Deep blue eyes that seem to hold ancient wisdom. Wears flowing robes adorned with celestial symbols.\",\n    \"notableFeatures\": [\"Carries an ornate crystal staff\", \"Has intricate rune tattoos on hands\", \"Always surrounded by a faint magical aura\"]\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/characters",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "characters"]
+            },
+            "description": "Create a new character with detailed information"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Character by ID",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwtToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/characters/{{characterId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "characters", "{{characterId}}"]
+            },
+            "description": "Get detailed information about a specific character"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Character",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwtToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Aria the Wise - Updated\",\n  \"description\": \"Updated description: Aria has recently discovered new prophecies about the coming darkness.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/characters/{{characterId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "characters", "{{characterId}}"]
+            },
+            "description": "Update character information"
+          },
+          "response": []
+        },
+        {
+          "name": "Add Memory",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwtToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"Met a young adventurer seeking wisdom\",\n  \"actionType\": \"social\",\n  \"location\": \"tower of knowledge\",\n  \"description\": \"A brave young traveler approached seeking guidance on their quest to defeat the shadow dragon that threatens the kingdom.\",\n  \"emotionalImpact\": 3,\n  \"context\": {\n    \"environmentalConditions\": \"tower filled with ancient scrolls and magical artifacts\",\n    \"otherCharactersPresent\": [\"young_adventurer\"],\n    \"timeOfDay\": \"late afternoon\"\n  },\n  \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/characters/{{characterId}}/memories",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "characters", "{{characterId}}", "memories"]
+            },
+            "description": "Add a new memory to character's history"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Character Memories",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwtToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/characters/{{characterId}}/memories",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "characters", "{{characterId}}", "memories"]
+            },
+            "description": "Get all memories associated with a character"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Relationships",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwtToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/characters/{{characterId}}/relationships",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "characters", "{{characterId}}", "relationships"]
+            },
+            "description": "Get all relationships for a character"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Relationship Score",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwtToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"score\": 15,\n  \"type\": \"friendship\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/characters/{{characterId}}/relationships/{{targetId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "characters", "{{characterId}}", "relationships", "{{targetId}}"]
+            },
+            "description": "Update relationship score between two characters"
+          },
+          "response": []
+        }
+      ],
+      "description": "Character CRUD, memory management, and relationship tracking"
+    },
+    {
+      "name": "💬 Dialogue Generation",
+      "item": [
+        {
+          "name": "Generate Dialogue",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"playerId\": \"player_12345\",\n  \"characterId\": \"aria_wise_sage\",\n  \"prompt\": \"I've heard rumors about a shadow dragon threatening the kingdom. Can you tell me more about this prophecy?\",\n  \"context\": \"seeking wisdom about dragon prophecy\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/dialogue/generate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dialogue", "generate"]
+            },
+            "description": "Generate AI-driven dialogue for a character based on prompt and context"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Dialogue Suggestions",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"playerId\": \"player_12345\",\n  \"characterId\": \"aria_wise_sage\",\n  \"context\": \"trading magical items\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/dialogue/suggestions",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dialogue", "suggestions"]
+            },
+            "description": "Get dialogue suggestions based on context and character"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Dialogue History",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/dialogue/history/{{characterId}}/{{playerId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dialogue", "history", "{{characterId}}", "{{playerId}}"]
+            },
+            "description": "Get conversation history between character and player"
+          },
+          "response": []
+        }
+      ],
+      "description": "AI-powered dialogue generation system"
+    },
+    {
+      "name": "⛓️ Blockchain Actions",
+      "item": [
+        {
+          "name": "Record Action",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": {\n    \"id\": \"action_attack_dragon_001\",\n    \"playerId\": \"player_12345\",\n    \"intent\": \"combat\",\n    \"originalInput\": \"attack the ancient dragon with my enchanted sword\",\n    \"timestamp\": \"2025-11-23T12:00:00.000Z\",\n    \"status\": \"received\",\n    \"metadata\": {\n      \"confidence\": 0.95,\n      \"processingTime\": 150\n    }\n  },\n  \"worldStateVersion\": 1,\n  \"generateVerificationLink\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/actions/record",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "actions", "record"]
+            },
+            "description": "Record player action on Walrus blockchain for permanent storage"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Recording Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/actions/status/{{actionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "actions", "status", "{{actionId}}"]
+            },
+            "description": "Get the current status of a recorded action"
+          },
+          "response": []
+        },
+        {
+          "name": "Verify Action",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/actions/verify/{{actionId}}?includeActionData=true&checkIntegrity=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "actions", "verify", "{{actionId}}"],
+              "query": [
+                {
+                  "key": "includeActionData",
+                  "value": "true",
+                  "description": "Include full action data in response"
+                },
+                {
+                  "key": "checkIntegrity",
+                  "value": "true",
+                  "description": "Verify cryptographic integrity"
+                }
+              ]
+            },
+            "description": "Verify action stored on blockchain and return verification details"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Verification Link",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/actions/link/{{actionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "actions", "link", "{{actionId}}"]
+            },
+            "description": "Get verification link for a recorded blockchain action"
+          },
+          "response": []
+        }
+      ],
+      "description": "Action recording and blockchain verification endpoints"
+    },
+    {
+      "name": "🎮 Demo Reliability",
+      "item": [
+        {
+          "name": "Get Demo Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/demo/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "demo", "status"]
+            },
+            "description": "Get current demo mode and service status"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Demo Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/demo/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "demo", "health"]
+            },
+            "description": "Get detailed health check for demo systems"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Emergency Data",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/demo/emergency",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "demo", "emergency"]
+            },
+            "description": "Get pre-configured emergency demo data for presentation"
+          },
+          "response": []
+        },
+        {
+          "name": "Cache Response",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"actionId\": \"demo_cached_action_001\",\n  \"actionInput\": \"attack the dragon with my sword\",\n  \"actionType\": \"combat\",\n  \"consequences\": [\n    {\n      \"system\": \"combat\",\n      \"narrative\": \"Your sword strikes true! The dragon roars in fury and counters with a massive fire blast.\",\n      \"severity\": \"major\",\n      \"impact\": 8\n    },\n    {\n      \"system\": \"relationships\",\n      \"narrative\": \"The dragon remembers your betrayal and will hunt you relentlessly across the realm.\",\n      \"severity\": \"critical\",\n      \"impact\": 9\n    }\n  ],\n  \"verificationLink\": \"walrus-readblob://demo-dragon-action-123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/demo/cache",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "demo", "cache"]
+            },
+            "description": "Manually cache a response for future fallback scenarios"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Demo Configuration",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/demo/config",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "demo", "config"]
+            },
+            "description": "Get current demo configuration and settings"
+          },
+          "response": []
+        }
+      ],
+      "description": "Demo fallback and emergency systems for hackathon reliability"
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3001",
+      "type": "string",
+      "description": "Base URL for the SuiSaga API"
+    },
+    {
+      "key": "jwtToken",
+      "value": "",
+      "type": "string",
+      "description": "JWT authentication token (automatically set after successful authentication)"
+    },
+    {
+      "key": "characterId",
+      "value": "aria_wise_sage",
+      "type": "string",
+      "description": "Sample character ID for testing"
+    },
+    {
+      "key": "targetId",
+      "value": "player_hero_001",
+      "type": "string",
+      "description": "Sample target character ID for relationship testing"
+    },
+    {
+      "key": "actionId",
+      "value": "action_attack_dragon_001",
+      "type": "string",
+      "description": "Sample action ID for blockchain testing"
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Pre-request script to validate required variables",
+          "const url = pm.request.url.toString();",
+          "const needsAuth = url.includes('/api/characters') || url.includes('/api/auth/validate') || url.includes('/api/auth/refresh');",
+          "",
+          "if (needsAuth && !pm.collectionVariables.get('jwtToken')) {",
+          "    console.log('Warning: This request requires authentication. Please authenticate first.');",
+          "}",
+          "",
+          "// Add request ID header for tracking",
+          "pm.request.headers.add({",
+          "    key: 'x-request-id',",
+          "    value: 'req_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)",
+          "    disabled: false",
+          "});"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Post-response test script",
+          "const response = pm.response.json();",
+          "const statusCode = pm.response.code;",
+          "const requestName = pm.info.requestName;",
+          "const url = pm.request.url.toString();",
+          "",
+          "// Test for successful responses",
+          "pm.test(`[${requestName}] Status code is ${statusCode}`, function () {",
+          "    pm.expect(statusCode).to.be.oneOf([200, 201, 204]);",
+          "});",
+          "",
+          "// Test for success field in response",
+          "if (response && response.hasOwnProperty('success')) {",
+          "    pm.test(`[${requestName}] Response has success field`, function () {",
+          "        pm.expect(response).to.have.property('success');",
+          "    });",
+          "    ",
+          "    if (response.success === false) {",
+          "        pm.test(`[${requestName}] API returned error`, function () {",
+          "            console.log('API Error:', response.error, response.message);",
+          "            pm.expect(response.error).to.be.a('string');",
+          "        });",
+          "    }",
+          "}",
+          "",
+          "// Log response times for performance monitoring",
+          "pm.test(`[${requestName}] Response time < 5 seconds`, function () {",
+          "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+          "});",
+          "",
+          "// Log authentication token when received",
+          "if (requestName === 'Authenticate' && statusCode === 200) {",
+          "    console.log('Authentication successful, token received');",
+          "}"
+        ]
+      }
+    }
+  ]
+}

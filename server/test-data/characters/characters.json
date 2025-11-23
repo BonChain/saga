@@ -1,0 +1,36 @@
+[
+  {
+    "id": "e150cefd-5ecc-4b1c-b989-7942299b3859",
+    "name": "Test Character",
+    "type": "npc",
+    "personality": "friendly",
+    "description": "A test character for testing",
+    "backstory": "Created for testing purposes",
+    "appearance": {
+      "physicalDescription": "Average height, brown hair",
+      "notableFeatures": [
+        "Friendly smile"
+      ]
+    },
+    "memories": [],
+    "createdAt": 1763893382367,
+    "updatedAt": 1763893382367
+  },
+  {
+    "id": "169ddd57-1489-4a93-b078-1d86f261dd4b",
+    "name": "Test Character",
+    "type": "npc",
+    "personality": "friendly",
+    "description": "A test character for testing",
+    "backstory": "Created for testing purposes",
+    "appearance": {
+      "physicalDescription": "Average height, brown hair",
+      "notableFeatures": [
+        "Friendly smile"
+      ]
+    },
+    "memories": [],
+    "createdAt": 1763893471902,
+    "updatedAt": 1763893471902
+  }
+]

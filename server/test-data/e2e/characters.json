@@ -1,0 +1,53 @@
+[
+  {
+    "id": "e2f08286-d90f-427f-bffb-ba4983369cd7",
+    "name": "E2E Test Character",
+    "type": "npc",
+    "personality": "wise",
+    "description": "Character for end-to-end testing",
+    "backstory": "Created for comprehensive testing",
+    "appearance": {
+      "physicalDescription": "Tall and wise appearance",
+      "notableFeatures": [
+        "Intelligent eyes"
+      ]
+    },
+    "memories": [],
+    "createdAt": 1763892446509,
+    "updatedAt": 1763892446509
+  },
+  {
+    "id": "d5089e89-a389-4f5f-84ae-9b671bc2419b",
+    "name": "E2E Test Character",
+    "type": "npc",
+    "personality": "wise",
+    "description": "Character for end-to-end testing",
+    "backstory": "Created for comprehensive testing",
+    "appearance": {
+      "physicalDescription": "Tall and wise appearance",
+      "notableFeatures": [
+        "Intelligent eyes"
+      ]
+    },
+    "memories": [],
+    "createdAt": 1763893393842,
+    "updatedAt": 1763893393842
+  },
+  {
+    "id": "af55c534-ac4c-4d09-bb5e-5ec14877678c",
+    "name": "E2E Test Character",
+    "type": "npc",
+    "personality": "wise",
+    "description": "Character for end-to-end testing",
+    "backstory": "Created for comprehensive testing",
+    "appearance": {
+      "physicalDescription": "Tall and wise appearance",
+      "notableFeatures": [
+        "Intelligent eyes"
+      ]
+    },
+    "memories": [],
+    "createdAt": 1763893537332,
+    "updatedAt": 1763893537332
+  }
+]

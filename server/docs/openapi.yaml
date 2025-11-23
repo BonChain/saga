@@ -1,0 +1,1667 @@
+openapi: 3.0.3
+info:
+  title: SuiSaga API
+  description: |
+    SuiSaga is a blockchain-powered living world game API that provides endpoints for
+    authentication, character management, AI-driven dialogue generation, blockchain action
+    recording & verification, and demo reliability systems.
+
+    ## Features
+    - **Authentication**: Wallet-based JWT authentication
+    - **Character Management**: Create, update, and manage characters with memory systems
+    - **AI Dialogue**: Generate dynamic dialogue using Z.ai integration
+    - **Blockchain Actions**: Record and verify actions on Walrus blockchain
+    - **Demo Reliability**: Fallback systems ensuring hackathon demo success
+
+    ## Authentication
+    All API endpoints (except health and demo endpoints) require JWT authentication using
+    wallet signatures. See the Authentication section for the complete flow.
+
+    ## Rate Limiting
+    - Authentication: 10 requests/minute per IP
+    - Character API: 100 requests/minute per user
+    - Dialogue API: 50 requests/minute per user
+    - Actions API: 200 requests/minute per user
+  version: 1.0.0
+  contact:
+    name: SuiSaga Team
+    email: team@suisaga.io
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:3001
+    description: Development server
+  - url: https://api.suisaga.io
+    description: Production server
+
+paths:
+  /health:
+    get:
+      tags:
+        - Health & System
+      summary: Get system health status
+      description: Returns the current health status of the SuiSaga server including memory usage, CPU, and service availability.
+      responses:
+        '200':
+          description: Health status retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              example:
+                success: true
+                data:
+                  status: healthy
+                  timestamp: "2025-11-23T11:55:39.603Z"
+                  uptime: 229.2736018
+                  memory:
+                    used: 247828096
+                    total: 251047936
+                    percentage: 98.72
+                  cpu:
+                    usage: 17.859
+                  services:
+                    storage: true
+                    ai: true
+                    database: true
+
+  /api/auth/challenge:
+    post:
+      tags:
+        - Authentication
+      summary: Get authentication challenge
+      description: Returns a challenge string that should be signed by the user's wallet for authentication.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChallengeRequest'
+      responses:
+        '200':
+          description: Challenge generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChallengeResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  /api/auth/authenticate:
+    post:
+      tags:
+        - Authentication
+      summary: Authenticate with signed challenge
+      description: Authenticates a user by validating their signed challenge and returns a JWT token.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthenticateRequest'
+      responses:
+        '200':
+          description: Authentication successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthenticateResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  /api/auth/refresh:
+    post:
+      tags:
+        - Authentication
+      summary: Refresh JWT token
+      description: Generates a new JWT token using a valid existing token.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Token refreshed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RefreshTokenResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/auth/validate:
+    get:
+      tags:
+        - Authentication
+      summary: Validate JWT token
+      description: Validates a JWT token and returns its payload information.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Token is valid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidateTokenResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/characters:
+    get:
+      tags:
+        - Character Management
+      summary: Get all characters
+      description: Retrieves a list of all characters with optional inclusion of memories and relationships.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IncludeMemories'
+        - $ref: '#/components/parameters/IncludeRelationships'
+      responses:
+        '200':
+          description: Characters retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CharactersResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      tags:
+        - Character Management
+      summary: Create a new character
+      description: Creates a new character with the specified attributes and personality.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCharacterRequest'
+      responses:
+        '201':
+          description: Character created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateCharacterResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/characters/{id}:
+    get:
+      tags:
+        - Character Management
+      summary: Get character by ID
+      description: Retrieves detailed information about a specific character including memories and relationships.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/CharacterId'
+      responses:
+        '200':
+          description: Character retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CharacterResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    put:
+      tags:
+        - Character Management
+      summary: Update character
+      description: Updates character information such as name, description, or personality.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/CharacterId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCharacterRequest'
+      responses:
+        '200':
+          description: Character updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateCharacterResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/characters/{id}/memories:
+    get:
+      tags:
+        - Character Management
+      summary: Get character memories
+      description: Retrieves all memories associated with a specific character.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/CharacterId'
+      responses:
+        '200':
+          description: Memories retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MemoriesResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    post:
+      tags:
+        - Character Management
+      summary: Add memory to character
+      description: Adds a new memory to a character's memory collection.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/CharacterId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddMemoryRequest'
+      responses:
+        '201':
+          description: Memory added successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddMemoryResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/characters/{id}/relationships:
+    get:
+      tags:
+        - Character Management
+      summary: Get character relationships
+      description: Retrieves all relationships for a specific character.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/CharacterId'
+      responses:
+        '200':
+          description: Relationships retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RelationshipsResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/characters/{id}/relationships/{targetId}:
+    get:
+      tags:
+        - Character Management
+      summary: Get relationship status
+      description: Retrieves the relationship status between two specific characters.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/CharacterId'
+        - $ref: '#/components/parameters/TargetId'
+      responses:
+        '200':
+          description: Relationship status retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RelationshipResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    post:
+      tags:
+        - Character Management
+      summary: Update relationship score
+      description: Updates the relationship score between two characters.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/CharacterId'
+        - $ref: '#/components/parameters/TargetId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateRelationshipRequest'
+      responses:
+        '200':
+          description: Relationship updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateRelationshipResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/dialogue/generate:
+    post:
+      tags:
+        - Dialogue Generation
+      summary: Generate AI dialogue
+      description: Generates AI-driven dialogue for a character based on the prompt and context.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateDialogueRequest'
+      responses:
+        '200':
+          description: Dialogue generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenerateDialogueResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /api/dialogue/suggestions:
+    post:
+      tags:
+        - Dialogue Generation
+      summary: Get dialogue suggestions
+      description: Returns suggested dialogue options based on the context and character.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DialogueSuggestionsRequest'
+      responses:
+        '200':
+          description: Suggestions generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DialogueSuggestionsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /api/dialogue/history/{characterId}/{playerId}:
+    get:
+      tags:
+        - Dialogue Generation
+      summary: Get dialogue history
+      description: Retrieves the conversation history between a character and player.
+      parameters:
+        - $ref: '#/components/parameters/CharacterId'
+        - $ref: '#/components/parameters/PlayerId'
+      responses:
+        '200':
+          description: Dialogue history retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DialogueHistoryResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/actions/record:
+    post:
+      tags:
+        - Blockchain Actions
+      summary: Record blockchain action
+      description: Records a player action on the Walrus blockchain for permanent storage.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecordActionRequest'
+      responses:
+        '200':
+          description: Action recorded successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecordActionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /api/actions/status/{actionId}:
+    get:
+      tags:
+        - Blockchain Actions
+      summary: Get recording status
+      description: Retrieves the current status of a recorded action.
+      parameters:
+        - $ref: '#/components/parameters/ActionId'
+      responses:
+        '200':
+          description: Status retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActionStatusResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/actions/verify/{actionId}:
+    get:
+      tags:
+        - Blockchain Actions
+      summary: Verify blockchain action
+      description: Verifies an action stored on the blockchain and returns verification details.
+      parameters:
+        - $ref: '#/components/parameters/ActionId'
+        - $ref: '#/components/parameters/IncludeActionData'
+        - $ref: '#/components/parameters/CheckIntegrity'
+      responses:
+        '200':
+          description: Action verified successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerifyActionResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/actions/link/{actionId}:
+    get:
+      tags:
+        - Blockchain Actions
+      summary: Get verification link
+      description: Returns the verification link for a recorded blockchain action.
+      parameters:
+        - $ref: '#/components/parameters/ActionId'
+      responses:
+        '200':
+          description: Verification link retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerificationLinkResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/demo/status:
+    get:
+      tags:
+        - Demo Reliability
+      summary: Get demo status
+      description: Returns the current demo mode and service status for hackathon presentation.
+      responses:
+        '200':
+          description: Demo status retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DemoStatusResponse'
+
+  /api/demo/health:
+    get:
+      tags:
+        - Demo Reliability
+      summary: Get demo health
+      description: Provides detailed health check for demo systems including fallback status.
+      responses:
+        '200':
+          description: Demo health retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DemoHealthResponse'
+
+  /api/demo/emergency:
+    get:
+      tags:
+        - Demo Reliability
+      summary: Get emergency demo data
+      description: Returns pre-configured emergency demo data for presentation when services are unavailable.
+      responses:
+        '200':
+          description: Emergency data retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmergencyDataResponse'
+
+  /api/demo/cache:
+    post:
+      tags:
+        - Demo Reliability
+      summary: Cache response manually
+      description: Manually caches a response for future fallback scenarios.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CacheResponseRequest'
+      responses:
+        '200':
+          description: Response cached successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CacheResponseResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /api/demo/config:
+    get:
+      tags:
+        - Demo Reliability
+      summary: Get demo configuration
+      description: Returns current demo configuration including mode and settings.
+      responses:
+        '200':
+          description: Demo configuration retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DemoConfigResponse'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtained from /api/auth/authenticate
+
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          $ref: '#/components/schemas/HealthData'
+
+    HealthData:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, unhealthy]
+        timestamp:
+          type: string
+          format: date-time
+        uptime:
+          type: number
+        memory:
+          $ref: '#/components/schemas/MemoryInfo'
+        cpu:
+          $ref: '#/components/schemas/CPUInfo'
+        services:
+          $ref: '#/components/schemas/ServiceStatus'
+
+    MemoryInfo:
+      type: object
+      properties:
+        used:
+          type: integer
+        total:
+          type: integer
+        percentage:
+          type: number
+
+    CPUInfo:
+      type: object
+      properties:
+        usage:
+          type: number
+
+    ServiceStatus:
+      type: object
+      properties:
+        storage:
+          type: boolean
+        ai:
+          type: boolean
+        database:
+          type: boolean
+
+    ChallengeRequest:
+      type: object
+      required:
+        - walletAddress
+      properties:
+        walletAddress:
+          type: string
+          pattern: '^0x[a-fA-F0-9]{40}$'
+
+    ChallengeResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            challenge:
+              type: string
+            expiresIn:
+              type: integer
+              description: Time in seconds until challenge expires
+
+    AuthenticateRequest:
+      type: object
+      required:
+        - walletAddress
+        - signature
+        - challenge
+      properties:
+        walletAddress:
+          type: string
+          pattern: '^0x[a-fA-F0-9]{40}$'
+        signature:
+          type: string
+          description: Wallet signature of the challenge
+        challenge:
+          type: string
+          description: Challenge string that was signed
+
+    AuthenticateResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            token:
+              type: string
+              description: JWT authentication token
+            walletAddress:
+              type: string
+            expiresIn:
+              type: integer
+              description: Token expiration time in seconds
+
+    RefreshTokenResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            token:
+              type: string
+            expiresIn:
+              type: integer
+
+    ValidateTokenResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            valid:
+              type: boolean
+            payload:
+              type: object
+              properties:
+                walletAddress:
+                  type: string
+                role:
+                  type: string
+                  enum: [user, admin, moderator, guest]
+
+    Character:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        type:
+          type: string
+          enum: [npc, player]
+        personality:
+          $ref: '#/components/schemas/Personality'
+        description:
+          type: string
+        backstory:
+          type: string
+        appearance:
+          $ref: '#/components/schemas/Appearance'
+        memories:
+          type: array
+          items:
+            $ref: '#/components/schemas/Memory'
+        relationships:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/Relationship'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Personality:
+      type: string
+      enum: [FRIENDLY, AGGRESSIVE, NEUTRAL, MYSTERIOUS, WISE, PLAYFUL]
+
+    Appearance:
+      type: object
+      properties:
+        physicalDescription:
+          type: string
+        notableFeatures:
+          type: array
+          items:
+            type: string
+
+    Memory:
+      type: object
+      properties:
+        id:
+          type: string
+        characterId:
+          type: string
+        action:
+          type: string
+        actionType:
+          type: string
+        location:
+          type: string
+        description:
+          type: string
+        emotionalImpact:
+          type: integer
+          minimum: -10
+          maximum: 10
+        context:
+          type: object
+        isActive:
+          type: boolean
+        timestamp:
+          type: integer
+          format: int64
+
+    Relationship:
+      type: object
+      properties:
+        score:
+          type: integer
+          minimum: -100
+          maximum: 100
+        type:
+          type: string
+          enum: [friendship, hostility, romance, professional, family]
+        lastInteraction:
+          type: string
+          format: date-time
+
+    CreateCharacterRequest:
+      type: object
+      required:
+        - name
+        - type
+        - personality
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        type:
+          type: string
+          enum: [npc, player]
+        personality:
+          $ref: '#/components/schemas/Personality'
+        description:
+          type: string
+          maxLength: 500
+        backstory:
+          type: string
+          maxLength: 1000
+        appearance:
+          $ref: '#/components/schemas/Appearance'
+
+    UpdateCharacterRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        description:
+          type: string
+          maxLength: 500
+        personality:
+          $ref: '#/components/schemas/Personality'
+        backstory:
+          type: string
+          maxLength: 1000
+        appearance:
+          $ref: '#/components/schemas/Appearance'
+
+    AddMemoryRequest:
+      type: object
+      required:
+        - action
+        - actionType
+        - description
+      properties:
+        action:
+          type: string
+          maxLength: 200
+        actionType:
+          type: string
+          maxLength: 50
+        location:
+          type: string
+          maxLength: 100
+        description:
+          type: string
+          maxLength: 500
+        emotionalImpact:
+          type: integer
+          minimum: -10
+          maximum: 10
+        context:
+          type: object
+          additionalProperties: true
+        isActive:
+          type: boolean
+          default: true
+
+    UpdateRelationshipRequest:
+      type: object
+      required:
+        - score
+      properties:
+        score:
+          type: integer
+          minimum: -100
+          maximum: 100
+        type:
+          type: string
+          enum: [friendship, hostility, romance, professional, family]
+          default: friendship
+
+    GenerateDialogueRequest:
+      type: object
+      required:
+        - playerId
+        - characterId
+        - prompt
+      properties:
+        playerId:
+          type: string
+        characterId:
+          type: string
+        prompt:
+          type: string
+          maxLength: 500
+        context:
+          type: string
+          maxLength: 200
+
+    GenerateDialogueResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            dialogue:
+              type: string
+            characterId:
+              type: string
+            emotionalTone:
+              type: string
+            consequences:
+              type: array
+              items:
+                $ref: '#/components/schemas/Consequence'
+
+    Consequence:
+      type: object
+      properties:
+        system:
+          type: string
+        narrative:
+          type: string
+        severity:
+          type: string
+          enum: [minor, major, critical]
+        impact:
+          type: integer
+          minimum: 1
+          maximum: 10
+
+    RecordActionRequest:
+      type: object
+      required:
+        - action
+      properties:
+        action:
+          $ref: '#/components/schemas/Action'
+        worldStateVersion:
+          type: integer
+          minimum: 1
+        generateVerificationLink:
+          type: boolean
+          default: true
+
+    Action:
+      type: object
+      required:
+        - id
+        - playerId
+        - intent
+        - originalInput
+        - timestamp
+        - status
+      properties:
+        id:
+          type: string
+        playerId:
+          type: string
+        intent:
+          type: string
+        originalInput:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [received, pending, processing, completed, failed]
+        metadata:
+          type: object
+          properties:
+            confidence:
+              type: number
+              minimum: 0
+              maximum: 1
+            processingTime:
+              type: integer
+
+  parameters:
+    CharacterId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Unique character identifier
+      example: char_12345
+
+    TargetId:
+      name: targetId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Target character identifier for relationships
+      example: char_67890
+
+    PlayerId:
+      name: playerId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Unique player identifier
+      example: player_12345
+
+    ActionId:
+      name: actionId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Unique action identifier
+      example: action_12345
+
+    IncludeMemories:
+      name: includeMemories
+      in: query
+      required: false
+      schema:
+        type: boolean
+        default: false
+      description: Include character memories in response
+
+    IncludeRelationships:
+      name: includeRelationships
+      in: query
+      required: false
+      schema:
+        type: boolean
+        default: false
+      description: Include character relationships in response
+
+    IncludeActionData:
+      name: includeActionData
+      in: query
+      required: false
+      schema:
+        type: boolean
+        default: false
+      description: Include full action data in verification response
+
+    CheckIntegrity:
+      name: checkIntegrity
+      in: query
+      required: false
+      schema:
+        type: boolean
+        default: false
+      description: Verify cryptographic integrity of stored action
+
+  responses:
+    BadRequest:
+      description: Bad request - invalid input data
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              error:
+                type: string
+                example: VALIDATION_ERROR
+              message:
+                type: string
+                example: Invalid request parameters
+              details:
+                type: array
+                items:
+                  type: string
+              metadata:
+                $ref: '#/components/schemas/ErrorMetadata'
+
+    Unauthorized:
+      description: Authentication required or invalid token
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              error:
+                type: string
+                example: UNAUTHORIZED
+              message:
+                type: string
+                example: Authentication required
+              metadata:
+                $ref: '#/components/schemas/ErrorMetadata'
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              error:
+                type: string
+                example: NOT_FOUND
+              message:
+                type: string
+                example: The requested resource was not found
+              metadata:
+                $ref: '#/components/schemas/ErrorMetadata'
+
+    RateLimited:
+      description: Too many requests - rate limit exceeded
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              error:
+                type: string
+                example: RATE_LIMITED
+              message:
+                type: string
+                example: Too many requests. Please try again later.
+              metadata:
+                $ref: '#/components/schemas/ErrorMetadata'
+
+    ErrorMetadata:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        requestId:
+          type: string
+
+  # Response schemas for specific endpoints
+  CharactersResponse:
+    type: object
+    properties:
+      success:
+        type: boolean
+      data:
+        type: object
+        properties:
+          characters:
+            type: array
+            items:
+              $ref: '#/components/schemas/Character'
+          count:
+            type: integer
+      metadata:
+        $ref: '#/components/schemas/ResponseMetadata'
+
+  CharacterResponse:
+    type: object
+    properties:
+      success:
+        type: boolean
+      data:
+        $ref: '#/components/schemas/Character'
+      metadata:
+        $ref: '#/components/schemas/ResponseMetadata'
+
+  CreateCharacterResponse:
+    type: object
+    properties:
+      success:
+        type: boolean
+      data:
+        $ref: '#/components/schemas/Character'
+      message:
+        type: string
+        example: "Character created successfully"
+      metadata:
+        $ref: '#/components/schemas/ResponseMetadata'
+
+  UpdateCharacterResponse:
+    type: object
+    properties:
+      success:
+        type: boolean
+      data:
+        $ref: '#/components/schemas/Character'
+      message:
+        type: string
+        example: "Character updated successfully"
+      metadata:
+        $ref: '#/components/schemas/ResponseMetadata'
+
+  MemoriesResponse:
+    type: object
+    properties:
+      success:
+        type: boolean
+      data:
+        type: object
+        properties:
+          memories:
+            type: array
+            items:
+              $ref: '#/components/schemas/Memory'
+          count:
+            type: integer
+      metadata:
+        $ref: '#/components/schemas/ResponseMetadata'
+
+  RelationshipsResponse:
+    type: object
+    properties:
+      success:
+        type: boolean
+      data:
+        type: object
+        properties:
+          relationships:
+            type: object
+            additionalProperties:
+              $ref: '#/components/schemas/Relationship'
+          count:
+            type: integer
+      metadata:
+        $ref: '#/components/schemas/ResponseMetadata'
+
+  RelationshipResponse:
+    type: object
+    properties:
+      success:
+        type: boolean
+      data:
+        $ref: '#/components/schemas/Relationship'
+      metadata:
+        $ref: '#/components/schemas/ResponseMetadata'
+
+  AddMemoryResponse:
+    type: object
+    properties:
+      success:
+        type: boolean
+      data:
+        type: object
+        properties:
+          id:
+            type: string
+          success:
+            type: boolean
+      message:
+        type: string
+        example: "Memory added successfully"
+      metadata:
+        $ref: '#/components/schemas/ResponseMetadata'
+
+  UpdateRelationshipResponse:
+    type: object
+    properties:
+      success:
+        type: boolean
+      data:
+        type: object
+        properties:
+          characterId:
+            type: string
+          targetId:
+            type: string
+          score:
+            type: integer
+          type:
+            type: string
+      message:
+        type: string
+        example: "Relationship updated successfully"
+      metadata:
+        $ref: '#/components/schemas/ResponseMetadata'
+
+  DialogueSuggestionsRequest:
+    type: object
+    required:
+      - playerId
+      - characterId
+    properties:
+      playerId:
+        type: string
+      characterId:
+        type: string
+      context:
+        type: string
+        maxLength: 200
+
+  DialogueSuggestionsResponse:
+    type: object
+    properties:
+      success:
+        type: boolean
+      data:
+        type: object
+        properties:
+          suggestions:
+            type: array
+            items:
+              type: string
+      metadata:
+        $ref: '#/components/schemas/ResponseMetadata'
+
+  DialogueHistoryResponse:
+    type: object
+    properties:
+      success:
+        type: boolean
+      data:
+        type: object
+        properties:
+          history:
+            type: array
+            items:
+              $ref: '#/components/schemas/DialogueEntry'
+          count:
+            type: integer
+      metadata:
+        $ref: '#/components/schemas/ResponseMetadata'
+
+  DialogueEntry:
+    type: object
+    properties:
+      id:
+        type: string
+      characterId:
+        type: string
+      playerId:
+        type: string
+      prompt:
+        type: string
+      response:
+        type: string
+      timestamp:
+        type: string
+        format: date-time
+
+  RecordActionResponse:
+    type: object
+    properties:
+      success:
+        type: boolean
+      data:
+        type: object
+        properties:
+          actionId:
+            type: string
+          blobId:
+            type: string
+          objectId:
+            type: string
+          verificationLink:
+            type: string
+          timestamp:
+            type: string
+            format: date-time
+      metadata:
+        $ref: '#/components/schemas/ResponseMetadata'
+
+  ActionStatusResponse:
+    type: object
+    properties:
+      success:
+        type: boolean
+      data:
+        type: object
+        properties:
+          actionId:
+            type: string
+          status:
+            type: string
+          blobId:
+            type: string
+          timestamp:
+            type: string
+            format: date-time
+      metadata:
+        $ref: '#/components/schemas/ResponseMetadata'
+
+  VerifyActionResponse:
+    type: object
+    properties:
+      success:
+        type: boolean
+      data:
+        type: object
+        properties:
+          actionId:
+            type: string
+          verified:
+            type: boolean
+          verificationLink:
+            type: string
+          isTamperProof:
+            type: boolean
+          timestamp:
+            type: string
+            format: date-time
+          actionData:
+            $ref: '#/components/schemas/Action'
+      metadata:
+        $ref: '#/components/schemas/ResponseMetadata'
+
+  VerificationLinkResponse:
+    type: object
+    properties:
+      success:
+        type: boolean
+      data:
+        type: object
+        properties:
+          actionId:
+            type: string
+          verificationLink:
+            type: string
+          gatewayLink:
+            type: string
+      metadata:
+        $ref: '#/components/schemas/ResponseMetadata'
+
+  DemoStatusResponse:
+    type: object
+    properties:
+      success:
+        type: boolean
+      data:
+        $ref: '#/components/schemas/DemoStatus'
+
+  DemoStatus:
+    type: object
+    properties:
+      mode:
+        type: string
+        enum: [normal, offline, emergency]
+      serviceStatus:
+        type: object
+        properties:
+          walrus:
+            type: string
+            enum: [online, offline, error]
+          ai:
+            type: string
+            enum: [online, offline, error]
+          network:
+            type: string
+            enum: [online, offline, error]
+          lastCheck:
+            type: integer
+      fallbackEnabled:
+        type: boolean
+      cachedResponses:
+        type: integer
+      ready:
+        type: boolean
+      issues:
+        type: array
+        items:
+          type: string
+      timestamp:
+        type: string
+        format: date-time
+
+  DemoHealthResponse:
+    type: object
+    properties:
+      success:
+        type: boolean
+      data:
+        type: object
+        properties:
+          serviceStatus:
+            $ref: '#/components/schemas/DemoStatus/properties/serviceStatus'
+          ready:
+            type: boolean
+          mode:
+            type: string
+            enum: [normal, offline, emergency]
+          issues:
+            type: array
+            items:
+              type: string
+      metadata:
+        $ref: '#/components/schemas/ResponseMetadata'
+
+  EmergencyDataResponse:
+    type: object
+    properties:
+      success:
+        type: boolean
+      data:
+        type: object
+        properties:
+          emergency:
+            type: boolean
+          mode:
+            type: string
+          demoData:
+            $ref: '#/components/schemas/EmergencyDemoData'
+          timestamp:
+            type: string
+            format: date-time
+          message:
+            type: string
+      metadata:
+        $ref: '#/components/schemas/ResponseMetadata'
+
+  EmergencyDemoData:
+    type: object
+    properties:
+      title:
+        type: string
+      description:
+        type: string
+      subtitle:
+        type: string
+      videoUrl:
+        type: string
+        screenshotUrl:
+        type: string
+      presenterNotes:
+        type: object
+      actions:
+        type: array
+        items:
+          $ref: '#/components/schemas/DemoAction'
+      worldState:
+        type: object
+      technicalInfo:
+        type: object
+
+  DemoAction:
+    type: object
+    properties:
+      id:
+        type: string
+      input:
+        type: string
+      type:
+        type: string
+      playerIntent:
+        type: string
+      consequences:
+        type: array
+        items:
+          $ref: '#/components/schemas/Consequence'
+      verificationLink:
+        type: string
+      timestamp:
+        type: string
+        format: date-time
+      impactScore:
+        type: integer
+      worldChanges:
+        type: string
+
+  CacheResponseRequest:
+    type: object
+    required:
+      - actionInput
+      - actionType
+      - consequences
+    properties:
+      actionId:
+        type: string
+      actionInput:
+        type: string
+      actionType:
+        type: string
+      consequences:
+        type: array
+        items:
+          type: object
+      verificationLink:
+        type: string
+
+  CacheResponseResponse:
+    type: object
+    properties:
+      success:
+        type: boolean
+      message:
+        type: string
+        example: "Response cached successfully for future fallbacks"
+
+  DemoConfigResponse:
+    type: object
+    properties:
+      success:
+        type: boolean
+      data:
+        $ref: '#/components/schemas/DemoStatus'
+
+  ResponseMetadata:
+    type: object
+    properties:
+      timestamp:
+        type: string
+        format: date-time
+      requestId:
+        type: string
+      count:
+        type: integer
+      total:
+        type: integer
+
+tags:
+  - name: Health & System
+    description: System health monitoring and status endpoints
+  - name: Authentication
+    description: JWT-based wallet authentication
+  - name: Character Management
+    description: Character CRUD, memories, and relationships
+  - name: Dialogue Generation
+    description: AI-powered dialogue generation system
+  - name: Blockchain Actions
+    description: Action recording and blockchain verification
+  - name: Demo Reliability
+    description: Demo fallback and emergency systems

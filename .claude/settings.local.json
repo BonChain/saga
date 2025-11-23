@@ -77,7 +77,8 @@
       "Bash(yarn lint:*)",
       "Bash(yarn test:*)",
       "Bash(npm run lint:*)",
-      "Bash(npx eslint-formatter-codeframe)"
+      "Bash(npx eslint-formatter-codeframe)",
+      "SlashCommand(/bmad:bmm:workflows:code-review:*)"
     ],
     "deny": [],
     "ask": []

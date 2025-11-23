@@ -1,0 +1,30 @@
+[
+  {
+    "id": "de36aafa-4180-457b-b73f-ad521fb9c979",
+    "characterId": "e150cefd-5ecc-4b1c-b989-7942299b3859",
+    "action": "Met a traveler",
+    "actionType": "social",
+    "location": "tavern",
+    "description": "Met a traveler",
+    "emotionalImpact": 1,
+    "context": {
+      "environmentalConditions": "tavern atmosphere"
+    },
+    "isActive": true,
+    "timestamp": 1763893382406
+  },
+  {
+    "id": "1d8a12ef-d1cc-497e-a054-5122d8783b3e",
+    "characterId": "169ddd57-1489-4a93-b078-1d86f261dd4b",
+    "action": "Met a traveler",
+    "actionType": "social",
+    "location": "tavern",
+    "description": "Met a traveler",
+    "emotionalImpact": 1,
+    "context": {
+      "environmentalConditions": "tavern atmosphere"
+    },
+    "isActive": true,
+    "timestamp": 1763893471931
+  }
+]

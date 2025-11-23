@@ -1,0 +1,50 @@
+[
+  {
+    "id": "56434c8d-0126-4751-80d3-92c299942c0b",
+    "characterId": "e150cefd-5ecc-4b1c-b989-7942299b3859",
+    "targetId": "player_test",
+    "scores": {
+      "trust": 10,
+      "friendship": 10,
+      "respect": 10
+    },
+    "lastInteraction": 1763893382431,
+    "totalInteractions": 1,
+    "relationshipType": "npc-npc",
+    "sharedExperiences": {
+      "events": [],
+      "locations": [],
+      "timeSpent": 0
+    },
+    "modifiers": {
+      "personalityCompatibility": 0,
+      "externalInfluences": []
+    },
+    "createdAt": 1763893382431,
+    "updatedAt": 1763893382431
+  },
+  {
+    "id": "45635bbe-237d-4892-91bc-abb6ba4e2acd",
+    "characterId": "169ddd57-1489-4a93-b078-1d86f261dd4b",
+    "targetId": "player_test",
+    "scores": {
+      "trust": 10,
+      "friendship": 10,
+      "respect": 10
+    },
+    "lastInteraction": 1763893471955,
+    "totalInteractions": 1,
+    "relationshipType": "npc-npc",
+    "sharedExperiences": {
+      "events": [],
+      "locations": [],
+      "timeSpent": 0
+    },
+    "modifiers": {
+      "personalityCompatibility": 0,
+      "externalInfluences": []
+    },
+    "createdAt": 1763893471955,
+    "updatedAt": 1763893471955
+  }
+]
