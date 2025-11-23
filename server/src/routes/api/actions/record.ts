@@ -12,6 +12,14 @@ import { verificationService } from '../../../services/VerificationService'
 import { ActionSerializer } from '../../../services/ActionSerializer'
 import { CryptographicService } from '../../../services/CryptographicService'
 import { Action } from '../../../types/storage'
+import {
+  ValidationError,
+  ServiceUnavailableError,
+  BlockchainError,
+  ExternalServiceError,
+  ErrorFactory,
+  toAppError
+} from '../../../utils/errors'
 
 export interface ActionRecordRequest {
   action: Action
@@ -33,9 +41,15 @@ export async function recordAction(req: Request, res: Response): Promise<void> {
     // Validate request
     const errors = validationResult(req)
     if (!errors.isEmpty()) {
-      res.status(400).json({
+      const validationError = ErrorFactory.fromValidationResult(errors.array(), {
+        actionId: req.body.action?.id,
+        endpoint: '/api/actions/record'
+      })
+
+      res.status(validationError.statusCode).json({
         success: false,
-        error: 'Validation failed',
+        error: validationError.message,
+        code: validationError.code,
         details: errors.array()
       })
       return
@@ -46,9 +60,19 @@ export async function recordAction(req: Request, res: Response): Promise<void> {
     // Validate action data completeness
     const validation = ActionSerializer.validateAction(action)
     if (!validation.isValid) {
-      res.status(400).json({
+      const actionValidationError = new ValidationError(
+        `Invalid action data: ${validation.errors?.join(', ') || 'Unknown validation error'}`,
+        {
+          actionId: action.id,
+          missingFields: validation.missingFields,
+          validationErrors: validation.errors
+        }
+      )
+
+      res.status(actionValidationError.statusCode).json({
         success: false,
-        error: 'Invalid action data',
+        error: actionValidationError.message,
+        code: actionValidationError.code,
         details: {
           missingFields: validation.missingFields,
           errors: validation.errors
@@ -62,7 +86,7 @@ export async function recordAction(req: Request, res: Response): Promise<void> {
 
     // Serialize action for blockchain storage
     const serializedAction = ActionSerializer.serializeForBlockchain(action, worldStateVersion)
-    const enhancedSerializedAction = ActionSerializer.addCryptographicMetadata(
+    const _enhancedSerializedAction = ActionSerializer.addCryptographicMetadata(
       serializedAction,
       blockchainProof.actionHash,
       blockchainProof.proof.signature
@@ -106,21 +130,43 @@ export async function recordAction(req: Request, res: Response): Promise<void> {
         }
       })
     } else {
-      res.status(500).json({
+      const blockchainError = new BlockchainError(
+        storageResult.error || 'Blockchain storage failed',
+        {
+          actionId: action.id,
+          retryAttempt: storageResult.retryAttempt,
+          service: 'walrus-storage'
+        }
+      )
+
+      res.status(blockchainError.statusCode).json({
         success: false,
         actionId: action.id,
-        error: storageResult.error,
+        error: blockchainError.message,
+        code: blockchainError.code,
         retryAttempt: storageResult.retryAttempt
       })
     }
 
   } catch (error) {
-    console.error('Action recording error:', error)
-    res.status(500).json({
+    const appError = toAppError(error, {
+      actionId: req.body.action?.id,
+      endpoint: '/api/actions/record',
+      timestamp: Date.now()
+    })
+
+    // Log error appropriately
+    if (appError.isOperational) {
+      console.warn('Action recording operational error:', appError.message)
+    } else {
+      console.error('Action recording error:', appError)
+    }
+
+    res.status(appError.statusCode).json({
       success: false,
-      error: 'Internal server error during action recording',
-      details: process.env.NODE_ENV === 'development' ?
-        (error instanceof Error ? error.message : 'Unknown error') : undefined
+      error: appError.message,
+      code: appError.code,
+      details: process.env.NODE_ENV === 'development' ? appError.context : undefined
     })
   }
 }
@@ -196,7 +242,7 @@ export async function recordBatchActions(req: Request, res: Response): Promise<v
 
           // Serialize and enhance with cryptographic metadata
           const serializedAction = ActionSerializer.serializeForBlockchain(action, worldStateVersion)
-          const enhancedSerializedAction = ActionSerializer.addCryptographicMetadata(
+          const _enhancedSerializedAction = ActionSerializer.addCryptographicMetadata(
             serializedAction,
             blockchainProof.actionHash,
             blockchainProof.proof.signature

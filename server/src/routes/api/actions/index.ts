@@ -108,7 +108,7 @@ router.get('/health', (req, res) => {
 /**
  * Error handling middleware
  */
-router.use((error: any, req: Request, res: Response, next: NextFunction) => {
+router.use((error: any, req: Request, res: Response, _next: NextFunction) => {
   console.error('Actions API error:', error)
 
   // Handle validation errors

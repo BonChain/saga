@@ -85,21 +85,38 @@ export class OpenAIConfigManager {
   }
 
   /**
-   * Check if API key might be exposed in unsafe locations
+   * Enhanced security validation for API key exposure
    */
   private isPotentiallyExposed(apiKey: string): boolean {
-    // Check if API key is in common unsafe locations
-    const unsafePatterns = [
-      /localhost/i,
-      /127\.0\.0\.1/i,
-      /0\.0\.0\.0/i,
-      /\.env$/i,
-      /config\.json$/i,
-      /debug/i
+    // Check if API key might be exposed in environment
+    const insecureEnvPatterns = [
+      process.env.NODE_ENV === 'development' && process.env.DEBUG?.includes('true'),
+      process.env.VERBOSE_LOGGING === 'true',
+      process.env.LOG_SECRETS === 'true'
     ]
 
-    // This is a basic check - in production, you'd want more sophisticated validation
-    return false // Placeholder for actual security checks
+    // Check for suspicious environment configurations
+    if (insecureEnvPatterns.some(pattern => pattern === true)) {
+      return true
+    }
+
+    // Check API key format and strength
+    if (apiKey.length < 20) {
+      return true
+    }
+
+    // Check for obvious test/demo keys
+    const suspiciousPatterns = [
+      /test/i,
+      /demo/i,
+      /example/i,
+      /fake/i,
+      /sk-test/i,  // Stripe test pattern (just in case)
+      /^1234/,     // Obvious test sequence
+      /aaaaa/i,    // Repeated characters
+    ]
+
+    return suspiciousPatterns.some(pattern => pattern.test(apiKey))
   }
 
   /**
