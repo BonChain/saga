@@ -378,16 +378,32 @@ export class Layer1Blueprint implements StorageLayer<WorldRules> {
   }
 
   private async writeToWalrus(rules: WorldRules): Promise<{ success: boolean, url?: string, error?: string }> {
-    // Walrus integration placeholder
-    // In a real implementation, this would interact with the Walrus storage API
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 100))
+      // Import the real Walrus service
+      const { walrusService } = await import('../services/WalrusService')
 
-      // Return mock result for now
-      return {
-        success: false,
-        error: 'Walrus integration not yet implemented'
+      // Convert world rules to blob data
+      const blobData = {
+        type: 'world-rules',
+        action: 'store-rules',
+        timestamp: new Date().toISOString(),
+        rules: rules,
+        epochs: parseInt(process.env.STORAGE_EPOCHS || '100')
+      }
+
+      // Use real Walrus service to store the data
+      const result = await walrusService.writeBlob(blobData)
+
+      if (result.success && result.blobId) {
+        return {
+          success: true,
+          url: result.url || `https://walrus-gateway.testnet.walrus.ai/blobs/${result.blobId}`
+        }
+      } else {
+        return {
+          success: false,
+          error: result.error || 'Failed to store world rules in Walrus'
+        }
       }
     } catch (error) {
       return {

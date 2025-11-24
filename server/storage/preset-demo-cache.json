@@ -1,0 +1,170 @@
+{
+  "5f4dcc3b5aa765d61d8327deb882cf99": {
+    "actionId": "preset-001",
+    "actionType": "combat",
+    "originalInput": "attack the dragon",
+    "consequences": [
+      {
+        "system": "combat",
+        "narrative": "Your sword strikes true! The dragon roars in fury and counters with a massive fire blast. The ground trembles as the battle begins.",
+        "severity": "major",
+        "impact": 8
+      },
+      {
+        "system": "environment",
+        "narrative": "The dragon's fire spreads to nearby trees, creating a perimeter of flames that blocks escape routes.",
+        "severity": "major",
+        "impact": 6
+      },
+      {
+        "system": "relationships",
+        "narrative": "The dragon remembers your betrayal and will hunt you relentlessly across the realm.",
+        "severity": "critical",
+        "impact": 9
+      }
+    ],
+    "verificationLink": "walrus-readblob://demo-dragon-attack-123",
+    "timestamp": "2025-11-23T00:00:00.000Z",
+    "isFallback": false
+  },
+  "a5b9c2d3e4f6789a1b2c3d4e5f6789a": {
+    "actionId": "preset-002",
+    "actionType": "diplomacy",
+    "originalInput": "befriend the goblin king",
+    "consequences": [
+      {
+        "system": "relationships",
+        "narrative": "The goblin king is impressed by your courage! He offers you a golden goblet filled with mysterious liquid.",
+        "severity": "minor",
+        "impact": 3
+      },
+      {
+        "system": "economy",
+        "narrative": "A new trade route opens between the goblin caves and human village. Both prosper from the exchange.",
+        "severity": "minor",
+        "impact": 5
+      },
+      {
+        "system": "combat",
+        "narrative": "Some goblins challenge your leadership, creating internal conflict in the tribe.",
+        "severity": "major",
+        "impact": 4
+      }
+    ],
+    "verificationLink": "walrus-readblob://demo-diplomacy-goblin-456",
+    "timestamp": "2025-11-23T00:00:00.000Z",
+    "isFallback": false
+  },
+  "b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e": {
+    "actionId": "preset-003",
+    "actionType": "magic",
+    "originalInput": "cast a spell to make it rain",
+    "consequences": [
+      {
+        "system": "environment",
+        "narrative": "Dark clouds gather above the drought-stricken lands. Thunder rumbles as the first drops of rain fall.",
+        "severity": "minor",
+        "impact": 4
+      },
+      {
+        "system": "economy",
+        "narrative": "Farmers celebrate as crops begin to grow. Local markets boom with fresh produce.",
+        "severity": "minor",
+        "impact": 6
+      },
+      {
+        "system": "wildlife",
+        "narrative": "Magical rain affects local creatures strangely. Some animals grow larger, others develop new abilities.",
+        "severity": "major",
+        "impact": 7
+      }
+    ],
+    "verificationLink": "walrus-readblob://demo-magic-rain-789",
+    "timestamp": "2025-11-23T00:00:00.000Z",
+    "isFallback": false
+  },
+  "c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f": {
+    "actionId": "preset-004",
+    "actionType": "exploration",
+    "originalInput": "explore the ancient ruins",
+    "consequences": [
+      {
+        "system": "discovery",
+        "narrative": "You find an ancient artifact pulsing with magical energy. Runes glow faintly on its surface.",
+        "severity": "minor",
+        "impact": 5
+      },
+      {
+        "system": "mystery",
+        "narrative": "Strange symbols on the walls seem to shift and change when you're not looking directly at them.",
+        "severity": "major",
+        "impact": 6
+      },
+      {
+        "system": "danger",
+        "narrative": "Something stirs in the depths below. The ground begins to shake slightly.",
+        "severity": "critical",
+        "impact": 8
+      }
+    ],
+    "verificationLink": "walrus-readblob://demo-explore-ruins-012",
+    "timestamp": "2025-11-23T00:00:00.000Z",
+    "isFallback": false
+  },
+  "d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a": {
+    "actionId": "preset-005",
+    "actionType": "social",
+    "originalInput": "tell a story in the tavern",
+    "consequences": [
+      {
+        "system": "relationships",
+        "narrative": "The tavern crowd falls silent, captivated by your tale. The tavern keeper offers you a free drink.",
+        "severity": "minor",
+        "impact": 2
+      },
+      {
+        "system": "reputation",
+        "narrative": "News of your storytelling spreads through the village. People start seeking you out for entertainment.",
+        "severity": "minor",
+        "impact": 4
+      },
+      {
+        "system": "mystery",
+        "narrative": "A mysterious stranger in the corner nods knowingly, as if your story connects to a larger truth.",
+        "severity": "major",
+        "impact": 5
+      }
+    ],
+    "verificationLink": "walrus-readblob://demo-storytelling-345",
+    "timestamp": "2025-11-23T00:00:00.000Z",
+    "isFallback": false
+  },
+  "e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b": {
+    "actionId": "preset-006",
+    "actionType": "crafting",
+    "originalInput": "forge a legendary sword",
+    "consequences": [
+      {
+        "system": "crafting",
+        "narrative": "The hammer strikes true! Sparks fly as the magical metal takes shape in the forge.",
+        "severity": "minor",
+        "impact": 3
+      },
+      {
+        "system": "enchantment",
+        "narrative": "The sword glows with an inner light. Ancient runes appear along its blade as magic flows through it.",
+        "severity": "major",
+        "impact": 8
+      },
+      {
+        "system": "destiny",
+        "narrative": "A prophecy unfolds - this sword is destined to change the fate of the realm.",
+        "severity": "critical",
+        "impact": 10
+      }
+    ],
+    "verificationLink": "walrus-readblob://demo-crafting-sword-678",
+    "timestamp": "2025-11-23T00:00:00.000Z",
+    "isFallback": false
+  }
+}

@@ -65,13 +65,14 @@ export function validateValue(value: any, rule: ValidationRule): { valid: boolea
           return { valid: false, error: `${rule.field} must be a string` };
         }
         break;
-      case 'number':
+      case 'number': {
         const numValue = Number(value);
         if (isNaN(numValue)) {
           return { valid: false, error: `${rule.field} must be a number` };
         }
         value = numValue;
         break;
+      }
       case 'boolean':
         if (typeof value !== 'boolean' && value !== 'true' && value !== 'false') {
           return { valid: false, error: `${rule.field} must be a boolean` };

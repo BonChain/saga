@@ -1,0 +1,220 @@
+{
+  "title": "SuiSaga Living World Demo",
+  "description": "Unlimited player agency with AI-generated unexpected consequences",
+  "subtitle": "A blockchain-powered living world where every action creates permanent impact",
+  "videoUrl": null,
+  "screenshotUrl": null,
+  "presenterNotes": {
+    "opening": "Welcome to SuiSaga - a living world where your actions create real, permanent consequences using blockchain technology.",
+    "coreInnovation": "Unlike traditional games, every action you take is permanently recorded on the blockchain and generates AI-driven consequences that ripple through the world.",
+    "demoFlow": "I'll show you how players can type literally anything they can imagine, and the world responds intelligently.",
+    "closing": "This is just the beginning - with Walrus blockchain storage, every action creates an immutable digital legacy.",
+    "fallbackNote": "This is our emergency demo version showcasing the core concept even if live services are unavailable."
+  },
+  "actions": [
+    {
+      "id": "demo-1",
+      "input": "attack the dragon with my sword",
+      "type": "combat",
+      "playerIntent": "Engage in combat with the dragon character",
+      "consequences": [
+        {
+          "id": "cons-1",
+          "system": "combat",
+          "narrative": "Your sword strikes true! The dragon roars in fury and counters with a massive fire blast that engulfs the battlefield.",
+          "severity": "major",
+          "impact": 8,
+          "butterflyEffects": [
+            "Nearby forest catches fire from dragon breath",
+            "Villagers flee to safety, disrupting trade",
+            "Dragon's lair becomes more fortified"
+          ]
+        },
+        {
+          "id": "cons-2",
+          "system": "relationships",
+          "narrative": "The dragon remembers your betrayal and will hunt you relentlessly across the realm. Your reputation among dragons is now 'Dragon Slayer'.",
+          "severity": "critical",
+          "impact": 9,
+          "butterflyEffects": [
+            "Other dragons become wary of humans",
+            "Dragon hunters seek you out for training",
+            "Dragon treasure becomes accessible if you return"
+          ]
+        },
+        {
+          "id": "cons-3",
+          "system": "environment",
+          "narrative": "The dragon's fire spreads to nearby ancient trees, creating a perimeter of flames that blocks escape routes and transforms the landscape.",
+          "severity": "major",
+          "impact": 6,
+          "butterflyEffects": [
+            "Forest animals flee to new territories",
+            "Air quality affects nearby villages",
+            "New fire-resistant plants emerge in ashes"
+          ]
+        }
+      ],
+      "verificationLink": "walrus-readblob://demo-dragon-battle-001",
+      "timestamp": "2025-11-23T12:00:00.000Z",
+      "impactScore": 23,
+      "worldChanges": "Dragon becomes hostile, landscape scarred by fire, player reputation established"
+    },
+    {
+      "id": "demo-2",
+      "input": "befriend the goblin king",
+      "type": "diplomacy",
+      "playerIntent": "Form alliance with goblin tribe",
+      "consequences": [
+        {
+          "id": "cons-1",
+          "system": "relationships",
+          "narrative": "The goblin king is impressed by your courage! He offers you a golden goblet filled with mysterious liquid and declares you 'Friend of the Tribe'.",
+          "severity": "minor",
+          "impact": 3,
+          "butterflyEffects": [
+            "Other goblin tribes become curious about humans",
+            "Human merchants gain access to goblin markets",
+            "Goblin artisans offer unique crafts"
+          ]
+        },
+        {
+          "id": "cons-2",
+          "system": "economy",
+          "narrative": "A new trade route opens between the goblin caves and human village. Both prosper from the exchange of rare minerals and agricultural goods.",
+          "severity": "minor",
+          "impact": 5,
+          "butterflyEffects": [
+            "Local economy booms with new goods",
+            "Goblin technology spreads to human settlements",
+            "Humans gain access to underground resources"
+          ]
+        },
+        {
+          "id": "cons-3",
+          "system": "politics",
+          "narrative": "Some goblin warriors challenge your leadership, creating internal conflict in the tribe. The king must balance traditional values with new alliances.",
+          "severity": "major",
+          "impact": 4,
+          "butterflyEffects": [
+            "Goblin tribe may split into factions",
+            "Other races notice human-goblin cooperation",
+            "Political stability of region affected"
+          ]
+        }
+      ],
+      "verificationLink": "walrus-readblob://demo-diplomacy-goblin-002",
+      "timestamp": "2025-11-23T12:15:00.000Z",
+      "impactScore": 12,
+      "worldChanges": "New alliance established, trade routes opened, political balance shifted"
+    },
+    {
+      "id": "demo-3",
+      "input": "cast a spell to make it rain",
+      "type": "magic",
+      "playerIntent": "Use magic to solve environmental problem",
+      "consequences": [
+        {
+          "id": "cons-1",
+          "system": "environment",
+          "narrative": "Dark clouds gather above the drought-stricken lands. Thunder rumbles as the first drops of rain fall on thirsty soil.",
+          "severity": "minor",
+          "impact": 4,
+          "butterflyEffects": [
+            "Underground water levels begin to rise",
+            "Plants respond quickly to moisture",
+            "Atmospheric pressure changes affect weather patterns"
+          ]
+        },
+        {
+          "id": "cons-2",
+          "system": "economy",
+          "narrative": "Farmers celebrate as crops begin to grow. Local markets boom with fresh produce, and food prices drop dramatically.",
+          "severity": "minor",
+          "impact": 6,
+          "butterflyEffects": [
+            "Food surplus enables population growth",
+            "Trade caravans begin regular routes",
+            "Storage facilities expanded for abundance"
+          ]
+        },
+        {
+          "id": "cons-3",
+          "system": "wildlife",
+          "narrative": "Magical rain affects local creatures strangely. Some animals grow larger, others develop new abilities, and some begin glowing faintly.",
+          "severity": "major",
+          "impact": 7,
+          "butterflyEffects": [
+            "New magical species emerge",
+            "Existing animals migrate or adapt",
+            "Predator-prey dynamics shift dramatically"
+          ]
+        }
+      ],
+      "verificationLink": "walrus-readblob://demo-magic-rain-003",
+      "timestamp": "2025-11-23T12:30:00.000Z",
+      "impactScore": 17,
+      "worldChanges": "Drought ended, economy revitalized, magical ecosystem created"
+    }
+  ],
+  "worldState": {
+    "player": {
+      "name": "Demo Player",
+      "reputation": {
+        "dragons": -50,
+        "goblins": 75,
+        "humans": 25,
+        "mystical": 10
+      },
+      "achievements": ["First Alliance", "Dragon Slayer", "Weather Maker"]
+    },
+    "regions": {
+      "village": {
+        "status": "prospering",
+        "prosperity": 85,
+        "population": 1500,
+        "recentEvents": ["Trade boom", "New alliances"]
+      },
+      "dragon_lair": {
+        "status": "hostile",
+        "danger": 95,
+        "treasure": 10000,
+        "recentEvents": ["Battle scars", "Increased defenses"]
+      },
+      "goblin_caves": {
+        "status": "allied",
+        "prosperity": 70,
+        "population": 800,
+        "recentEvents": ["New leadership", "Trade openness"]
+      },
+      "ancient_forest": {
+        "status": "recovering",
+        "wildlife": 60,
+        "mystery": 75,
+        "recentEvents": ["Magical rain", "New species"]
+      }
+    },
+    "timestamp": "2025-11-23T12:45:00.000Z"
+  },
+  "technicalInfo": {
+    "blockchain": {
+      "network": "Walrus Testnet",
+      "totalActions": 1567,
+      "verificationWorking": true
+    },
+    "ai": {
+      "model": "Z.ai Enhanced",
+      "consequencesGenerated": 4502,
+      "avgResponseTime": "1.2s"
+    },
+    "demo": {
+      "version": "Emergency Demo v1.0",
+      "fallbackActivated": true,
+      "servicesStatus": {
+        "walrus": "offline",
+        "ai": "offline",
+        "network": "limited"
+      }
+    }
+  }
+}

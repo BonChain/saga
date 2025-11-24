@@ -1,0 +1,53 @@
+[
+  {
+    "id": "749385d7-bac3-42e1-99d1-01755f317d83",
+    "characterId": "e2f08286-d90f-427f-bffb-ba4983369cd7",
+    "action": "Had a meaningful conversation about wisdom",
+    "actionType": "social",
+    "location": "library",
+    "description": "Had a meaningful conversation about wisdom",
+    "emotionalImpact": 2,
+    "context": {
+      "environmentalConditions": "library atmosphere",
+      "otherCharactersPresent": [
+        "traveler"
+      ]
+    },
+    "isActive": true,
+    "timestamp": 1763892456791
+  },
+  {
+    "id": "49c9dc56-b355-48ec-b925-de618767d01b",
+    "characterId": "d5089e89-a389-4f5f-84ae-9b671bc2419b",
+    "action": "Had a meaningful conversation about wisdom",
+    "actionType": "social",
+    "location": "library",
+    "description": "Had a meaningful conversation about wisdom",
+    "emotionalImpact": 2,
+    "context": {
+      "environmentalConditions": "library atmosphere",
+      "otherCharactersPresent": [
+        "traveler"
+      ]
+    },
+    "isActive": true,
+    "timestamp": 1763893403191
+  },
+  {
+    "id": "fa9c2e69-fc3e-4a44-b8bd-592023db6e56",
+    "characterId": "af55c534-ac4c-4d09-bb5e-5ec14877678c",
+    "action": "Had a meaningful conversation about wisdom",
+    "actionType": "social",
+    "location": "library",
+    "description": "Had a meaningful conversation about wisdom",
+    "emotionalImpact": 2,
+    "context": {
+      "environmentalConditions": "library atmosphere",
+      "otherCharactersPresent": [
+        "traveler"
+      ]
+    },
+    "isActive": true,
+    "timestamp": 1763893584916
+  }
+]
