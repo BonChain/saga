@@ -103,7 +103,20 @@ interface UpdateCharacterRequest {
 }
 
 const app = express();
+
+// Environment-based configuration
+const isProduction = process.env.NODE_ENV === 'production';
 const PORT = process.env.PORT || 3001; // Using port 3001
+
+// Parse allowed origins from environment variable
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim())
+  : [
+      process.env.FRONTEND_URL || 'http://localhost:5173',
+      'http://localhost:5174',
+      'http://localhost:5175',
+      'http://localhost:3000'
+    ];
 
 // Initialize storage configuration (SECURE: Using environment variables)
 const storageConfig: StorageManagerConfig = {
@@ -163,7 +176,21 @@ storageManager.initializeWorldState().catch(error => {
 
 // Security and monitoring middleware
 app.use(helmet());
-app.use(cors());
+// Configure CORS with environment-based origins
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps or Postman)
+    if (!origin) return callback(null, true);
+
+    // Check if the origin is in our allowed list
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('The CORS policy for this site does not allow access from the specified Origin.'));
+    }
+  },
+  credentials: true // Allow cookies for JWT authentication
+}));
 app.use(securityHeaders);
 app.use(morgan('combined'));
 app.use(express.json({ limit: '10mb' }));
@@ -619,6 +646,97 @@ app.get('/api/storage/world-state/history', async (req, res) => {
   }
 });
 
+// Introduction Narrative System - Story 8.2
+app.get('/api/narrative/introduction', async (req, res) => {
+  try {
+    const result = await storageManager.getCurrentWorldState();
+    if (!result.success || !result.state) {
+      return res.status(500).json({
+        success: false,
+        error: result.error || 'Unable to retrieve world state for narrative'
+      });
+    }
+
+    const worldState = result.state;
+
+    // Get the first village and dragon from the world state
+    const regions = worldState.regions;
+    const characters = worldState.characters;
+
+    // Find village and dragon dynamically
+    const village = Object.values(regions).find(r => r.type === 'village');
+    const lair = Object.values(regions).find(r => r.type === 'lair');
+    const dragon = Object.values(characters).find(c => c.type === 'dragon');
+
+    // Generate narrative content based on current world state
+    const narrativeContent = {
+      greeting: generateGreeting(req.query.isReturning === 'true'),
+      worldContext: {
+        village: village?.name || 'Unknown Village',
+        dragon: {
+          name: dragon?.name || 'Unknown Dragon',
+          title: 'the Ancient',
+          location: lair?.name || 'Unknown Lair',
+          status: lair?.status || 'unknown'
+        },
+        worldState: {
+          timeOfDay: worldState.environment.timeOfDay,
+          weather: worldState.environment.weather,
+          season: worldState.environment.season,
+          magicalEnergy: worldState.environment.magicalEnergy
+        }
+      },
+      storySections: [
+        {
+          title: "Your Awakening",
+          content: `You find yourself awakening in ${village?.name || 'a quiet village'}, a peaceful settlement that exists in the shadow of ancient power. The air hums with magical energy, and the townsfolk speak in hushed tones about the balance that maintains their fragile peace.`
+        },
+        {
+          title: "The Living World",
+          content: `This is no ordinary realm—it is a living world that evolves with every hero's choice. Your actions, whether of courage or cunning, ripple through the fabric of reality itself, creating permanent change that all who follow will witness.`
+        },
+        {
+          title: "The Ancient Dragon",
+          content: `High in the ${lair?.name || 'ancient lair'} dwells ${dragon?.name || 'an ancient dragon'}, a being of immense power and ancient wisdom. Some speak of destruction, others of forgotten knowledge. The truth, as with all things in this realm, awaits those brave enough to seek it.`
+        },
+        {
+          title: "Your Legacy Begins",
+          content: "Your presence here is no accident. The world itself has called you forth, for every soul that enters this realm becomes both observer and author of an ever-unfolding saga. What legacy will you write in the annals of this living world?"
+        }
+      ]
+    };
+
+    res.json({
+      success: true,
+      data: narrativeContent
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+// Helper function to generate greeting based on player session history
+function generateGreeting(isReturning: boolean): string {
+  if (isReturning) {
+    const greetings = [
+      "Welcome back, noble hero. The world has continued its dance in your absence.",
+      "Your return is noted, adventurer. The threads of fate have woven new tales since your last journey.",
+      "Ah, you have returned! The living world remembers your deeds and awaits your next chapter."
+    ];
+    return greetings[Math.floor(Math.random() * greetings.length)];
+  } else {
+    const greetings = [
+      "Welcome, brave soul, to a world where every choice echoes through eternity.",
+      "Greetings, seeker of destiny. Your arrival marks the beginning of a new saga.",
+      "Step forward, champion of choice. The living world has been waiting for one such as you."
+    ];
+    return greetings[Math.floor(Math.random() * greetings.length)];
+  }
+}
+
 // Layer 3: World State - Enhanced Endpoints
 app.get('/api/storage/world-state/regions', async (req, res) => {
   try {
@@ -1000,6 +1118,12 @@ try {
     console.log(`📊 Health check: http://localhost:${PORT}/health`);
     console.log(`📈 Enhanced monitoring: http://localhost:${PORT}/health (detailed)`);
     console.log(`🔧 Environment: ${process.env.NODE_ENV || 'development'}`);
+
+    // Log important environment configuration
+    console.log(`🌐 Frontend URL: ${process.env.FRONTEND_URL || 'http://localhost:5173'}`);
+    console.log(`🔗 Allowed Origins: ${allowedOrigins.join(', ')}`);
+    console.log(`🔐 JWT Secret: ${process.env.JWT_SECRET ? '✅ Configured' : '⚠️  Missing - Please set JWT_SECRET'}`);
+    console.log(`📦 Sui Network: ${process.env.SUI_NETWORK || 'testnet'}`);
 
     // Setup graceful shutdown
     setupGracefulShutdown();

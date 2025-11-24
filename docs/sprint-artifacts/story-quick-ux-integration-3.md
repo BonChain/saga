@@ -1,6 +1,6 @@
 # Story 1.3: Session Persistence Enhancement
 
-**Status:** Draft
+**Status:** Ready for Development
 **Epic:** Quick UX Integration
 **Points:** 2
 **Time Estimate:** 1 day
@@ -13,6 +13,8 @@
 **As a** returning player
 **I want to** be recognized when I reconnect to SuiSaga
 **So that** I feel acknowledged as a consistent contributor to the collective living world
+
+**PRD Traceability:** This story enables FR8, FR9, FR14, and FR16 by providing session continuity for players to discover their previous world impacts, build persistent reputation, and return to see world evolution from their prior actions.
 
 ---
 

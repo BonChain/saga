@@ -9,7 +9,9 @@
 
 ## Epic Goal
 
-Transform SuiSaga from a technically sophisticated but impersonal backend into a welcoming user experience by implementing wallet connection, narrative introduction, and player recognition. This creates the essential user journey layer that enables players to connect with the living world, understand their role, and feel acknowledged as returning contributors to the collective story.
+**Strategic Enabler for Living World Innovation:** Transform SuiSaga's sophisticated backend into a player-ready experience by implementing the essential authentication and onboarding layer. This epic creates the human-computer interface that enables players to **demonstrate the core SuiSaga innovation** - where wallet authentication provides the identity foundation for players to create permanent, blockchain-verified world impact and understand their role in the collective living world evolution.
+
+**Key Innovation Connection:** The wallet connection and session persistence systems directly enable the "Provable History" innovation by giving players verified identities, while the introduction narrative ensures judges and users immediately understand how SuiSaga's asynchronous world mechanics create authentic digital legacies.
 
 ## Epic Scope
 
@@ -32,8 +34,14 @@ Transform SuiSaga from a technically sophisticated but impersonal backend into a
 
 ## Epic Success Criteria
 
-- **Authentication Success Rate:** >95% of wallet connection attempts succeed
-- **User Engagement:** >80% of new users complete the introduction narrative
+**Hackathon Innovation Success:**
+- **Authentication Success Rate:** >95% of wallet connection attempts succeed (enables reliable demo)
+- **Judge Understanding:** 100% of judges understand player identity connection to blockchain impact within 2 minutes
+- **Demo Flow Reliability:** Complete authentication → introduction → game interface in <60 seconds
+- **Provable History Demonstration:** Players can show wallet-linked action verification during demo
+
+**User Experience Success:**
+- **User Engagement:** >80% of new users complete the introduction narrative (understand living world concept)
 - **Returning Player Recognition:** 100% of returning players receive personalized welcome messaging
 - **Session Persistence:** JWT token refresh works seamlessly without user interruption
 - **Accessibility Compliance:** All new components pass Axe accessibility standards

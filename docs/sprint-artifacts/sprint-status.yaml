@@ -1,14 +1,14 @@
 # Sprint Status Tracking: SuiSaga - Living World Blockchain Game
 # Generated: 2025-11-14
 # Project: 3-day hackathon build with unlimited agency + AI consequences innovation
-# Total Epics: 8 | Total Stories: 28
+# Total Epics: 9 | Total Stories: 31 (Updated with Quick UX Integration)
 
 metadata:
   project_name: "SuiSaga"
   project_type: "Living World Blockchain Game"
   development_context: "3-day hackathon MVP with Full Product Vision"
-  total_epics: 8
-  total_stories: 28
+  total_epics: 9
+  total_stories: 32
   generation_date: "2025-11-14"
   last_updated: "2025-11-21"
   hackathon_duration: "3 days"
@@ -540,8 +540,105 @@ epic-7:
     lessons_learned: []
     next_improvements: []
 
-# Epic 8: Retro Gaming Interface & Demo Experience (3 stories)
+# Epic 8: Quick UX Integration (4 stories) - NEW EPIC
 epic-8:
+  title: "Quick UX Integration"
+  goal: "Strategic enabler for living world innovation - creates player authentication and onboarding layer that enables demonstration of core SuiSaga innovation with wallet-connected blockchain identity"
+  status: "ready_for_development"
+  stories:
+    story-8-1-wallet-connection-implementation:
+      title: "Wallet Connection Implementation"
+      description: "As a new player, I want to connect my Sui wallet to authenticate with the game, so that I can establish my identity and participate in the living world with a verifiable blockchain-backed account."
+      status: "ready_for_review"
+      completion_date: "2025-11-21"
+      implementation_notes: "Complete wallet connection implementation using @mysten/dapp-kit. Successfully integrated SuiClientProvider and WalletProvider, created comprehensive authentication flow with JWT tokens, built retro gaming UI components, and implemented full test suite with Axe accessibility compliance. 22/24 tasks completed - only backend integration verification tasks remain."
+      actual_hours: 4
+      prerequisites: []
+      estimated_hours: 8
+      story_file: "sprint-artifacts/story-quick-ux-integration-1.md"
+      validation_status: "Complete - FR traceability added, ready for development"
+      acceptance_criteria:
+        - "Given user is not authenticated, when they click \"Connect Wallet\", then wallet selection modal appears with available Sui wallets"
+        - "Given wallet selection modal, when user selects and authorizes wallet, then backend receives valid signature and authentication succeeds"
+        - "Given valid signature, when authentication completes, then JWT token is stored and user state updates to 'authenticated'"
+        - "Given wallet connection error, when connection fails, then user-friendly error message displays with specific retry options"
+        - "Given successful authentication, when component unmounts, then wallet connection properly disconnects and cleans up resources"
+        - "Given accessibility testing, when screen reader users interact, then all elements are accessible via keyboard navigation and ARIA labels"
+      technical_notes:
+        - "Use @mysten/sui SDK 1.45.0 already available in backend dependencies"
+        - "Implement React Context + custom hooks for authentication state management"
+        - "Integrate with existing auth-service.ts JWT authentication system"
+        - "Follow existing ActionInput.tsx component patterns for consistency"
+
+    story-8-2-introduction-narrative-system:
+      title: "Introduction Narrative System"
+      description: "As a newly authenticated player, I want to receive an immersive introduction to the SuiSaga living world, so that I understand the setting, my role, and the unique mechanics of this collective evolution experience."
+      status: "completed"
+      prerequisites: ["story-8-1-wallet-connection-implementation"]
+      estimated_hours: 8
+      story_file: "sprint-artifacts/story-quick-ux-integration-2.md"
+      validation_status: "Complete - FR traceability added, ready for development"
+      acceptance_criteria:
+        - "Given user is authenticated, when authentication completes successfully, then introduction story appears with current world context"
+        - "Given introduction story, when content loads, then narrative includes Dragonslayer Village and Ignis the Ancient dragon references"
+        - "Given introduction story, when text displays, then typography matches existing retro gaming aesthetic with typewriter animations"
+        - "Given screen reader user, when introduction displays, then all content is accessible via assistive technology"
+        - "Given mobile device, when introduction displays, then content is responsive and readable"
+        - "Given returning user, when introduction displays, then \"Skip Introduction\" option is available"
+      technical_notes:
+        - "Fetch dynamic content from /api/storage/world-state for consistency"
+        - "Implement typewriter animations matching retro gaming aesthetic"
+        - "Integrate with existing performanceMonitor for optimization"
+        - "Create responsive design matching current UI patterns"
+
+    story-8-3-session-persistence-enhancement:
+      title: "Session Persistence Enhancement"
+      description: "As a returning player, I want to be recognized when I reconnect to SuiSaga, so that I feel acknowledged as a consistent contributor to the collective living world."
+      status: "ready_for_development"
+      prerequisites: ["story-8-1-wallet-connection-implementation", "story-8-2-introduction-narrative-system"]
+      estimated_hours: 6
+      story_file: "sprint-artifacts/story-quick-ux-integration-3.md"
+      validation_status: "Complete - FR traceability added, ready for development"
+      acceptance_criteria:
+        - "Given returning user, when they authenticate, then welcome message includes session history (\"Welcome back, [address]! This is your [N]th session\")"
+        - "Given JWT token expiration, when token expires, then automatic refresh occurs without user interruption"
+        - "Given new user, when they authenticate, then welcome message indicates first session (\"Welcome to SuiSaga!\")"
+        - "Given browser restart, when user returns, then session recognition persists via stored JWT token"
+        - "Given session tracking, when multiple sessions occur, then session count increments accurately"
+      technical_notes:
+        - "Enhance existing auth-service.ts with session history tracking"
+        - "Add session metadata to JWT tokens for offline recognition"
+        - "Implement seamless automatic token refresh mechanism"
+        - "Create welcome messaging system for returning players"
+
+    story-8-4-hero-nft-integration:
+      title: "Hero NFT Smart Contract Integration"
+      description: "As a new player, I want to mint a unique Hero NFT that represents my character in the SuiSaga world, so that I have a permanent, verifiable blockchain identity that unlocks gameplay and serves as my gateway to the living world experience."
+      status: "backlog"
+      prerequisites: ["story-8-1-wallet-connection-implementation"]
+      estimated_hours: 20
+      story_file: "sprint-artifacts/story-hero-nft-integration.md"
+      validation_status: "Complete - FR traceability added, ready for development"
+      acceptance_criteria:
+        - "Given user has completed wallet connection, when they reach character creation phase, then Hero NFT minting interface appears with customization options"
+        - "Given character creation interface, when user confirms selection, then minimal Hero NFT smart contract mints exactly one NFT to their wallet with selected traits"
+        - "Given successful NFT mint, when transaction completes, then game interface displays player's Hero NFT with stats and seamless transition to gameplay"
+        - "Given minting transaction error, when transaction fails, then user receives clear error messaging with retry options"
+        - "Given existing Hero NFT in wallet, when user returns, then system detects NFT and skips character creation"
+        - "Given gas cost considerations, when user initiates minting, then interface displays estimated fees and one-time cost model"
+      technical_notes:
+        - "Create minimal hero_nft.move contract with NFT minting capability"
+        - "Implement character creation UI with retro gaming aesthetics"
+        - "Integrate with existing Sui dApp Kit for transaction signing"
+        - "Add comprehensive error handling and gas fee estimation"
+
+  retrospective:
+    status: "pending"
+    lessons_learned: []
+    next_improvements: []
+
+# Epic 9: Retro Gaming Interface & Demo Experience (3 stories)
+epic-9:
   title: "Retro Gaming Interface & Demo Experience"
   goal: "Polished hackathon demonstration interface with retro gaming aesthetics and reliable demo flow"
   status: "in_progress"
@@ -643,9 +740,16 @@ development_phases:
     estimated_hours: 28
     description: "Character relationships, multiplayer, and combat"
 
-  phase-4-polish:
-    title: "Phase 4: Polish & Demo"
+  phase-4-user-experience:
+    title: "Phase 4: User Experience & Onboarding"
     epics: ["epic-8"]
+    stories: 3
+    estimated_hours: 22
+    description: "Quick UX Integration with wallet authentication and onboarding"
+
+  phase-5-polish:
+    title: "Phase 5: Polish & Demo"
+    epics: ["epic-9"]
     stories: 3
     estimated_hours: 12
     description: "Retro interface and presentation flow"

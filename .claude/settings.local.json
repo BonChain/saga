@@ -77,7 +77,10 @@
       "Bash(yarn lint:*)",
       "Bash(yarn test:*)",
       "Bash(npm run lint:*)",
-      "Bash(npx eslint-formatter-codeframe)"
+      "Bash(npx eslint-formatter-codeframe)",
+      "Bash(npm run type-check:*)",
+      "SlashCommand(/bmad:bmm:agents:architect)",
+      "Bash(rm:*)"
     ],
     "deny": [],
     "ask": []
