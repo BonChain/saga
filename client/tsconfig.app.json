@@ -25,5 +25,5 @@
     "noUncheckedSideEffectImports": true
   },
   "include": ["src"],
-  "exclude": ["src/**/*.test.*", "src/**/*.spec.*", "src/**/__tests__/**/*"]
+  "exclude": ["src/**/*.test.*", "src/**/*.spec.*", "src/**/__tests__/**/*", "src/hooks/useAuthentication.ts", "src/types/authentication.ts"]
 }

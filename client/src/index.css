@@ -2,41 +2,45 @@
 @import url('https://fonts.googleapis.com/css2?family=VT323&family=Roboto+Mono:wght@400;700&display=swap');
 
 :root {
-  /* Retro Gaming Color Palette */
-  --terminal-black: #0a0a0a;
-  --terminal-dark: #1a1a1a;
-  --terminal-medium: #2d2d2d;
-  --terminal-light: #404040;
+  /* Peaceful Retro Medieval Color Palette */
+  --parchment-dark: #1a1410;
+  --parchment-medium: #2a1f1a;
+  --parchment-light: #3d3025;
+  --stone-dark: #0f0f0f;
+  --stone-medium: #1a1a1a;
 
-  /* Neon Accent Colors */
-  --neon-green: #00ff41;
-  --neon-cyan: #00ffff;
-  --neon-pink: #ff99ff; /* Ultra-bright pink for WCAG AAA compliance */
-  --neon-yellow: #ffaa00;
-  --neon-red: #ff4141;
+  /* Subtle Peaceful Accent Colors */
+  --potion-gold: #6b5a1a; /* Very muted gold */
+  --potion-green: #4a5a2a; /* Forest moss green */
+  --magic-blue: #3a5a7a; /* Stormy blue */
+  --potion-red: #5a3a2a; /* Earth red */
+  --parchment-cream: #d4c5a9; /* Soft aged paper */
+  --enchanted-purple: #4a3a5a; /* Dusk purple */
 
-  /* Color Variations */
-  --green-bright: #33ff33;
-  --green-dim: #00cc33;
-  --cyan-bright: #33ffff;
-  --cyan-dim: #00cccc;
-  --pink-bright: #ffccff; /* Bright pink variant for AAA */
-  --pink-dim: #ff66ff;  /* Slightly dimmer but still AAA compliant */
+  /* Very Subtle Color Variations */
+  --gold-bright: #8b7a3a; /* Soft gold */
+  --gold-dim: #6b5a1a;
+  --green-bright: #5a6a3a; /* Soft green */
+  --green-dim: #4a5a2a;
+  --blue-bright: #4a6a8a; /* Soft blue */
+  --blue-dim: #3a5a7a;
+  --purple-bright: #5a4a6a; /* Soft purple */
+  --purple-dim: #4a3a5a;
 
   /* Typography */
   --font-terminal: 'VT323', 'Courier New', monospace;
   --font-mono: 'Roboto Mono', 'Courier New', monospace;
 
   /* Effects */
-  --glow-intensity: 0 0 20px;
-  --glow-heavy: 0 0 40px;
-  --shadow-intense: 0 0 60px;
+  --glow-intensity: 0 0 10px;
+  --glow-heavy: 0 0 20px;
+  --shadow-intense: 0 0 30px;
 
   font-family: var(--font-terminal);
   line-height: 1.4;
   font-weight: 400;
-  color: var(--neon-green);
-  background-color: var(--terminal-black);
+  color: var(--potion-gold);
+  background-color: var(--parchment-dark);
 
   color-scheme: dark;
   font-synthesis: none;
@@ -45,13 +49,13 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Base retro link styles */
+/* Fantasy medieval link styles */
 a {
   font-weight: 700;
   font-family: var(--font-mono);
-  color: var(--neon-cyan);
+  color: var(--magic-blue);
   text-decoration: none;
-  text-shadow: var(--glow-intensity) var(--neon-cyan);
+  text-shadow: var(--glow-intensity) var(--magic-blue);
   padding: 2px 4px;
   border: 1px solid transparent;
   border-radius: 4px;
@@ -59,9 +63,9 @@ a {
 }
 
 a:hover {
-  color: var(--cyan-bright);
-  border-color: var(--neon-cyan);
-  background: rgba(0, 255, 255, 0.1);
+  color: var(--blue-bright);
+  border-color: var(--magic-blue);
+  background: rgba(74, 144, 226, 0.1);
   -webkit-transform: translateY(-1px);
   -moz-transform: translateY(-1px);
   -ms-transform: translateY(-1px);
@@ -69,7 +73,7 @@ a:hover {
 }
 
 a:focus-visible {
-  outline: 2px solid var(--neon-cyan);
+  outline: 2px solid var(--magic-blue);
   outline-offset: 2px;
 }
 
@@ -77,15 +81,17 @@ a:focus-visible {
 body {
   margin: 0;
   font-family: var(--font-terminal);
-  background: var(--terminal-black);
-  color: var(--neon-green);
+  background: var(--parchment-dark);
+  color: var(--potion-gold);
   min-width: 320px;
-  min-height: 100vh;
   overflow-x: hidden;
+  overflow-y: scroll;
   position: relative;
+  scroll-behavior: smooth;
+  height: 100vh;
 }
 
-/* CRT Scanline Effect */
+/* Very subtle parchment texture */
 body::before {
   content: '';
   position: fixed;
@@ -93,34 +99,13 @@ body::before {
   left: 0;
   width: 100%;
   height: 100%;
-  background: repeating-linear-gradient(
-    0deg,
-    rgba(0, 0, 0, 0.15),
-    rgba(0, 0, 0, 0.15) 1px,
-    transparent 1px,
-    transparent 2px
-  );
+  background: radial-gradient(ellipse at center, rgba(107, 90, 26, 0.01) 0%, transparent 80%);
   pointer-events: none;
   z-index: 1000;
-  animation: scanline 8s linear infinite;
+  opacity: 0.5;
 }
 
-@-webkit-keyframes scanline {
-  0% { -webkit-transform: translateY(0); transform: translateY(0); }
-  100% { -webkit-transform: translateY(10px); transform: translateY(10px); }
-}
-
-@-moz-keyframes scanline {
-  0% { -moz-transform: translateY(0); transform: translateY(0); }
-  100% { -moz-transform: translateY(10px); transform: translateY(10px); }
-}
-
-@keyframes scanline {
-  0% { -webkit-transform: translateY(0); -moz-transform: translateY(0); -ms-transform: translateY(0); transform: translateY(0); }
-  100% { -webkit-transform: translateY(10px); -moz-transform: translateY(10px); -ms-transform: translateY(10px); transform: translateY(10px); }
-}
-
-/* CRT Screen Curve Effect */
+/* Subtle edge vignette */
 body::after {
   content: '';
   position: fixed;
@@ -131,9 +116,8 @@ body::after {
   background: radial-gradient(
     ellipse at center,
     transparent 0%,
-    transparent 60%,
-    rgba(0, 0, 0, 0.1) 90%,
-    rgba(0, 0, 0, 0.3) 100%
+    transparent 75%,
+    rgba(26, 20, 16, 0.03) 100%
   );
   pointer-events: none;
   z-index: 999;
@@ -148,54 +132,54 @@ h1, h2, h3, h4, h5, h6 {
   margin: 0 0 1rem 0;
   text-shadow:
     var(--glow-intensity) currentColor,
-    var(--glow-heavy) rgba(0, 255, 65, 0.3);
+    var(--glow-heavy) rgba(139, 105, 20, 0.2);
 }
 
 h1 {
-  font-size: clamp(2rem, 8vw, 4rem);
-  line-height: 1.1;
-  color: var(--neon-green);
+  font-size: clamp(1.8rem, 6vw, 3rem);
+  line-height: 1.2;
+  color: var(--gold-bright);
 }
 
 h2 {
-  font-size: clamp(1.5rem, 6vw, 2.5rem);
-  color: var(--neon-cyan);
+  font-size: clamp(1.3rem, 4vw, 2rem);
+  color: var(--blue-bright);
 }
 
 h3 {
-  font-size: clamp(1.2rem, 4vw, 1.8rem);
-  color: var(--neon-pink);
+  font-size: clamp(1.1rem, 3vw, 1.5rem);
+  color: var(--purple-bright);
 }
 
 p {
-  font-size: clamp(0.9rem, 3vw, 1.1rem);
-  line-height: 1.6;
+  font-size: clamp(0.85rem, 2.5vw, 1rem);
+  line-height: 1.7;
   margin: 0 0 1rem 0;
-  color: var(--green-dim);
+  color: var(--parchment-cream);
 }
 
-/* Retro Button Base Styles */
+/* Fantasy Medieval Button Base Styles */
 button {
   font-family: var(--font-mono);
   font-weight: 700;
   font-size: 1rem;
   text-transform: uppercase;
   letter-spacing: 1px;
-  color: var(--terminal-black);
-  background: var(--neon-green);
-  border: 2px solid var(--neon-green);
+  color: var(--parchment-dark);
+  background: var(--potion-gold);
+  border: 2px solid var(--potion-gold);
   border-radius: 4px;
   padding: 0.75em 1.5em;
   cursor: pointer;
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
-  -webkit-box-shadow: var(--glow-intensity) rgba(0, 255, 65, 0.5);
-  -moz-box-shadow: var(--glow-intensity) rgba(0, 255, 65, 0.5);
-  box-shadow: var(--glow-intensity) rgba(0, 255, 65, 0.5);
+  -webkit-box-shadow: var(--glow-intensity) rgba(212, 175, 55, 0.5);
+  -moz-box-shadow: var(--glow-intensity) rgba(212, 175, 55, 0.5);
+  box-shadow: var(--glow-intensity) rgba(212, 175, 55, 0.5);
 }
 
-/* Pixel border effect for buttons */
+/* Medieval enchanted border effect for buttons */
 button::before {
   content: '';
   position: absolute;
@@ -204,29 +188,29 @@ button::before {
   right: -2px;
   bottom: -2px;
   background: linear-gradient(45deg,
-    var(--neon-green),
-    var(--neon-cyan),
-    var(--neon-pink),
-    var(--neon-green)
+    var(--potion-gold),
+    var(--magic-blue),
+    var(--enchanted-purple),
+    var(--potion-gold)
   );
   border-radius: 4px;
   z-index: -1;
   opacity: 0;
   transition: opacity 0.3s ease;
-  animation: pixelGlow 3s linear infinite;
+  animation: enchantmentGlow 3s linear infinite;
 }
 
-@-webkit-keyframes pixelGlow {
+@-webkit-keyframes enchantmentGlow {
   0%, 100% { opacity: 0; }
   50% { opacity: 0.7; }
 }
 
-@-moz-keyframes pixelGlow {
+@-moz-keyframes enchantmentGlow {
   0%, 100% { opacity: 0; }
   50% { opacity: 0.7; }
 }
 
-@keyframes pixelGlow {
+@keyframes enchantmentGlow {
   0%, 100% { opacity: 0; }
   50% { opacity: 0.7; }
 }
@@ -237,14 +221,14 @@ button:hover {
   -ms-transform: translateY(-2px);
   transform: translateY(-2px);
   -webkit-box-shadow:
-    var(--glow-heavy) var(--neon-green),
-    0 4px 0 rgba(0, 255, 65, 0.3);
+    var(--glow-heavy) var(--potion-gold),
+    0 4px 0 rgba(212, 175, 55, 0.3);
   -moz-box-shadow:
-    var(--glow-heavy) var(--neon-green),
-    0 4px 0 rgba(0, 255, 65, 0.3);
+    var(--glow-heavy) var(--potion-gold),
+    0 4px 0 rgba(212, 175, 55, 0.3);
   box-shadow:
-    var(--glow-heavy) var(--neon-green),
-    0 4px 0 rgba(0, 255, 65, 0.3);
+    var(--glow-heavy) var(--potion-gold),
+    0 4px 0 rgba(212, 175, 55, 0.3);
 }
 
 button:hover::before {
@@ -257,18 +241,18 @@ button:active {
   -ms-transform: translateY(0);
   transform: translateY(0);
   -webkit-box-shadow:
-    var(--glow-intensity) var(--neon-green),
-    0 1px 0 rgba(0, 255, 65, 0.3);
+    var(--glow-intensity) var(--potion-gold),
+    0 1px 0 rgba(212, 175, 55, 0.3);
   -moz-box-shadow:
-    var(--glow-intensity) var(--neon-green),
-    0 1px 0 rgba(0, 255, 65, 0.3);
+    var(--glow-intensity) var(--potion-gold),
+    0 1px 0 rgba(212, 175, 55, 0.3);
   box-shadow:
-    var(--glow-intensity) var(--neon-green),
-    0 1px 0 rgba(0, 255, 65, 0.3);
+    var(--glow-intensity) var(--potion-gold),
+    0 1px 0 rgba(212, 175, 55, 0.3);
 }
 
 button:focus-visible {
-  outline: 2px solid var(--neon-cyan);
+  outline: 2px solid var(--magic-blue);
   outline-offset: 2px;
 }
 
@@ -284,12 +268,12 @@ button:disabled {
   box-shadow: none;
 }
 
-/* Form elements */
+/* Medieval form elements */
 input, textarea, select {
   font-family: var(--font-terminal);
-  background: var(--terminal-dark);
-  color: var(--neon-green);
-  border: 2px solid var(--green-dim);
+  background: var(--stone-medium);
+  color: var(--potion-gold);
+  border: 2px solid var(--gold-dim);
   border-radius: 4px;
   padding: 0.75em;
   font-size: 1rem;
@@ -298,40 +282,40 @@ input, textarea, select {
 
 input:focus, textarea:focus, select:focus {
   outline: none;
-  border-color: var(--neon-cyan);
-  -webkit-box-shadow: var(--glow-intensity) rgba(0, 255, 255, 0.3);
-  -moz-box-shadow: var(--glow-intensity) rgba(0, 255, 255, 0.3);
-  box-shadow: var(--glow-intensity) rgba(0, 255, 255, 0.3);
-  background: rgba(0, 0, 0, 0.8);
+  border-color: var(--magic-blue);
+  -webkit-box-shadow: var(--glow-intensity) rgba(74, 144, 226, 0.3);
+  -moz-box-shadow: var(--glow-intensity) rgba(74, 144, 226, 0.3);
+  box-shadow: var(--glow-intensity) rgba(74, 144, 226, 0.3);
+  background: rgba(45, 24, 16, 0.8);
 }
 
-/* Utility classes */
-.neon-text {
+/* Fantasy utility classes */
+.enchanted-text {
   text-shadow: var(--glow-heavy) currentColor;
 }
 
-.pixel-border {
+.medieval-border {
   border: 2px solid currentColor;
   border-radius: 4px;
   position: relative;
 }
 
-.pixel-border::before {
+.medieval-border::before {
   content: '';
   position: absolute;
   top: -1px;
   left: -1px;
   right: -1px;
   bottom: -1px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(244, 228, 193, 0.3);
   border-radius: 4px;
   pointer-events: none;
 }
 
-.glow-green { color: var(--neon-green); }
-.glow-cyan { color: var(--neon-cyan); }
-.glow-pink { color: var(--neon-pink); }
-.glow-yellow { color: var(--neon-yellow); }
+.glow-gold { color: var(--potion-gold); }
+.glow-blue { color: var(--magic-blue); }
+.glow-purple { color: var(--enchanted-purple); }
+.glow-green { color: var(--potion-green); }
 
 /* Flicker animation for retro effect */
 @-webkit-keyframes flicker {
@@ -371,19 +355,21 @@ input:focus, textarea:focus, select:focus {
 /* High contrast for accessibility */
 @media (prefers-contrast: high) {
   :root {
-    --neon-green: #00ff00;
-    --neon-cyan: #00ffff;
-    --neon-pink: #ff00ff;
-    --green-dim: #00cc00;
-    --cyan-dim: #00cccc;
-    --pink-dim: #ff00ff;
-    --pink-bright: #ffffff;
+    --potion-gold: #ffcc00;
+    --magic-blue: #00ccff;
+    --enchanted-purple: #ff00ff;
+    --potion-green: #00ff00;
+    --parchment-cream: #ffffff;
+    --gold-bright: #ffcc00;
+    --blue-bright: #00ccff;
+    --purple-bright: #ff00ff;
+    --green-bright: #00ff00;
   }
 }
 
 /* Enhanced focus indicators for keyboard navigation */
 :focus-visible {
-  outline: 3px solid var(--neon-cyan);
+  outline: 3px solid var(--magic-blue);
   outline-offset: 2px;
   border-radius: 4px;
 }
@@ -393,8 +379,8 @@ input:focus, textarea:focus, select:focus {
   position: absolute;
   top: -40px;
   left: 6px;
-  background: var(--neon-green);
-  color: var(--terminal-black);
+  background: var(--potion-gold);
+  color: var(--parchment-dark);
   padding: 8px;
   text-decoration: none;
   border-radius: 4px;
